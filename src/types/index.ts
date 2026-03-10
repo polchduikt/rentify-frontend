@@ -10,5 +10,6 @@ export * from './promotion';
 export * from './property';
 export * from './review';
 export * from './scalars';
+export * from './search';
 export * from './user';
 export * from './wallet';

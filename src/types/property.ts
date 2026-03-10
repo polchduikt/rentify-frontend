@@ -27,6 +27,11 @@ export interface AmenityDto {
   icon: string;
 }
 
+export interface AmenityCategoryGroupDto {
+  category: AmenityCategory;
+  amenities: AmenityDto[];
+}
+
 export interface AvailabilityBlockDto {
   id: number;
   propertyId: number;

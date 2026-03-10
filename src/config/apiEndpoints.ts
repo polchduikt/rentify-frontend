@@ -32,6 +32,10 @@ export const API_ENDPOINTS = {
   locations: {
     suggest: '/locations/suggest',
   },
+  amenities: {
+    root: '/amenities',
+    grouped: '/amenities/grouped',
+  },
   payments: {
     mine: '/payments/my',
     payBooking: (bookingId: number) => `/payments/bookings/${bookingId}/mock-pay`,

@@ -11,7 +11,7 @@ const NAV_LINKS = [
 ] as const;
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -50,37 +50,54 @@ const Navbar = () => {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            to={ROUTES.createProperty}
-            className="inline-flex items-center gap-2 rounded-lg border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50"
-          >
-            <PlusSquare size={16} /> Додати оголошення
-          </Link>
+        {isAuthenticated ? (
+          <div className="hidden items-center gap-3 md:flex">
+            <Link
+              to={ROUTES.createProperty}
+              className="inline-flex items-center gap-2 rounded-lg border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50"
+            >
+              <PlusSquare size={16} /> Додати оголошення
+            </Link>
 
-          <Link
-            to={ROUTES.profile}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
-          >
-            {user?.avatarUrl ? (
-              <img src={user.avatarUrl} alt="Аватар" className="h-7 w-7 rounded-full object-cover" />
-            ) : (
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-                {initials}
-              </span>
-            )}
-            <span className="max-w-[100px] truncate">{user?.firstName ?? 'Профіль'}</span>
-          </Link>
+            <Link
+              to={ROUTES.profile}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
+            >
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="Аватар" className="h-7 w-7 rounded-full object-cover" />
+              ) : (
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+                  {initials}
+                </span>
+              )}
+              <span className="max-w-[100px] truncate">{user?.firstName ?? 'Профіль'}</span>
+            </Link>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            title="Вийти"
-            className="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Вийти"
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="hidden items-center gap-2 md:flex">
+            <Link
+              to={ROUTES.login}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              Вхід
+            </Link>
+            <Link
+              to={ROUTES.register}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+            >
+              Реєстрація
+            </Link>
+          </div>
+        )}
 
         <button
           type="button"
@@ -110,35 +127,54 @@ const Navbar = () => {
             ))}
           </div>
 
-          <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
-            <Link
-              to={ROUTES.createProperty}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-50"
-            >
-              <PlusSquare size={16} />
-              Додати оголошення
-            </Link>
-            <Link
-              to={ROUTES.profile}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            >
-              <User size={16} />
-              Профіль
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                handleLogout();
-              }}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
-            >
-              <LogOut size={16} />
-              Вийти
-            </button>
-          </div>
+          {isAuthenticated ? (
+            <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
+              <Link
+                to={ROUTES.createProperty}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-50"
+              >
+                <PlusSquare size={16} />
+                Додати оголошення
+              </Link>
+              <Link
+                to={ROUTES.profile}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                <User size={16} />
+                Профіль
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  handleLogout();
+                }}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+              >
+                <LogOut size={16} />
+                Вийти
+              </button>
+            </div>
+          ) : (
+            <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
+              <Link
+                to={ROUTES.login}
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                Вхід
+              </Link>
+              <Link
+                to={ROUTES.register}
+                onClick={() => setOpen(false)}
+                className="block rounded-lg bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                Реєстрація
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </header>

@@ -1,3 +1,4 @@
+export { amenityService } from './amenityService';
 export { authService } from './authService';
 export { bookingService } from './bookingService';
 export { conversationService } from './conversationService';

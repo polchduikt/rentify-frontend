@@ -2,6 +2,7 @@ import type { PageQuery } from '@/types/api';
 import type { LocationSuggestQuery } from '@/services/locationService';
 import type { PropertySearchCriteriaDto } from '@/types/property';
 import type { UnavailableRangesQuery } from '@/services/propertyService';
+import type { AmenityCategory } from '@/types/enums';
 
 export const queryKeys = {
   auth: {
@@ -25,6 +26,10 @@ export const queryKeys = {
   },
   locations: {
     suggest: (query: LocationSuggestQuery) => ['locations', 'suggest', query] as const,
+  },
+  amenities: {
+    all: (category?: AmenityCategory) => ['amenities', 'all', category ?? null] as const,
+    grouped: () => ['amenities', 'grouped'] as const,
   },
   payments: {
     mine: () => ['payments', 'mine'] as const,

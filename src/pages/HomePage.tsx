@@ -1,37 +1,56 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '@/config/env';
+import { useAuth } from '@/contexts/AuthContext';
 
 const HomePage = () => {
-  const apiUrl = API_BASE_URL;
+  const { user, logout } = useAuth();
+
+  const fullName = useMemo(() => {
+    if (!user) {
+      return 'Guest';
+    }
+    return `${user.firstName} ${user.lastName}`.trim();
+  }, [user]);
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-6 py-12">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-blue-600">Rentify</p>
-        <h1 className="max-w-2xl text-4xl font-bold leading-tight text-slate-900">
-          Платформа оренди житла для довгострокових і короткострокових бронювань
-        </h1>
-        <p className="mt-5 max-w-2xl text-base text-slate-600">
-          Простий старт фронтенду: роутинг, авторизація, API-клієнт і DTO типи вже підключені.
-        </p>
+    <main className="min-h-screen bg-slate-50 px-4 py-10">
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm font-medium uppercase tracking-wider text-blue-600">Rentify</p>
+          <h1 className="mt-2 text-3xl font-bold text-slate-900">Welcome, {fullName}</h1>
+          <p className="mt-3 text-slate-600">
+            Authentication is active. You can now build protected features on top of this baseline.
+          </p>
+        </header>
 
-        <div className="mt-8 flex flex-wrap gap-3">
+        <section className="grid gap-4 sm:grid-cols-2">
+          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Profile</h2>
+            <p className="mt-3 text-sm text-slate-700">Email: {user?.email ?? 'n/a'}</p>
+            <p className="mt-1 text-sm text-slate-700">Plan: {user?.subscriptionPlan ?? 'FREE'}</p>
+          </article>
+
+          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">API</h2>
+            <p className="mt-3 break-all text-sm text-slate-700">{API_BASE_URL}</p>
+          </article>
+        </section>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={logout}
+            className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+          >
+            Logout
+          </button>
           <Link
             to="/login"
-            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
           >
-            Увійти
+            Go to Login
           </Link>
-          <Link
-            to="/register"
-            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
-          >
-            Зареєструватися
-          </Link>
-        </div>
-
-        <div className="mt-10 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
-          <span className="font-medium text-slate-900">API URL:</span> {apiUrl || 'не задано'}
         </div>
       </div>
     </main>

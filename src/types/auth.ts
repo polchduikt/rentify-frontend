@@ -1,3 +1,5 @@
+import type { UserResponseDto } from './user';
+
 export interface AuthenticationRequestDto {
   email: string;
   password: string;
@@ -17,4 +19,9 @@ export interface RegisterRequestDto {
   phone?: string;
   email: string;
   password: string;
+}
+
+export interface AuthSession {
+  token: string;
+  user: UserResponseDto;
 }

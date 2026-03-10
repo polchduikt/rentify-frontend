@@ -27,7 +27,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        const requestUrl = typeof error.config?.url === 'string' ? error.config.url : '';
+        const isAuthRequest =
+            requestUrl.includes('/auth/login') ||
+            requestUrl.includes('/auth/register') ||
+            requestUrl.includes('/auth/google');
+
+        if (error.response?.status === 401 && !isAuthRequest) {
             clearAuthToken();
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));

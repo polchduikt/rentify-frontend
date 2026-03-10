@@ -14,22 +14,22 @@ const registerSchema = z.object({
   firstName: z
     .string()
     .trim()
-    .min(2, 'First name must be at least 2 characters')
-    .max(50, 'First name is too long'),
+    .min(2, 'Імʼя має містити щонайменше 2 символи')
+    .max(50, 'Імʼя занадто довге'),
   lastName: z
     .string()
     .trim()
-    .min(2, 'Last name must be at least 2 characters')
-    .max(50, 'Last name is too long'),
+    .min(2, 'Прізвище має містити щонайменше 2 символи')
+    .max(50, 'Прізвище занадто довге'),
   phone: z
     .string()
     .trim()
-    .refine((value) => value.length === 0 || phonePattern.test(value), 'Phone format must be +XXXXXXXXXX'),
-  email: z.string().trim().email('Enter a valid email address'),
+    .refine((value) => value.length === 0 || phonePattern.test(value), 'Телефон має бути у форматі +XXXXXXXXXX'),
+  email: z.string().trim().email('Введіть коректну email адресу'),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(100, 'Password is too long'),
+    .min(8, 'Пароль має містити щонайменше 8 символів')
+    .max(100, 'Пароль занадто довгий'),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -71,7 +71,7 @@ const RegisterPage = () => {
       });
       navigate(redirectPath, { replace: true });
     } catch (error) {
-      setSubmitError(getApiErrorMessage(error, 'Registration failed'));
+      setSubmitError(getApiErrorMessage(error, 'Помилка реєстрації'));
     }
   };
 
@@ -83,7 +83,7 @@ const RegisterPage = () => {
         await loginWithGoogle({ idToken });
         navigate(redirectPath, { replace: true });
       } catch (error) {
-        setSubmitError(getApiErrorMessage(error, 'Google sign-up failed'));
+        setSubmitError(getApiErrorMessage(error, 'Помилка реєстрації через Google'));
       } finally {
         setGoogleLoading(false);
       }
@@ -94,11 +94,11 @@ const RegisterPage = () => {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-12">
       <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900">Create account</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Реєстрація</h1>
         <p className="mt-2 text-sm text-slate-600">
-          Already have an account?{' '}
+          Вже маєте акаунт?{' '}
           <Link to="/login" className="font-medium text-blue-600 hover:underline">
-            Sign in
+            Увійти
           </Link>
         </p>
 
@@ -112,7 +112,7 @@ const RegisterPage = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="firstName" className="mb-1 block text-sm font-medium text-slate-700">
-                First name
+                Імʼя
               </label>
               <input
                 id="firstName"
@@ -126,7 +126,7 @@ const RegisterPage = () => {
 
             <div>
               <label htmlFor="lastName" className="mb-1 block text-sm font-medium text-slate-700">
-                Last name
+                Прізвище
               </label>
               <input
                 id="lastName"
@@ -141,7 +141,7 @@ const RegisterPage = () => {
 
           <div>
             <label htmlFor="phone" className="mb-1 block text-sm font-medium text-slate-700">
-              Phone (optional)
+              Телефон (необовʼязково)
             </label>
             <input
               id="phone"
@@ -170,7 +170,7 @@ const RegisterPage = () => {
 
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-              Password
+              Пароль
             </label>
             <input
               id="password"
@@ -187,13 +187,13 @@ const RegisterPage = () => {
             disabled={isSubmitting || googleLoading}
             className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
           >
-            {isSubmitting ? 'Creating account...' : 'Create account'}
+            {isSubmitting ? 'Створюємо акаунт...' : 'Створити акаунт'}
           </button>
         </form>
 
         <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200" />
-          <span className="text-xs uppercase tracking-wide text-slate-400">or</span>
+          <span className="text-xs uppercase tracking-wide text-slate-400">або</span>
           <div className="h-px flex-1 bg-slate-200" />
         </div>
 

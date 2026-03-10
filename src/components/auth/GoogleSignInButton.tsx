@@ -57,7 +57,7 @@ const loadGoogleScript = async (): Promise<void> => {
     const existingScript = document.getElementById(GOOGLE_SCRIPT_ID) as HTMLScriptElement | null;
     if (existingScript) {
       const onLoad = () => resolve();
-      const onError = () => reject(new Error('Failed to load Google script'));
+      const onError = () => reject(new Error('Не вдалося завантажити скрипт Google'));
 
       existingScript.addEventListener('load', onLoad, { once: true });
       existingScript.addEventListener('error', onError, { once: true });
@@ -70,7 +70,7 @@ const loadGoogleScript = async (): Promise<void> => {
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Google script'));
+    script.onerror = () => reject(new Error('Не вдалося завантажити скрипт Google'));
     document.head.appendChild(script);
   });
 };
@@ -104,7 +104,7 @@ const GoogleSignInButton = ({
           client_id: clientId,
           callback: (response: GoogleCredentialResponse) => {
             if (!response.credential) {
-              onError('Google sign-in failed. No credential received.');
+              onError('Помилка входу через Google. Не отримано credential.');
               return;
             }
             void onCredential(response.credential);
@@ -126,7 +126,7 @@ const GoogleSignInButton = ({
       } catch {
         if (isActive) {
           setIsReady(false);
-          onError('Google sign-in is temporarily unavailable.');
+          onError('Вхід через Google тимчасово недоступний.');
         }
       }
     };
@@ -141,14 +141,14 @@ const GoogleSignInButton = ({
   if (!clientId) {
     return (
       <p className="text-center text-xs text-slate-500">
-        Google sign-in is disabled. Missing `VITE_GOOGLE_CLIENT_ID`.
+        Вхід через Google вимкнено. Відсутній `VITE_GOOGLE_CLIENT_ID`.
       </p>
     );
   }
 
   return (
     <div className={disabled ? 'pointer-events-none opacity-70' : ''}>
-      {!isReady && <p className="mb-2 text-center text-xs text-slate-500">Loading Google Sign-In...</p>}
+      {!isReady && <p className="mb-2 text-center text-xs text-slate-500">Завантаження Google Sign-In...</p>}
       <div ref={containerRef} className="flex justify-center" />
     </div>
   );

@@ -9,11 +9,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getApiErrorMessage } from '@/utils/errors';
 
 const loginSchema = z.object({
-  email: z.string().trim().email('Enter a valid email address'),
+  email: z.string().trim().email('Введіть коректну email адресу'),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(100, 'Password is too long'),
+    .min(8, 'Пароль має містити щонайменше 8 символів')
+    .max(100, 'Пароль занадто довгий'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -45,7 +45,7 @@ const LoginPage = () => {
       await login(values);
       navigate(redirectPath, { replace: true });
     } catch (error) {
-      setSubmitError(getApiErrorMessage(error, 'Invalid email or password'));
+      setSubmitError(getApiErrorMessage(error, 'Невірний email або пароль'));
     }
   };
 
@@ -57,7 +57,7 @@ const LoginPage = () => {
         await loginWithGoogle({ idToken });
         navigate(redirectPath, { replace: true });
       } catch (error) {
-        setSubmitError(getApiErrorMessage(error, 'Google sign-in failed'));
+        setSubmitError(getApiErrorMessage(error, 'Помилка входу через Google'));
       } finally {
         setGoogleLoading(false);
       }
@@ -68,11 +68,11 @@ const LoginPage = () => {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-12">
       <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900">Sign in</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Вхід</h1>
         <p className="mt-2 text-sm text-slate-600">
-          New here?{' '}
+          Ще не маєте акаунта?{' '}
           <Link to="/register" className="font-medium text-blue-600 hover:underline">
-            Create an account
+            Створити акаунт
           </Link>
         </p>
 
@@ -99,7 +99,7 @@ const LoginPage = () => {
 
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-              Password
+              Пароль
             </label>
             <input
               id="password"
@@ -116,13 +116,13 @@ const LoginPage = () => {
             disabled={isSubmitting || googleLoading}
             className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
           >
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? 'Входимо...' : 'Увійти'}
           </button>
         </form>
 
         <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200" />
-          <span className="text-xs uppercase tracking-wide text-slate-400">or</span>
+          <span className="text-xs uppercase tracking-wide text-slate-400">або</span>
           <div className="h-px flex-1 bg-slate-200" />
         </div>
 

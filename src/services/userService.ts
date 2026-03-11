@@ -43,4 +43,8 @@ export const userService = {
     });
     return data;
   },
+
+  async deleteAvatar(): Promise<void> {
+    await api.delete(API_ENDPOINTS.users.avatar);
+  },
 };

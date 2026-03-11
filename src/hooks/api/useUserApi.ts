@@ -56,3 +56,15 @@ export const useUploadAvatarMutation = () => {
     },
   });
 };
+
+export const useDeleteAvatarMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => userService.deleteAvatar(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.users.profile() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile() });
+    },
+  });
+};

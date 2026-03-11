@@ -1,71 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Home, LogOut, Menu, PlusSquare, Search, User, X } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, Heart, Home, Menu, Plus, User, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { APP_CONTENT } from '@/constants/appContent';
-import { API_BASE_URL } from '@/config/env';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { getGoogleAvatarUrl } from '@/services/storage';
-
-const NAV_LINKS = [
-  { to: ROUTES.home, label: 'Головна', icon: Home },
-  { to: ROUTES.search, label: 'Пошук', icon: Search },
-] as const;
-
-const isAbsoluteUrl = (value: string) => /^(https?:)?\/\//i.test(value);
-
-const sanitizeAvatarValue = (value: string | null | undefined) => {
-  const trimmed = value?.trim();
-  if (!trimmed) {
-    return '';
-  }
-  const withoutQuotes = trimmed.replace(/^["']+|["']+$/g, '');
-  if (withoutQuotes === 'null' || withoutQuotes === 'undefined') {
-    return '';
-  }
-  return withoutQuotes;
-};
-
-const resolveAvatarUrl = (avatarUrl: string | null | undefined) => {
-  const value = sanitizeAvatarValue(avatarUrl);
-  if (!value) {
-    return '';
-  }
-
-  if (value.startsWith('lh3.googleusercontent.com/')) {
-    return `https://${value}`;
-  }
-
-  if (isAbsoluteUrl(value) || value.startsWith('data:') || value.startsWith('blob:')) {
-    if (value.startsWith('http://lh3.googleusercontent.com')) {
-      return value.replace('http://', 'https://');
-    }
-    return value;
-  }
-
-  try {
-    const apiOrigin = isAbsoluteUrl(API_BASE_URL) ? new URL(API_BASE_URL).origin : window.location.origin;
-    return new URL(value.startsWith('/') ? value : `/${value}`, apiOrigin).toString();
-  } catch {
-    return value;
-  }
-};
+import { resolveAvatarUrl } from '@/utils/avatar';
 
 const Navbar = () => {
-  const { user, logout, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
 
-  const isActive = (path: string) =>
-    path === ROUTES.home ? location.pathname === ROUTES.home : location.pathname.startsWith(path);
-
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.login);
-  };
-
+  const isSearchActive = location.pathname.startsWith(ROUTES.search);
   const initials = user?.firstName?.charAt(0)?.toUpperCase() ?? user?.email?.charAt(0)?.toUpperCase() ?? 'U';
   const avatarSrc = useMemo(() => {
     const direct = resolveAvatarUrl(user?.avatarUrl);
@@ -79,67 +27,65 @@ const Navbar = () => {
     setAvatarLoadFailed(false);
   }, [avatarSrc]);
 
-  return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to={ROUTES.home} className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <Home size={16} />
-          </span>
-          <span className="text-xl font-bold text-slate-900">{APP_CONTENT.companyName}</span>
-        </Link>
+  const desktopIconButtonClass =
+    'inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:border-slate-300 hover:bg-slate-100';
 
-        <nav className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map(({ to, label }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                isActive(to) ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+  return (
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-5">
+          <Link to={ROUTES.home} className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
+              <Home size={18} />
+            </span>
+            <span className="text-[28px] font-black leading-none text-slate-900">{APP_CONTENT.companyName}</span>
+          </Link>
+
+          <Link
+            to={ROUTES.search}
+            className={`hidden rounded-lg px-3 py-2 text-sm font-semibold transition md:inline-flex ${
+              isSearchActive ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100'
+            }`}
+          >
+            Орендувати
+          </Link>
+        </div>
 
         {isAuthenticated ? (
-          <div className="hidden items-center gap-3 md:flex">
-            <Link
-              to={ROUTES.createProperty}
-              className="inline-flex items-center gap-2 rounded-lg border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50"
-            >
-              <PlusSquare size={16} /> Додати оголошення
+          <div className="hidden items-center gap-2 md:flex">
+            <Link to={ROUTES.profile} className={desktopIconButtonClass} aria-label="Сповіщення">
+              <Bell size={17} />
+            </Link>
+            <Link to={ROUTES.profile} className={desktopIconButtonClass} aria-label="Улюблене">
+              <Heart size={17} />
             </Link>
 
             <Link
               to={ROUTES.profile}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
+              className="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-slate-200 text-sm text-slate-700 transition hover:bg-slate-100"
             >
               {avatarSrc && !avatarLoadFailed ? (
                 <img
                   src={avatarSrc}
                   alt="Аватар"
-                  className="h-7 w-7 rounded-full object-cover"
+                  className="h-full w-full object-cover"
                   referrerPolicy="no-referrer"
                   onError={() => setAvatarLoadFailed(true)}
                 />
               ) : (
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+                <span className="flex h-full w-full items-center justify-center bg-blue-100 text-sm font-bold text-blue-700">
                   {initials}
                 </span>
               )}
-              <span className="max-w-[100px] truncate">{user?.firstName ?? 'Профіль'}</span>
             </Link>
 
-            <button
-              type="button"
-              onClick={handleLogout}
-              title="Вийти"
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+            <Link
+              to={ROUTES.createProperty}
+              className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
             >
-              <LogOut size={16} />
-            </button>
+              <Plus size={16} />
+              Виставити оголошення
+            </Link>
           </div>
         ) : (
           <div className="hidden items-center gap-2 md:flex">
@@ -171,30 +117,34 @@ const Navbar = () => {
       {open ? (
         <div className="border-t border-slate-200 bg-white px-4 py-4 md:hidden">
           <div className="space-y-1">
-            {NAV_LINKS.map(({ to, label, icon: Icon }) => (
-              <Link
-                key={to}
-                to={to}
-                onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
-                  isActive(to) ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                <Icon size={16} />
-                {label}
-              </Link>
-            ))}
+            <Link
+              to={ROUTES.search}
+              onClick={() => setOpen(false)}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
+                isSearchActive ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              Орендувати
+            </Link>
           </div>
 
           {isAuthenticated ? (
             <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
               <Link
-                to={ROUTES.createProperty}
+                to={ROUTES.profile}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-50"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
               >
-                <PlusSquare size={16} />
-                Додати оголошення
+                <Bell size={16} />
+                Сповіщення
+              </Link>
+              <Link
+                to={ROUTES.profile}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                <Heart size={16} />
+                Улюблене
               </Link>
               <Link
                 to={ROUTES.profile}
@@ -204,17 +154,14 @@ const Navbar = () => {
                 <User size={16} />
                 Профіль
               </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  handleLogout();
-                }}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+              <Link
+                to={ROUTES.createProperty}
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50"
               >
-                <LogOut size={16} />
-                Вийти
-              </button>
+                <Plus size={16} />
+                Виставити оголошення
+              </Link>
             </div>
           ) : (
             <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">

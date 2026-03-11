@@ -7,6 +7,7 @@ import CreatePropertyPage from '@/pages/CreatePropertyPage';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import PlaceholderPage from '@/pages/PlaceholderPage';
+import ProfilePage from '@/pages/ProfilePage';
 import PropertyDetailsPage from '@/pages/PropertyDetailsPage';
 import RegisterPage from '@/pages/RegisterPage';
 import SearchPage from '@/pages/SearchPage';
@@ -72,15 +73,7 @@ const AppRouter = () => (
 
         <Route element={<ProtectedRoute />}>
           <Route path={ROUTES.createProperty} element={<CreatePropertyPage />} />
-          <Route
-            path={ROUTES.profile}
-            element={
-              <PlaceholderPage
-                title="Профіль"
-                description="Тут буде доступне керування профілем: акаунт, безпека, аватар і налаштування."
-              />
-            }
-          />
+          <Route path={ROUTES.profile} element={<ProfilePage />} />
         </Route>
       </Route>
 

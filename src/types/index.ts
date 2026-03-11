@@ -7,6 +7,7 @@ export * from './favorite';
 export * from './location';
 export * from './payment';
 export * from './promotion';
+export * from './profile';
 export * from './property';
 export * from './propertyCreate';
 export * from './review';

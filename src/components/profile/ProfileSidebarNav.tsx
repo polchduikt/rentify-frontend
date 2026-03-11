@@ -1,0 +1,164 @@
+import { ChevronDown, ChevronRight, CreditCard, FileText, Heart, LogOut, MessageCircle, PlusSquare, Settings2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { PROFILE_PROPERTIES_NAV_ITEMS, PROFILE_SETTINGS_NAV_ITEMS } from '@/constants/profileNavigation';
+import { ROUTES } from '@/config/routes';
+import type { NavigationSection } from '@/types/profile';
+
+interface ProfileSidebarNavProps {
+  activeSection: NavigationSection | null;
+  isPropertiesOpen: boolean;
+  isSettingsOpen: boolean;
+  onToggleProperties: () => void;
+  onToggleSettings: () => void;
+  onSelectSection: (section: NavigationSection) => void;
+  onLogout: () => void;
+}
+
+export const ProfileSidebarNav = ({
+  activeSection,
+  isPropertiesOpen,
+  isSettingsOpen,
+  onToggleProperties,
+  onToggleSettings,
+  onSelectSection,
+  onLogout,
+}: ProfileSidebarNavProps) => (
+  <aside className="space-y-4 lg:sticky lg:top-24 lg:h-fit">
+    <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">Навігація</p>
+      <div className="space-y-1.5 text-sm">
+        <button
+          type="button"
+          onClick={onToggleProperties}
+          className="flex w-full items-center justify-between rounded-xl bg-slate-100 px-3 py-2.5 text-left font-semibold text-slate-800"
+        >
+          <span className="inline-flex items-center gap-2">
+            <FileText size={16} />
+            Оголошення
+          </span>
+          <ChevronDown size={14} className={`transition ${isPropertiesOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isPropertiesOpen ? (
+          <div className="space-y-1 rounded-2xl bg-slate-50 p-2">
+            {PROFILE_PROPERTIES_NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectSection(item.id)}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition ${
+                  activeSection === item.id ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                {item.label}
+                <ChevronRight size={14} className={activeSection === item.id ? 'text-blue-500' : 'text-slate-400'} />
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={() => onSelectSection('chat')}
+          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
+            activeSection === 'chat' ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            <MessageCircle size={16} />
+            Чат
+          </span>
+          <ChevronRight size={14} className={activeSection === 'chat' ? 'text-blue-500' : 'text-slate-400'} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onSelectSection('favorites')}
+          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
+            activeSection === 'favorites' ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            <Heart size={16} />
+            Обране
+          </span>
+          <ChevronRight size={14} className={activeSection === 'favorites' ? 'text-blue-500' : 'text-slate-400'} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onSelectSection('payments')}
+          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
+            activeSection === 'payments' ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            <CreditCard size={16} />
+            Транзакції
+          </span>
+          <ChevronRight size={14} className={activeSection === 'payments' ? 'text-blue-500' : 'text-slate-400'} />
+        </button>
+
+        <button
+          type="button"
+          onClick={onToggleSettings}
+          className="mt-2 flex w-full items-center justify-between rounded-xl bg-slate-100 px-3 py-2.5 text-left font-semibold text-slate-800"
+        >
+          <span className="inline-flex items-center gap-2">
+            <Settings2 size={16} />
+            Налаштування
+          </span>
+          <ChevronDown size={14} className={`transition ${isSettingsOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isSettingsOpen ? (
+          <div className="space-y-1 rounded-2xl bg-slate-50 p-2">
+            {PROFILE_SETTINGS_NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectSection(item.id)}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition ${
+                  activeSection === item.id ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                {item.label}
+                <ChevronRight size={14} className={activeSection === item.id ? 'text-blue-500' : 'text-slate-400'} />
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={onLogout}
+              className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-rose-700 transition hover:bg-rose-50"
+            >
+              <span className="inline-flex items-center gap-2">
+                <LogOut size={14} />
+                Вихід
+              </span>
+              <ChevronRight size={14} className="text-rose-400" />
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </section>
+
+    <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Швидкі дії</p>
+      <div className="space-y-2">
+        <Link
+          to={ROUTES.createProperty}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+        >
+          <PlusSquare size={16} />
+          Додати оголошення
+        </Link>
+        <Link
+          to={ROUTES.search}
+          className="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+        >
+          Перейти до пошуку
+        </Link>
+      </div>
+    </section>
+  </aside>
+);

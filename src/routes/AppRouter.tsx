@@ -1,13 +1,15 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/config/routes';
+import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
 import MainLayout from '@/layouts/MainLayout';
+import CreatePropertyPage from '@/pages/CreatePropertyPage';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import PlaceholderPage from '@/pages/PlaceholderPage';
 import RegisterPage from '@/pages/RegisterPage';
 import SearchPage from '@/pages/SearchPage';
+import SearchMapPage from '@/pages/SearchMapPage';
 
 const FullPageLoader = () => (
   <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-700">Завантаження...</div>
@@ -47,6 +49,8 @@ const AppRouter = () => (
     <Routes>
       <Route element={<MainLayout />}>
         <Route path={ROUTES.home} element={<HomePage />} />
+        <Route path={ROUTES.search} element={<SearchPage />} />
+
         <Route
           path={ROUTES.about}
           element={<PlaceholderPage title="Про Rentify" description="Інформація про компанію та бачення продукту." />}
@@ -65,16 +69,7 @@ const AppRouter = () => (
         />
 
         <Route element={<ProtectedRoute />}>
-          <Route path={ROUTES.search} element={<SearchPage />} />
-          <Route
-            path={ROUTES.createProperty}
-            element={
-              <PlaceholderPage
-                title="Створення оголошення"
-                description="Майстер створення оголошення буде реалізований із чернеткою та завантаженням фото."
-              />
-            }
-          />
+          <Route path={ROUTES.createProperty} element={<CreatePropertyPage />} />
           <Route
             path={ROUTES.profile}
             element={
@@ -86,6 +81,8 @@ const AppRouter = () => (
           />
         </Route>
       </Route>
+
+      <Route path={ROUTES.searchMap} element={<SearchMapPage />} />
 
       <Route element={<GuestRoute />}>
         <Route element={<AuthLayout />}>

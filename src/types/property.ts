@@ -2,21 +2,21 @@ import type { AmenityCategory, BookingStatus, PropertyMarketType, PropertyStatus
 import type { Decimal, LocalDateString, LocalTimeString, ZonedDateTimeString } from './scalars';
 
 export interface AddressDto {
-  id: number;
+  id?: number;
   location: LocationDto;
-  cityId: number;
-  districtId: number;
-  metroStationId: number;
-  residentialComplexId: number;
-  districtName: string;
-  metroStationName: string;
-  residentialComplexName: string;
+  cityId?: number;
+  districtId?: number;
+  metroStationId?: number;
+  residentialComplexId?: number;
+  districtName?: string;
+  metroStationName?: string;
+  residentialComplexName?: string;
   street: string;
-  houseNumber: string;
-  apartment: string;
-  postalCode: string;
-  lat: Decimal;
-  lng: Decimal;
+  houseNumber?: string;
+  apartment?: string;
+  postalCode?: string;
+  lat?: Decimal;
+  lng?: Decimal;
 }
 
 export interface AmenityDto {
@@ -49,9 +49,9 @@ export interface AvailabilityBlockRequestDto {
 }
 
 export interface LocationDto {
-  id: number;
+  id?: number;
   country: string;
-  region: string;
+  region?: string;
   city: string;
 }
 
@@ -85,14 +85,30 @@ export interface PropertyPhotoDto {
   createdAt: ZonedDateTimeString;
 }
 
-export interface PropertyPricingDto {
+export interface PropertyMapPinDto {
   id: number;
-  pricePerNight: Decimal;
-  pricePerMonth: Decimal;
+  title: string;
+  propertyType: string;
+  marketType: PropertyMarketType;
+  rentalType: RentalType;
+  rooms?: number;
+  lat: Decimal;
+  lng: Decimal;
+  price: Decimal;
   currency: string;
-  securityDeposit: Decimal;
-  cleaningFee: Decimal;
-  updatedAt: ZonedDateTimeString;
+  isTopPromoted: boolean;
+  averageRating: Decimal;
+  reviewCount: number;
+}
+
+export interface PropertyPricingDto {
+  id?: number;
+  pricePerNight?: Decimal;
+  pricePerMonth?: Decimal;
+  currency: string;
+  securityDeposit?: Decimal;
+  cleaningFee?: Decimal;
+  updatedAt?: ZonedDateTimeString;
 }
 
 export interface PropertyResponseDto {
@@ -129,11 +145,11 @@ export interface PropertyResponseDto {
 }
 
 export interface PropertyRuleDto {
-  id: number;
-  petsAllowed: boolean;
-  smokingAllowed: boolean;
-  partiesAllowed: boolean;
-  additionalRules: string;
+  id?: number;
+  petsAllowed?: boolean;
+  smokingAllowed?: boolean;
+  partiesAllowed?: boolean;
+  additionalRules?: string;
 }
 
 export interface PropertySearchCriteriaDto {
@@ -148,6 +164,10 @@ export interface PropertySearchCriteriaDto {
   lat?: number;
   lng?: number;
   radiusKm?: number;
+  southWestLat?: number;
+  southWestLng?: number;
+  northEastLat?: number;
+  northEastLng?: number;
   minPrice?: Decimal;
   maxPrice?: Decimal;
   minRooms?: number;

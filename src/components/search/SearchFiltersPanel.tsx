@@ -1,5 +1,5 @@
 import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import type { AmenityCategory, RentalType } from '@/types/enums';
 import type { LocationSuggestionDto } from '@/types/location';
 import type { AmenityCategoryGroupDto } from '@/types/property';
@@ -8,6 +8,8 @@ import { CollapsibleOptionsRow, DropdownTrigger } from './filters/FilterControls
 import { CATEGORY_LABELS, LOCATION_TYPE_LABELS, PROPERTY_TYPES } from './filters/constants';
 
 interface SearchFiltersPanelProps {
+  mode?: 'default' | 'map';
+  mapFormAction?: ReactNode;
   cityInput: string;
   rentalType?: RentalType;
   priceFrom: string;
@@ -50,6 +52,8 @@ const rangeLabel = (label: string, from: string, to: string, unit: string): stri
 };
 
 export const SearchFiltersPanel = ({
+  mode = 'default',
+  mapFormAction,
   cityInput,
   rentalType,
   priceFrom,
@@ -87,6 +91,7 @@ export const SearchFiltersPanel = ({
   const [isExtraOpen, setIsExtraOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const isMapMode = mode === 'map';
 
   const priceRef = useRef<HTMLDivElement | null>(null);
   const roomsRef = useRef<HTMLDivElement | null>(null);
@@ -123,8 +128,8 @@ export const SearchFiltersPanel = ({
   };
 
   return (
-    <section className="border-b border-blue-200 bg-[#93c5ed]">
-      <div className="mx-auto max-w-[1320px] px-4 py-3 sm:px-6">
+    <section className={isMapMode ? 'border-none bg-transparent' : 'border-b border-blue-200 bg-[#93c5ed]'}>
+      <div className="relative mx-auto max-w-[1320px] px-4 py-3 sm:px-6">
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -173,12 +178,15 @@ export const SearchFiltersPanel = ({
             )}
           </div>
 
-          <button type="submit" className="h-12 rounded-full bg-[#f39b1d] px-8 font-semibold text-white hover:bg-[#e28f1b]">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button type="submit" className="h-12 rounded-full bg-[#f39b1d] px-8 font-semibold text-white hover:bg-[#e28f1b]">
             Знайти
-          </button>
+            </button>
+            {isMapMode ? mapFormAction : null}
+          </div>
         </form>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className={`mt-3 flex flex-wrap items-center gap-2 ${isMapMode ? 'relative' : ''}`}>
           <label className="relative">
             <select
               value={rentalType ?? ''}
@@ -313,7 +321,13 @@ export const SearchFiltersPanel = ({
         </div>
 
         {isExtraOpen && (
-          <div className="mt-3 rounded-3xl border border-gray-200 bg-white p-5 sm:p-6">
+          <div
+            className={
+              isMapMode
+                ? 'absolute left-0 right-0 top-[calc(100%+10px)] z-[760] max-h-[68vh] overflow-y-auto rounded-3xl border border-gray-200 bg-white p-5 shadow-2xl sm:p-6'
+                : 'mt-3 rounded-3xl border border-gray-200 bg-white p-5 sm:p-6'
+            }
+          >
             <div className="grid grid-cols-1 gap-5">
               <CollapsibleOptionsRow
                 rowId="property-type"

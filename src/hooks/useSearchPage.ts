@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useAmenitiesGroupedQuery, useLocationSuggestQuery, useSearchPropertiesQuery } from '@/hooks/api';
+import {
+  useAmenitiesGroupedQuery,
+  useLocationSuggestQuery,
+  usePropertyByIdQuery,
+  useSearchPropertiesQuery,
+  useSearchPropertyMapPinsQuery,
+} from '@/hooks/api';
 import type { AmenityCategory } from '@/types/enums';
 import type { LocationSuggestionDto } from '@/types/location';
-import type { SearchExtraFilters, SearchSortMode, SearchViewMode } from '@/types/search';
+import type { PropertyResponseDto } from '@/types/property';
+import type { SearchExtraFilters, SearchMapBounds, SearchSortMode, SearchViewMode } from '@/types/search';
 import { getApiErrorMessage } from '@/utils/errors';
+import { buildFallbackMapPins, enrichMapPinsWithRooms } from './search/mapPins';
 import {
   applyClientOnlyFilters,
   buildPagination,
@@ -21,6 +29,8 @@ import {
   toCriteria,
 } from './search/searchPageUtils';
 
+const MAP_PINS_PAGE_SIZE = 300;
+
 const createEmptyFormState = () => ({
   ...EMPTY_FORM_FILTERS,
   extra: {
@@ -29,6 +39,13 @@ const createEmptyFormState = () => ({
     amenityCategories: [],
   },
 });
+
+const areBoundsEqual = (left: SearchMapBounds | null, right: SearchMapBounds): boolean =>
+  !!left &&
+  Math.abs(left.southWestLat - right.southWestLat) < 0.000001 &&
+  Math.abs(left.southWestLng - right.southWestLng) < 0.000001 &&
+  Math.abs(left.northEastLat - right.northEastLat) < 0.000001 &&
+  Math.abs(left.northEastLng - right.northEastLng) < 0.000001;
 
 export const useSearchPage = () => {
   const [params, setParams] = useSearchParams();
@@ -39,6 +56,8 @@ export const useSearchPage = () => {
   const [urlSortMode, setUrlSortMode] = useState<SearchSortMode>(() => parseSortMode(params.get('sortMode')));
   const [viewMode, setViewMode] = useState<SearchViewMode>(() => parseViewMode(params.get('view')));
   const [visiblePages, setVisiblePages] = useState(() => parsePositiveInt(params.get('page')));
+  const [mapBounds, setMapBounds] = useState<SearchMapBounds | null>(null);
+  const [selectedMapPropertyId, setSelectedMapPropertyId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const next = buildSearchParams(urlFilters, urlSortMode, viewMode, visiblePages);
@@ -48,8 +67,20 @@ export const useSearchPage = () => {
   }, [params, setParams, urlFilters, urlSortMode, viewMode, visiblePages]);
 
   const criteria = useMemo(() => toCriteria(draftFilters), [draftFilters]);
+  const mapCriteria = useMemo(
+    () => ({
+      ...criteria,
+      ...(mapBounds ?? {}),
+    }),
+    [criteria, mapBounds]
+  );
 
   const propertiesQuery = useSearchPropertiesQuery(criteria, { page: 0, size: 200, sort: 'createdAt,desc' });
+  const mapPinsQuery = useSearchPropertyMapPinsQuery(
+    mapCriteria,
+    { page: 0, size: MAP_PINS_PAGE_SIZE, sort: 'createdAt,desc' },
+    viewMode === 'map'
+  );
   const locationSuggestQuery = useLocationSuggestQuery(
     { q: draftFilters.cityInput, limit: 10 },
     draftFilters.cityInput.trim().length >= 2
@@ -67,6 +98,32 @@ export const useSearchPage = () => {
   const visibleCount = Math.min(filtered.length, currentPage * PAGE_SIZE);
   const visibleItems = filtered.slice(0, visibleCount);
   const paginationItems = buildPagination(currentPage, totalPages);
+
+  const fallbackMapPins = useMemo(() => buildFallbackMapPins(filtered), [filtered]);
+  const mapPins = useMemo(() => {
+    const serverPins = mapPinsQuery.data?.content ?? [];
+    return enrichMapPinsWithRooms(serverPins.length > 0 ? serverPins : fallbackMapPins, filtered);
+  }, [fallbackMapPins, filtered, mapPinsQuery.data?.content]);
+
+  const selectedPropertyFromFiltered = useMemo(
+    () => (selectedMapPropertyId != null ? filtered.find((property) => property.id === selectedMapPropertyId) ?? null : null),
+    [filtered, selectedMapPropertyId]
+  );
+  const selectedPropertyQuery = usePropertyByIdQuery(
+    selectedMapPropertyId ?? 0,
+    selectedMapPropertyId != null && selectedPropertyFromFiltered == null
+  );
+  const selectedMapProperty = selectedPropertyFromFiltered ?? selectedPropertyQuery.data ?? null;
+
+  useEffect(() => {
+    if (selectedMapPropertyId == null) {
+      return;
+    }
+    if (mapPins.some((pin) => pin.id === selectedMapPropertyId)) {
+      return;
+    }
+    setSelectedMapPropertyId(undefined);
+  }, [mapPins, selectedMapPropertyId]);
 
   const handleFiltersCommit = () => {
     setUrlFilters(draftFilters);
@@ -109,6 +166,8 @@ export const useSearchPage = () => {
     setDraftSortMode('NEWEST');
     setUrlSortMode('NEWEST');
     setVisiblePages(1);
+    setMapBounds(null);
+    setSelectedMapPropertyId(undefined);
   };
 
   const showMore = () => {
@@ -147,6 +206,14 @@ export const useSearchPage = () => {
     amenitiesGrouped: amenitiesGroupedQuery.data ?? [],
     amenitiesLoading: amenitiesGroupedQuery.isLoading || amenitiesGroupedQuery.isFetching,
     error: propertiesQuery.error ? getApiErrorMessage(propertiesQuery.error, 'Не вдалося завантажити оголошення') : null,
+    mapPinsLoading: mapPinsQuery.isLoading || mapPinsQuery.isFetching,
+    mapPinsError:
+      mapPinsQuery.error && mapPins.length === 0
+        ? getApiErrorMessage(mapPinsQuery.error, 'Не вдалося завантажити точки на мапі')
+        : null,
+    mapPins,
+    selectedMapPropertyId,
+    selectedMapProperty,
     filtered,
     visibleItems,
     currentPage,
@@ -245,6 +312,9 @@ export const useSearchPage = () => {
     handleSortModeChange,
     handleResetAllFilters,
     setViewMode: (mode: SearchViewMode) => setViewMode(mode),
+    setSelectedMapPropertyId,
+    handleMapBoundsChange: (bounds: SearchMapBounds) =>
+      setMapBounds((prev) => (areBoundsEqual(prev, bounds) ? prev : bounds)),
     showMore,
     goPrevPage,
     goNextPage,

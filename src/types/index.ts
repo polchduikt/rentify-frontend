@@ -8,6 +8,7 @@ export * from './location';
 export * from './payment';
 export * from './promotion';
 export * from './property';
+export * from './propertyCreate';
 export * from './review';
 export * from './scalars';
 export * from './search';

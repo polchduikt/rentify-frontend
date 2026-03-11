@@ -73,7 +73,7 @@ export const parseSortMode = (value: string | null): SearchSortMode =>
   value === 'PRICE_ASC' || value === 'PRICE_DESC' || value === 'NEWEST' ? value : 'NEWEST';
 
 export const parseViewMode = (value: string | null): SearchViewMode =>
-  value === 'double' || value === 'single' ? value : 'single';
+  value === 'double' || value === 'single' || value === 'map' ? value : 'single';
 
 export const parsePositiveInt = (value: string | null, fallback = 1): number => {
   const num = Number(value);

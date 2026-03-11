@@ -1,20 +1,62 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Home, LogOut, Menu, PlusSquare, Search, User, X } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { APP_CONTENT } from '@/constants/appContent';
-import { useAuth } from '@/contexts/AuthContext';
+import { API_BASE_URL } from '@/config/env';
 import { ROUTES } from '@/config/routes';
+import { useAuth } from '@/contexts/AuthContext';
+import { getGoogleAvatarUrl } from '@/services/storage';
 
 const NAV_LINKS = [
   { to: ROUTES.home, label: 'Головна', icon: Home },
   { to: ROUTES.search, label: 'Пошук', icon: Search },
 ] as const;
 
+const isAbsoluteUrl = (value: string) => /^(https?:)?\/\//i.test(value);
+
+const sanitizeAvatarValue = (value: string | null | undefined) => {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return '';
+  }
+  const withoutQuotes = trimmed.replace(/^["']+|["']+$/g, '');
+  if (withoutQuotes === 'null' || withoutQuotes === 'undefined') {
+    return '';
+  }
+  return withoutQuotes;
+};
+
+const resolveAvatarUrl = (avatarUrl: string | null | undefined) => {
+  const value = sanitizeAvatarValue(avatarUrl);
+  if (!value) {
+    return '';
+  }
+
+  if (value.startsWith('lh3.googleusercontent.com/')) {
+    return `https://${value}`;
+  }
+
+  if (isAbsoluteUrl(value) || value.startsWith('data:') || value.startsWith('blob:')) {
+    if (value.startsWith('http://lh3.googleusercontent.com')) {
+      return value.replace('http://', 'https://');
+    }
+    return value;
+  }
+
+  try {
+    const apiOrigin = isAbsoluteUrl(API_BASE_URL) ? new URL(API_BASE_URL).origin : window.location.origin;
+    return new URL(value.startsWith('/') ? value : `/${value}`, apiOrigin).toString();
+  } catch {
+    return value;
+  }
+};
+
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
 
   const isActive = (path: string) =>
     path === ROUTES.home ? location.pathname === ROUTES.home : location.pathname.startsWith(path);
@@ -25,6 +67,17 @@ const Navbar = () => {
   };
 
   const initials = user?.firstName?.charAt(0)?.toUpperCase() ?? user?.email?.charAt(0)?.toUpperCase() ?? 'U';
+  const avatarSrc = useMemo(() => {
+    const direct = resolveAvatarUrl(user?.avatarUrl);
+    if (direct) {
+      return direct;
+    }
+    return resolveAvatarUrl(getGoogleAvatarUrl());
+  }, [user?.avatarUrl]);
+
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [avatarSrc]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -63,8 +116,14 @@ const Navbar = () => {
               to={ROUTES.profile}
               className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
             >
-              {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt="Аватар" className="h-7 w-7 rounded-full object-cover" />
+              {avatarSrc && !avatarLoadFailed ? (
+                <img
+                  src={avatarSrc}
+                  alt="Аватар"
+                  className="h-7 w-7 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={() => setAvatarLoadFailed(true)}
+                />
               ) : (
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
                   {initials}
@@ -109,7 +168,7 @@ const Navbar = () => {
         </button>
       </div>
 
-      {open && (
+      {open ? (
         <div className="border-t border-slate-200 bg-white px-4 py-4 md:hidden">
           <div className="space-y-1">
             {NAV_LINKS.map(({ to, label, icon: Icon }) => (
@@ -176,7 +235,7 @@ const Navbar = () => {
             </div>
           )}
         </div>
-      )}
+      ) : null}
     </header>
   );
 };

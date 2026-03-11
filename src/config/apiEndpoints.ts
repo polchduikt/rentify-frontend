@@ -51,6 +51,7 @@ export const API_ENDPOINTS = {
     root: '/properties',
     mine: '/properties/my',
     search: '/properties/search',
+    searchMapPins: '/properties/search/map-pins',
     byId: (id: number) => `/properties/${id}`,
     photos: (id: number) => `/properties/${id}/photos`,
     photoById: (id: number, photoId: number) => `/properties/${id}/photos/${photoId}`,

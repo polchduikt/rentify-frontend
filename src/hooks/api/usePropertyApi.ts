@@ -39,6 +39,17 @@ export const useSearchPropertiesQuery = (
     enabled,
   });
 
+export const useSearchPropertyMapPinsQuery = (
+  criteria?: PropertySearchCriteriaDto,
+  page?: PageQuery,
+  enabled = true
+) =>
+  useQuery({
+    queryKey: queryKeys.properties.mapPins(criteria, page),
+    queryFn: () => propertyService.searchMapPins(criteria, page),
+    enabled,
+  });
+
 export const useAvailabilityBlocksQuery = (propertyId: number, enabled = true) =>
   useQuery({
     queryKey: queryKeys.properties.availability(propertyId),

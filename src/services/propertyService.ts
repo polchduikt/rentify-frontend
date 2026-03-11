@@ -4,6 +4,7 @@ import type {
   AvailabilityBlockDto,
   AvailabilityBlockRequestDto,
   PropertyCreateRequestDto,
+  PropertyMapPinDto,
   PropertyPhotoDto,
   PropertyResponseDto,
   PropertySearchCriteriaDto,
@@ -74,6 +75,19 @@ export const propertyService = {
     page?: PageQuery
   ): Promise<SpringPage<PropertyResponseDto>> {
     const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.search, {
+      params: {
+        ...cleanQueryParams(criteria ?? {}),
+        ...withPageQuery(page),
+      },
+    });
+    return data;
+  },
+
+  async searchMapPins(
+    criteria?: PropertySearchCriteriaDto,
+    page?: PageQuery
+  ): Promise<SpringPage<PropertyMapPinDto>> {
+    const { data } = await api.get<SpringPage<PropertyMapPinDto>>(API_ENDPOINTS.properties.searchMapPins, {
       params: {
         ...cleanQueryParams(criteria ?? {}),
         ...withPageQuery(page),

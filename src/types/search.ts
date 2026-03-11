@@ -1,12 +1,19 @@
 import type { AmenityCategory, LocationSuggestionType, PropertyMarketType, RentalType } from './enums';
 
-export type SearchViewMode = 'single' | 'double';
+export type SearchViewMode = 'single' | 'double' | 'map';
 
 export type SearchSortMode = 'NEWEST' | 'PRICE_ASC' | 'PRICE_DESC';
 
 export type SearchMainPanel = 'price' | 'rooms' | 'area' | null;
 
 export type SearchPaginationItem = number | 'dots-left' | 'dots-right';
+
+export interface SearchMapBounds {
+  southWestLat: number;
+  southWestLng: number;
+  northEastLat: number;
+  northEastLng: number;
+}
 
 export interface SearchExtraFilters {
   propertyType?: string;

@@ -7,4 +7,5 @@ export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ||
 
 export const STORAGE_KEYS = {
     authToken: 'rentify.auth.token',
+    googleAvatarUrl: 'rentify.auth.googleAvatarUrl',
 } as const;

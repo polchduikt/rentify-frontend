@@ -45,6 +45,8 @@ export const queryKeys = {
     byId: (id: number) => ['properties', 'byId', id] as const,
     search: (criteria?: PropertySearchCriteriaDto, page?: PageQuery) =>
       ['properties', 'search', criteria ?? null, page ?? null] as const,
+    mapPins: (criteria?: PropertySearchCriteriaDto, page?: PageQuery) =>
+      ['properties', 'mapPins', criteria ?? null, page ?? null] as const,
     availability: (propertyId: number) => ['properties', 'availability', propertyId] as const,
     unavailableRanges: (propertyId: number, query?: UnavailableRangesQuery) =>
       ['properties', 'unavailableRanges', propertyId, query ?? null] as const,

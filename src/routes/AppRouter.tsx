@@ -7,6 +7,7 @@ import CreatePropertyPage from '@/pages/CreatePropertyPage';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import PlaceholderPage from '@/pages/PlaceholderPage';
+import PropertyDetailsPage from '@/pages/PropertyDetailsPage';
 import RegisterPage from '@/pages/RegisterPage';
 import SearchPage from '@/pages/SearchPage';
 import SearchMapPage from '@/pages/SearchMapPage';
@@ -50,6 +51,7 @@ const AppRouter = () => (
       <Route element={<MainLayout />}>
         <Route path={ROUTES.home} element={<HomePage />} />
         <Route path={ROUTES.search} element={<SearchPage />} />
+        <Route path={ROUTES.propertyDetailsPattern} element={<PropertyDetailsPage />} />
 
         <Route
           path={ROUTES.about}

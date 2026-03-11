@@ -10,7 +10,6 @@ export const PropertyCreateAmenitiesStep = ({ model }: PropertyCreateAmenitiesSt
   <div className="space-y-8">
     <div>
       <h3 className="text-lg font-semibold text-slate-900">Зручності</h3>
-      <p className="mt-1 text-sm text-slate-500">Список приходить із бекенду (`/amenities/grouped`).</p>
 
       <div className="mt-4 space-y-5">
         {model.amenitiesLoading ? (

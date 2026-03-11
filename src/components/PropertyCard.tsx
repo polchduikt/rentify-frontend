@@ -1,5 +1,6 @@
 import { BedDouble, Expand, Layers, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
 
 const FALLBACK_PHOTO_URL =
@@ -22,53 +23,56 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   const currency = property.pricing?.currency || 'UAH';
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="aspect-[3/2] overflow-hidden bg-slate-100">
-        <img src={imageUrl} alt={property.title} className="h-full w-full object-cover transition group-hover:scale-105" />
-      </div>
+    <article className="group h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+      <Link
+        to={ROUTES.propertyDetails(property.id)}
+        aria-label={`Переглянути оголошення: ${property.title}`}
+        className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      >
+        <div className="aspect-[3/2] overflow-hidden bg-slate-100">
+          <img src={imageUrl} alt={property.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+        </div>
 
-      <div className="flex flex-1 flex-col p-5">
-        <div className="mb-2 flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold text-slate-900">
-            {Number(basePrice || 0).toLocaleString('uk-UA')} {currency}
+        <div className="flex min-w-0 flex-1 flex-col p-5">
+          <div className="mb-2 flex items-baseline gap-1.5">
+            <span className="text-2xl font-bold text-slate-900">
+              {Number(basePrice || 0).toLocaleString('uk-UA')} {currency}
+            </span>
+            <span className="text-sm font-medium text-slate-500">{priceSuffix}</span>
+          </div>
+
+          <h3 className="text-lg font-bold text-slate-900 break-words [overflow-wrap:anywhere]">{property.title}</h3>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
+            <MapPin size={14} />
+            <span className="break-words [overflow-wrap:anywhere]">{street || city}</span>
+          </p>
+
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
+            {property.rooms != null && (
+              <span className="inline-flex items-center gap-1.5">
+                <BedDouble size={15} className="text-slate-400" />
+                {property.rooms} кімн.
+              </span>
+            )}
+            {property.areaSqm != null && (
+              <span className="inline-flex items-center gap-1.5">
+                <Expand size={14} className="text-slate-400" />
+                {Number(property.areaSqm)} м²
+              </span>
+            )}
+            {property.floor != null && (
+              <span className="inline-flex items-center gap-1.5">
+                <Layers size={14} className="text-slate-400" />
+                {property.floor} / {property.totalFloors || '?'}
+              </span>
+            )}
+          </div>
+
+          <span className="mt-5 inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">
+            Детальніше
           </span>
-          <span className="text-sm font-medium text-slate-500">{priceSuffix}</span>
         </div>
-
-        <h3 className="text-lg font-bold text-slate-900">{property.title}</h3>
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
-          <MapPin size={14} />
-          <span>{street || city}</span>
-        </p>
-
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
-          {property.rooms != null && (
-            <span className="inline-flex items-center gap-1.5">
-              <BedDouble size={15} className="text-slate-400" />
-              {property.rooms} кімн.
-            </span>
-          )}
-          {property.areaSqm != null && (
-            <span className="inline-flex items-center gap-1.5">
-              <Expand size={14} className="text-slate-400" />
-              {Number(property.areaSqm)} м²
-            </span>
-          )}
-          {property.floor != null && (
-            <span className="inline-flex items-center gap-1.5">
-              <Layers size={14} className="text-slate-400" />
-              {property.floor} / {property.totalFloors || '?'}
-            </span>
-          )}
-        </div>
-
-        <Link
-          to={`/properties/${property.id}`}
-          className="mt-5 inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-        >
-          Детальніше
-        </Link>
-      </div>
+      </Link>
     </article>
   );
 };

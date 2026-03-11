@@ -97,24 +97,6 @@ export const PropertyCreateDetailsStep = ({ model }: PropertyCreateDetailsStepPr
           {...register('additionalRules')}
         />
       </div>
-
-      <div className="rounded-2xl border border-slate-200 p-4">
-        <p className="text-sm font-semibold text-slate-800">Прапорці якості</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" className="h-4 w-4 rounded border-slate-300" {...register('isVerifiedProperty')} />
-            Перевірене житло
-          </label>
-          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" className="h-4 w-4 rounded border-slate-300" {...register('isVerifiedRealtor')} />
-            Перевірений рієлтор
-          </label>
-          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" className="h-4 w-4 rounded border-slate-300" {...register('isDuplicate')} />
-            Позначити як дублікат
-          </label>
-        </div>
-      </div>
     </div>
   );
 };

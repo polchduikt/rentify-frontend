@@ -3,6 +3,8 @@ export const ROUTES = {
   search: '/search',
   searchMap: '/search/map',
   createProperty: '/properties/new',
+  propertyDetailsPattern: '/properties/:id',
+  propertyDetails: (id: number | string) => `/properties/${id}`,
   profile: '/profile',
   login: '/login',
   register: '/register',

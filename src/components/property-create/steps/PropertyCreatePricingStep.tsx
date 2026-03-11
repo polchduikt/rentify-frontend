@@ -62,7 +62,6 @@ export const PropertyCreatePricingStep = ({ model }: PropertyCreatePricingStepPr
       {rentalType === 'SHORT_TERM' ? (
         <div className="rounded-2xl border border-slate-200 p-4">
           <h3 className="text-lg font-semibold text-slate-900">Недоступні дати (опційно)</h3>
-          <p className="mt-1 text-sm text-slate-500">Після створення оголошення блоки відправляться у `/properties/{'{id}'}/availability`.</p>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_1.5fr_auto]">
             <input

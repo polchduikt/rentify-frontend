@@ -1,4 +1,6 @@
 import { BedDouble, Heart, Layers, MapPin, Square } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
 
 const FALLBACK_PHOTO_URL =
@@ -89,74 +91,91 @@ export const PropertyListItem = ({ property, variant = 'single' }: PropertyListI
 
   return (
     <article className="h-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-shadow hover:shadow-lg">
-      <div className={isDouble ? 'grid h-full grid-cols-1 md:grid-cols-[minmax(0,1.18fr)_minmax(0,1fr)]' : 'grid h-full grid-cols-1 md:grid-cols-[minmax(0,460px)_1fr]'}>
-        <div className="h-full">
-          <img
-            src={imageUrl}
-            alt={property.title}
-            className={`h-full w-full object-cover aspect-[4/3] md:aspect-auto ${isDouble ? 'md:min-h-[220px]' : 'md:min-h-[320px]'}`}
-          />
-        </div>
+      <Link
+        to={ROUTES.propertyDetails(property.id)}
+        aria-label={`Переглянути оголошення: ${property.title}`}
+        className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      >
+        <div
+          className={
+            isDouble
+              ? 'grid h-full grid-cols-1 md:grid-cols-[minmax(0,1.18fr)_minmax(0,1fr)]'
+              : 'grid h-full grid-cols-1 md:grid-cols-[minmax(0,460px)_1fr]'
+          }
+        >
+          <div
+            className={`overflow-hidden bg-slate-100 ${
+              isDouble ? 'h-[220px] md:h-[220px]' : 'h-[220px] md:h-[320px]'
+            }`}
+          >
+            <img
+              src={imageUrl}
+              alt={property.title}
+              className="h-full w-full object-cover"
+            />
+          </div>
 
-        <div className={isDouble ? 'p-3 lg:p-3.5' : 'p-5 lg:p-6'}>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <p className={`leading-none font-extrabold text-gray-900 ${isDouble ? 'text-[24px] lg:text-[26px]' : 'text-[34px]'}`}>
-                  {priceValue > 0 ? priceValue.toLocaleString('uk-UA') : '0'} {currency}
-                </p>
-                <p className={`text-gray-500 ${isDouble ? 'text-[14px]' : 'text-[18px]'}`}>{suffix}</p>
+          <div className={isDouble ? 'min-w-0 p-3 lg:p-3.5' : 'min-w-0 p-5 lg:p-6'}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-baseline gap-2">
+                  <p className={`leading-none font-extrabold text-gray-900 ${isDouble ? 'text-[24px] lg:text-[26px]' : 'text-[34px]'}`}>
+                    {priceValue > 0 ? priceValue.toLocaleString('uk-UA') : '0'} {currency}
+                  </p>
+                  <p className={`text-gray-500 ${isDouble ? 'text-[14px]' : 'text-[18px]'}`}>{suffix}</p>
+                </div>
               </div>
+              <span className="shrink-0 text-gray-400" aria-hidden="true">
+                <Heart size={isDouble ? 21 : 24} />
+              </span>
             </div>
-            <button
-              type="button"
-              className="shrink-0 text-gray-400 transition-colors hover:text-red-500"
-              aria-label="Додати в обране"
-            >
-              <Heart size={isDouble ? 21 : 24} />
-            </button>
-          </div>
 
-          <h3 className={`leading-tight font-bold text-gray-900 ${isDouble ? 'mt-2 text-[20px]' : 'mt-3.5 text-[28px]'}`}>
-            {street ? `вул. ${street}` : property.title}
-          </h3>
+            <h3 className={`leading-tight font-bold text-gray-900 break-words [overflow-wrap:anywhere] ${isDouble ? 'mt-2 text-[20px]' : 'mt-3.5 text-[28px]'}`}>
+              {street ? `вул. ${street}` : property.title}
+            </h3>
 
-          <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-gray-600 ${isDouble ? 'mt-1 text-[13px]' : 'mt-2 text-[17px]'}`}>
-            <span className="flex items-center gap-1.5">
-              <MapPin size={15} /> {city || 'Місто не вказано'}
-            </span>
-            <span className="text-gray-300">•</span>
-            <span>{propertyTypeLabel}</span>
-            {property.rentalType && (
-              <>
-                <span className="text-gray-300">•</span>
-                <span>{property.rentalType === 'SHORT_TERM' ? 'Подобова оренда' : 'Довгострокова оренда'}</span>
-              </>
-            )}
-          </div>
-
-          {meta.length > 0 && (
-            <div className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-800 ${isDouble ? 'text-[13px]' : 'text-[16px]'}`}>
-              {meta.map((item) => (
-                <span key={item} className="flex items-center gap-1.5">
-                  {item.includes('кімнати') && <BedDouble size={16} className="text-gray-500" />}
-                  {item.includes('м²') && <Square size={16} className="text-gray-500" />}
-                  {item.includes('поверх') && <Layers size={16} className="text-gray-500" />}
-                  {item}
-                </span>
-              ))}
+            <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-gray-600 ${isDouble ? 'mt-1 text-[13px]' : 'mt-2 text-[17px]'}`}>
+              <span className="flex items-center gap-1.5">
+                <MapPin size={15} /> {city || 'Місто не вказано'}
+              </span>
+              <span className="text-gray-300">•</span>
+              <span>{propertyTypeLabel}</span>
+              {property.rentalType ? (
+                <>
+                  <span className="text-gray-300">•</span>
+                  <span>{property.rentalType === 'SHORT_TERM' ? 'Подобова оренда' : 'Довгострокова оренда'}</span>
+                </>
+              ) : null}
             </div>
-          )}
 
-          {property.description && (
-            <p className={`mt-4 text-gray-700 ${isDouble ? 'text-[13px]' : 'text-[15px]'}`}>
-              {property.description.length > 180 ? `${property.description.slice(0, 180)}...` : property.description}
-            </p>
-          )}
+            {meta.length > 0 ? (
+              <div className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-800 ${isDouble ? 'text-[13px]' : 'text-[16px]'}`}>
+                {meta.map((item) => (
+                  <span key={item} className="flex items-center gap-1.5">
+                    {item.includes('кімнати') ? <BedDouble size={16} className="text-gray-500" /> : null}
+                    {item.includes('м²') ? <Square size={16} className="text-gray-500" /> : null}
+                    {item.includes('поверх') ? <Layers size={16} className="text-gray-500" /> : null}
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : null}
 
-          <div className={`mt-4 text-gray-500 ${isDouble ? 'text-[12px]' : 'text-[14px]'}`}>{formatPublishedLabel(property.createdAt)}</div>
+            {property.description ? (
+              <p className={`mt-4 line-clamp-2 whitespace-pre-line break-words [overflow-wrap:anywhere] text-gray-700 ${isDouble ? 'text-[13px]' : 'text-[15px]'}`}>
+                {property.description.length > 180 ? `${property.description.slice(0, 180)}...` : property.description}
+              </p>
+            ) : null}
+
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <div className={`text-gray-500 ${isDouble ? 'text-[12px]' : 'text-[14px]'}`}>{formatPublishedLabel(property.createdAt)}</div>
+              <span className="inline-flex items-center rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700">
+                Детальніше
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
+      </Link>
     </article>
   );
 };

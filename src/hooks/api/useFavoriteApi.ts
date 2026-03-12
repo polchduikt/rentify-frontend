@@ -2,10 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { favoriteService } from '@/services/favoriteService';
 import { queryKeys } from './queryKeys';
 
-export const useMyFavoritesQuery = () =>
+export const useMyFavoritesQuery = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.favorites.mine(),
     queryFn: () => favoriteService.getMyFavorites(),
+    enabled,
   });
 
 export const useAddToFavoritesMutation = () => {

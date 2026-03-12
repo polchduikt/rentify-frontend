@@ -88,6 +88,8 @@ const PropertyDetailsPage = () => {
             canSlideNext={model.canSlideNext}
             onSlidePrev={model.slideRecommendationsPrev}
             onSlideNext={model.slideRecommendationsNext}
+            isFavorite={model.isFavorite}
+            favoriteIds={model.favoriteIds}
           />
 
           <PropertyDetailsSidebar

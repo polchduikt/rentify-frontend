@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { userService } from '@/services/userService';
+import { authService } from '@/services/authService';
+import { clearGoogleAvatarUrl } from '@/services/storage';
 import type { ChangePasswordRequestDto, DeleteAccountRequestDto, UpdateUserRequestDto } from '@/types/user';
 import { queryKeys } from './queryKeys';
 
@@ -63,8 +65,17 @@ export const useDeleteAvatarMutation = () => {
   return useMutation({
     mutationFn: () => userService.deleteAvatar(),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.users.profile() });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile() });
+      clearGoogleAvatarUrl();
+      authService.clearProfileCache();
+      const currentProfileData = queryClient.getQueryData(queryKeys.users.profile()) as any;
+      if (currentProfileData) {
+        const updatedData = { ...currentProfileData, avatarUrl: null };
+        queryClient.setQueryData(queryKeys.users.profile(), updatedData);
+        queryClient.setQueryData(queryKeys.auth.profile(), updatedData);
+      } else {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.users.profile() });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile() });
+      }
     },
   });
 };

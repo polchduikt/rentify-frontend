@@ -1,16 +1,27 @@
-import { BedDouble, Expand, Layers, MapPin } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BedDouble, Expand, Heart, Layers, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
+import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
 
 const FALLBACK_PHOTO_URL =
   'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80';
 
 interface PropertyCardProps {
   property: PropertyResponseDto;
+  isFavorite?: boolean;
 }
 
-const PropertyCard = ({ property }: PropertyCardProps) => {
+const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
+  const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
+  const addToFavoritesMutation = useAddToFavoritesMutation();
+  const removeFromFavoritesMutation = useRemoveFromFavoritesMutation();
+
+  useEffect(() => {
+    setIsLocalFavorite(isFavorite);
+  }, [isFavorite]);
+
   const imageUrl = property.photos?.[0]?.url || FALLBACK_PHOTO_URL;
   const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
@@ -22,6 +33,26 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   const priceSuffix = property.rentalType === 'SHORT_TERM' ? '/ніч' : '/місяць';
   const currency = property.pricing?.currency || 'UAH';
 
+  const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isLoading) return;
+
+    try {
+      if (isLocalFavorite) {
+        await removeFromFavoritesMutation.mutateAsync(property.id);
+      } else {
+        await addToFavoritesMutation.mutateAsync(property.id);
+      }
+      setIsLocalFavorite(!isLocalFavorite);
+    } catch {
+      // Error handling is done by React Query
+    }
+  };
+
   return (
     <article className="group h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
       <Link
@@ -29,8 +60,19 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         aria-label={`Переглянути оголошення: ${property.title}`}
         className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       >
-        <div className="aspect-[3/2] overflow-hidden bg-slate-100">
+        <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
           <img src={imageUrl} alt={property.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+          <button
+            onClick={handleFavoriteClick}
+            className="absolute top-3 right-3 inline-flex items-center justify-center rounded-lg bg-white/80 p-2 transition hover:bg-white"
+            aria-label={isLocalFavorite ? 'Видалити з улюблених' : 'Додати в улюблене'}
+          >
+            <Heart
+              size={20}
+              fill={isLocalFavorite ? '#ef4444' : 'none'}
+              color={isLocalFavorite ? '#ef4444' : '#64748b'}
+            />
+          </button>
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col p-5">

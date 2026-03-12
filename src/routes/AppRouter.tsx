@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
 import MainLayout from '@/layouts/MainLayout';
 import CreatePropertyPage from '@/pages/CreatePropertyPage';
+import FavoritesPage from '@/pages/FavoritesPage';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import PlaceholderPage from '@/pages/PlaceholderPage';
@@ -74,6 +75,7 @@ const AppRouter = () => (
         <Route element={<ProtectedRoute />}>
           <Route path={ROUTES.createProperty} element={<CreatePropertyPage />} />
           <Route path={ROUTES.profile} element={<ProfilePage />} />
+          <Route path={ROUTES.favorites} element={<FavoritesPage />} />
         </Route>
       </Route>
 

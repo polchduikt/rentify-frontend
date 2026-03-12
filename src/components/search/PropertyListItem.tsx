@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { BedDouble, Heart, Layers, MapPin, Square } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
+import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
 
 const FALLBACK_PHOTO_URL =
   'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
@@ -16,6 +18,7 @@ const PROPERTY_TYPE_LABELS: Record<string, string> = {
 interface PropertyListItemProps {
   property: PropertyResponseDto;
   variant?: 'single' | 'double';
+  isFavorite?: boolean;
 }
 
 const resolveMeta = (property: PropertyResponseDto): string[] => {
@@ -80,7 +83,11 @@ const formatPublishedLabel = (createdAt?: string): string => {
   return `Опубліковано ${months} міс тому`;
 };
 
-export const PropertyListItem = ({ property, variant = 'single' }: PropertyListItemProps) => {
+export const PropertyListItem = ({ property, variant = 'single', isFavorite = false }: PropertyListItemProps) => {
+  const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
+  const addToFavoritesMutation = useAddToFavoritesMutation();
+  const removeFromFavoritesMutation = useRemoveFromFavoritesMutation();
+
   const imageUrl = property.photos?.[0]?.url ?? FALLBACK_PHOTO_URL;
   const { value: priceValue, suffix } = resolvePropertyPrice(property);
   const currency = property.pricing?.currency || 'UAH';
@@ -88,6 +95,25 @@ export const PropertyListItem = ({ property, variant = 'single' }: PropertyListI
   const meta = resolveMeta(property);
   const propertyTypeLabel = PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType || 'Нерухомість';
   const isDouble = variant === 'double';
+  const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isLoading) return;
+
+    try {
+      if (isLocalFavorite) {
+        await removeFromFavoritesMutation.mutateAsync(property.id);
+      } else {
+        await addToFavoritesMutation.mutateAsync(property.id);
+      }
+      setIsLocalFavorite(!isLocalFavorite);
+    } catch {
+      // Error handling is done by React Query
+    }
+  };
 
   return (
     <article className="h-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-shadow hover:shadow-lg">
@@ -125,9 +151,19 @@ export const PropertyListItem = ({ property, variant = 'single' }: PropertyListI
                   <p className={`text-gray-500 ${isDouble ? 'text-[14px]' : 'text-[18px]'}`}>{suffix}</p>
                 </div>
               </div>
-              <span className="shrink-0 text-gray-400" aria-hidden="true">
-                <Heart size={isDouble ? 21 : 24} />
-              </span>
+              <button
+                type="button"
+                onClick={handleFavoriteClick}
+                disabled={isLoading}
+                className="inline-flex shrink-0 items-center justify-center rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label={isLocalFavorite ? 'Видалити з улюблених' : 'Додати в улюблене'}
+              >
+                <Heart
+                  size={isDouble ? 21 : 24}
+                  fill={isLocalFavorite ? '#ef4444' : 'none'}
+                  color={isLocalFavorite ? '#ef4444' : '#94a3b8'}
+                />
+              </button>
             </div>
 
             <h3 className={`leading-tight font-bold text-gray-900 break-words [overflow-wrap:anywhere] ${isDouble ? 'mt-2 text-[20px]' : 'mt-3.5 text-[28px]'}`}>

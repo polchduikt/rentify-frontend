@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FALLBACK_IMAGE } from '@/components/property-details/constants';
+import { PropertyListItem } from '@/components/search/PropertyListItem';
 import { ROUTES } from '@/config/routes';
 import type { FavoriteResponseDto } from '@/types/favorite';
 
@@ -33,25 +33,9 @@ export const FavoritesSection = ({
         </Link>
       </div>
     ) : (
-      <div className="space-y-3">
-        {favorites.slice(0, 5).map((favorite) => (
-          <article key={favorite.id} className="flex items-center gap-3 rounded-2xl border border-slate-200 p-3">
-            <img
-              src={favorite.property.photos?.[0]?.url || FALLBACK_IMAGE}
-              alt={favorite.property.title}
-              className="h-16 w-20 rounded-xl object-cover"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="line-clamp-1 text-sm font-bold text-slate-900">{favorite.property.title}</p>
-              <p className="text-xs text-slate-500">{favorite.property.address?.location?.city || 'Місто не вказано'}</p>
-            </div>
-            <Link
-              to={ROUTES.propertyDetails(favorite.propertyId)}
-              className="inline-flex items-center rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-            >
-              Деталі
-            </Link>
-          </article>
+      <div className="space-y-4">
+        {favorites.map((favorite) => (
+          <PropertyListItem key={favorite.id} property={favorite.property} variant="single" isFavorite />
         ))}
       </div>
     )}

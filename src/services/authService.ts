@@ -148,6 +148,11 @@ export const authService = {
     return { token, user };
   },
 
+  clearProfileCache(): void {
+    profileRequest = null;
+    profileRequestToken = null;
+  },
+
   logout(): void {
     profileRequest = null;
     profileRequestToken = null;

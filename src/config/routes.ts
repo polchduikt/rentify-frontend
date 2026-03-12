@@ -6,6 +6,7 @@ export const ROUTES = {
   propertyDetailsPattern: '/properties/:id',
   propertyDetails: (id: number | string) => `/properties/${id}`,
   profile: '/profile',
+  favorites: '/favorites',
   login: '/login',
   register: '/register',
   about: '/about',

@@ -1,23 +1,64 @@
+import { useState } from 'react';
+import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
+import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
 import { FALLBACK_IMAGE } from './constants';
 import { formatPrice } from './utils';
 
 interface RecommendedPropertyCardProps {
   property: PropertyResponseDto;
+  isFavorite?: boolean;
 }
 
-export const RecommendedPropertyCard = ({ property }: RecommendedPropertyCardProps) => {
+export const RecommendedPropertyCard = ({ property, isFavorite = false }: RecommendedPropertyCardProps) => {
+  const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
+  const addToFavoritesMutation = useAddToFavoritesMutation();
+  const removeFromFavoritesMutation = useRemoveFromFavoritesMutation();
+
   const image = property.photos?.[0]?.url || FALLBACK_IMAGE;
   const price = Number(property.pricing?.pricePerMonth || property.pricing?.pricePerNight || 0);
   const currency = property.pricing?.currency || 'UAH';
   const city = property.address?.location?.city || 'Місто не вказано';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
 
+  const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isLoading) return;
+
+    try {
+      if (isLocalFavorite) {
+        await removeFromFavoritesMutation.mutateAsync(property.id);
+      } else {
+        await addToFavoritesMutation.mutateAsync(property.id);
+      }
+      setIsLocalFavorite(!isLocalFavorite);
+    } catch {
+      // Error handling is done by React Query
+    }
+  };
+
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <img src={image} alt={property.title} className="h-44 w-full object-cover" />
+      <div className="relative">
+        <img src={image} alt={property.title} className="h-44 w-full object-cover" />
+        <button
+          onClick={handleFavoriteClick}
+          className="absolute top-2 right-2 inline-flex items-center justify-center rounded-lg bg-white/80 p-1.5 transition hover:bg-white"
+          aria-label={isLocalFavorite ? 'Видалити з улюблених' : 'Додати в улюблене'}
+        >
+          <Heart
+            size={16}
+            fill={isLocalFavorite ? '#ef4444' : 'none'}
+            color={isLocalFavorite ? '#ef4444' : '#64748b'}
+          />
+        </button>
+      </div>
       <div className="p-4">
         <p className="text-xl font-black text-slate-900">{formatPrice(price, currency)}</p>
         <p className="mt-1 text-sm text-slate-600">

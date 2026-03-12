@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FALLBACK_IMAGE, resolveLocationFallback } from '@/components/property-details/constants';
 import { parseCoordinate } from '@/components/property-details/utils';
-import { usePropertyByIdQuery, usePublicProfileQuery, useSearchPropertiesQuery } from '@/hooks/api';
+import { usePropertyByIdQuery, usePublicProfileQuery, useSearchPropertiesQuery, useMyFavoritesQuery } from '@/hooks/api';
 import type { AmenityDto } from '@/types/property';
 import { getApiErrorMessage } from '@/utils/errors';
 import { geocodeAddress } from '@/utils/geocoding';
@@ -28,6 +28,7 @@ export const usePropertyDetailsPage = () => {
   const property = propertyQuery.data ?? null;
 
   const ownerQuery = usePublicProfileQuery(property?.hostId ?? 0, Boolean(property?.hostId));
+  const favoritesQuery = useMyFavoritesQuery();
   const recommendationsQuery = useSearchPropertiesQuery(
     {
       city: property?.address?.location?.city,
@@ -159,6 +160,12 @@ export const usePropertyDetailsPage = () => {
     owner?.firstName || owner?.lastName ? [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') : FALLBACK_OWNER_LABEL;
   const ownerInitial = owner?.firstName?.charAt(0)?.toUpperCase() || 'U';
 
+  const favoriteIds = useMemo(
+    () => new Set(favoritesQuery.data?.map((fav) => fav.propertyId) ?? []),
+    [favoritesQuery.data]
+  );
+  const isFavorite = property?.id ? favoriteIds.has(property.id) : false;
+
   const hasPropertyError = !propertyQuery.isLoading && (Boolean(propertyQuery.error) || !property);
 
   return {
@@ -195,6 +202,8 @@ export const usePropertyDetailsPage = () => {
     ownerInitial,
     pricePerMonth,
     currency,
+    isFavorite,
+    favoriteIds,
   };
 };
 

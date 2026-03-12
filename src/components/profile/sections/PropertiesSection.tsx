@@ -28,7 +28,7 @@ export const PropertiesSection = ({
         У цьому розділі поки немає оголошень.
       </div>
     ) : (
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="space-y-4">
         {properties.map((property) => (
           <PropertyPreviewItem key={property.id} property={property} />
         ))}

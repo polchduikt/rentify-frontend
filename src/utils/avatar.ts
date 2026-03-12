@@ -28,12 +28,17 @@ export const resolveAvatarUrl = (avatarUrl: string | null | undefined) => {
     if (value.startsWith('http://lh3.googleusercontent.com')) {
       return value.replace('http://', 'https://');
     }
+    if (value.includes('cloudinary')) {
+      const separator = value.includes('?') ? '&' : '?';
+      return `${value}${separator}t=${Date.now()}`;
+    }
     return value;
   }
 
   try {
     const apiOrigin = isAbsoluteUrl(API_BASE_URL) ? new URL(API_BASE_URL).origin : window.location.origin;
-    return new URL(value.startsWith('/') ? value : `/${value}`, apiOrigin).toString();
+    const url = new URL(value.startsWith('/') ? value : `/${value}`, apiOrigin).toString();
+    return `${url}?t=${Date.now()}`;
   } catch {
     return value;
   }

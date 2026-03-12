@@ -7,7 +7,7 @@ import { ROUTES } from '@/config/routes';
 import { useHomePage } from '@/hooks';
 
 const HomePage = () => {
-  const { query, setQuery, shortTerm, longTerm, loadingShort, loadingLong, handleSearchSubmit } = useHomePage();
+  const { query, setQuery, shortTerm, longTerm, favoriteIds, loadingShort, loadingLong, handleSearchSubmit } = useHomePage();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -70,7 +70,7 @@ const HomePage = () => {
             subtitle="Квартири та будинки подобово"
             linkTo={ROUTES.search}
           />
-          <PropertySlider items={shortTerm} loading={loadingShort} />
+          <PropertySlider items={shortTerm} loading={loadingShort} favoriteIds={favoriteIds} />
         </section>
 
         <section className="border-t border-slate-200/70 py-12">
@@ -79,7 +79,7 @@ const HomePage = () => {
             subtitle="Оренда від одного місяця"
             linkTo={ROUTES.search}
           />
-          <PropertySlider items={longTerm} loading={loadingLong} />
+          <PropertySlider items={longTerm} loading={loadingLong} favoriteIds={favoriteIds} />
         </section>
 
         <section className="border-t border-slate-200/70 py-12">

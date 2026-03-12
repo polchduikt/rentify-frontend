@@ -1,10 +1,10 @@
-import { ChevronRight } from 'lucide-react';
+import { BedDouble, CalendarClock, ChevronRight, Layers, MapPin, Square } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FALLBACK_IMAGE } from '@/components/property-details/constants';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
 import { PROPERTY_STATUS_LABELS } from './constants';
-import { formatMoney } from './formatters';
+import { formatDate, formatMoney } from './formatters';
 
 interface PropertyPreviewItemProps {
   property: PropertyResponseDto;
@@ -12,31 +12,89 @@ interface PropertyPreviewItemProps {
 
 export const PropertyPreviewItem = ({ property }: PropertyPreviewItemProps) => {
   const image = property.photos?.[0]?.url || FALLBACK_IMAGE;
-  const address = [property.address?.location?.city, property.address?.street, property.address?.houseNumber]
-    .filter(Boolean)
-    .join(', ');
+  const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
+  const addressLine = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
+
+  const isShortTerm = property.rentalType === 'SHORT_TERM';
+  const resolvedPrice = Number(
+    isShortTerm
+      ? property.pricing?.pricePerNight || property.pricing?.pricePerMonth
+      : property.pricing?.pricePerMonth || property.pricing?.pricePerNight,
+  ) || 0;
+  const priceSuffix = isShortTerm ? '/ доба' : '/ міс';
+  const currency = property.pricing?.currency || 'UAH';
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <img src={image} alt={property.title} className="h-36 w-full object-cover" />
-      <div className="p-4">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-            {PROPERTY_STATUS_LABELS[property.status] || property.status}
-          </span>
-          <span className="text-sm font-bold text-slate-900">
-            {formatMoney(property.pricing?.pricePerMonth || property.pricing?.pricePerNight, property.pricing?.currency || 'UAH')}
-          </span>
+    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-lg">
+      <Link
+        to={ROUTES.propertyDetails(property.id)}
+        className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        aria-label={`Переглянути оголошення: ${property.title}`}
+      >
+        <div className="grid h-full grid-cols-1 md:grid-cols-[minmax(0,360px)_1fr]">
+          <div className="h-[220px] overflow-hidden bg-slate-100 md:h-[280px]">
+            <img src={image} alt={property.title} className="h-full w-full object-cover" />
+          </div>
+
+          <div className="min-w-0 p-5 md:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                {PROPERTY_STATUS_LABELS[property.status] || property.status}
+              </span>
+              <div className="text-right">
+                <p className="text-3xl leading-none font-black text-slate-900">{formatMoney(resolvedPrice, currency)}</p>
+                <p className="mt-1 text-sm text-slate-500">{priceSuffix}</p>
+              </div>
+            </div>
+
+            <h3 className="mt-3 text-2xl leading-tight font-bold text-slate-900 break-words [overflow-wrap:anywhere]">{property.title}</h3>
+
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
+              <MapPin size={15} className="text-slate-500" />
+              <span>{addressLine || city}</span>
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-700">
+              {property.rooms != null ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <BedDouble size={15} className="text-slate-500" />
+                  {property.rooms} кімн.
+                </span>
+              ) : null}
+              {property.areaSqm != null ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Square size={15} className="text-slate-500" />
+                  {Number(property.areaSqm)} м²
+                </span>
+              ) : null}
+              {property.floor != null ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Layers size={15} className="text-slate-500" />
+                  {property.floor}
+                  {property.totalFloors != null ? ` / ${property.totalFloors}` : ''}
+                </span>
+              ) : null}
+            </div>
+
+            {property.description ? (
+              <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-slate-600 break-words [overflow-wrap:anywhere]">
+                {property.description}
+              </p>
+            ) : null}
+
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-1.5 text-sm text-slate-500">
+                <CalendarClock size={14} />
+                Опубліковано {formatDate(property.createdAt)}
+              </span>
+              <span className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700">
+                Відкрити оголошення
+                <ChevronRight size={15} />
+              </span>
+            </div>
+          </div>
         </div>
-        <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{property.title}</h3>
-        <p className="mt-1 line-clamp-1 text-xs text-slate-500">{address || 'Адресу не вказано'}</p>
-        <Link
-          to={ROUTES.propertyDetails(property.id)}
-          className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:text-blue-800"
-        >
-          Відкрити оголошення <ChevronRight size={14} />
-        </Link>
-      </div>
+      </Link>
     </article>
   );
 };

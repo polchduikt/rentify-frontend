@@ -20,9 +20,10 @@ const PropertyCardSkeleton = () => (
 interface PropertySliderProps {
   items: PropertyResponseDto[];
   loading: boolean;
+  favoriteIds?: Set<number>;
 }
 
-const PropertySlider = ({ items, loading }: PropertySliderProps) => {
+const PropertySlider = ({ items, loading, favoriteIds = new Set() }: PropertySliderProps) => {
   const sliderRef = useRef<HTMLDivElement | null>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -59,7 +60,7 @@ const PropertySlider = ({ items, loading }: PropertySliderProps) => {
         ) : (
           items.map((property) => (
             <div key={property.id} className={CARD_CLASS}>
-              <PropertyCard property={property} />
+              <PropertyCard property={property} isFavorite={favoriteIds.has(property.id)} />
             </div>
           ))
         )}

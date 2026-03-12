@@ -56,7 +56,7 @@ const Navbar = () => {
             <Link to={ROUTES.profile} className={desktopIconButtonClass} aria-label="Сповіщення">
               <Bell size={17} />
             </Link>
-            <Link to={ROUTES.profile} className={desktopIconButtonClass} aria-label="Улюблене">
+            <Link to={ROUTES.favorites} className={desktopIconButtonClass} aria-label="Улюблене">
               <Heart size={17} />
             </Link>
 
@@ -139,7 +139,7 @@ const Navbar = () => {
                 Сповіщення
               </Link>
               <Link
-                to={ROUTES.profile}
+                to={ROUTES.favorites}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
               >

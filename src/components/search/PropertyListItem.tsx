@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
+import { isTopPromotionActive } from '@/utils/promotions';
 
 const FALLBACK_PHOTO_URL =
   'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
@@ -55,29 +56,19 @@ const resolvePropertyPrice = (property: PropertyResponseDto): { value: number; s
 };
 
 const formatPublishedLabel = (createdAt?: string): string => {
-  if (!createdAt) {
-    return 'Опубліковано нещодавно';
-  }
+  if (!createdAt) return 'Опубліковано нещодавно';
 
   const ms = Date.now() - new Date(createdAt).getTime();
-  if (!Number.isFinite(ms) || ms < 0) {
-    return 'Опубліковано нещодавно';
-  }
+  if (!Number.isFinite(ms) || ms < 0) return 'Опубліковано нещодавно';
 
   const minutes = Math.floor(ms / (1000 * 60));
-  if (minutes < 60) {
-    return `Опубліковано ${Math.max(1, minutes)} хв тому`;
-  }
+  if (minutes < 60) return `Опубліковано ${Math.max(1, minutes)} хв тому`;
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return `Опубліковано ${hours} год тому`;
-  }
+  if (hours < 24) return `Опубліковано ${hours} год тому`;
 
   const days = Math.floor(hours / 24);
-  if (days < 30) {
-    return `Опубліковано ${days} дн тому`;
-  }
+  if (days < 30) return `Опубліковано ${days} дн тому`;
 
   const months = Math.floor(days / 30);
   return `Опубліковано ${months} міс тому`;
@@ -95,12 +86,12 @@ export const PropertyListItem = ({ property, variant = 'single', isFavorite = fa
   const meta = resolveMeta(property);
   const propertyTypeLabel = PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType || 'Нерухомість';
   const isDouble = variant === 'double';
+  const isRecommended = isTopPromotionActive(property);
   const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (isLoading) return;
 
     try {
@@ -129,27 +120,22 @@ export const PropertyListItem = ({ property, variant = 'single', isFavorite = fa
               : 'grid h-full grid-cols-1 md:grid-cols-[minmax(0,460px)_1fr]'
           }
         >
-          <div
-            className={`overflow-hidden bg-slate-100 ${
-              isDouble ? 'h-[220px] md:h-[220px]' : 'h-[220px] md:h-[320px]'
-            }`}
-          >
-            <img
-              src={imageUrl}
-              alt={property.title}
-              className="h-full w-full object-cover"
-            />
+          <div className={`relative overflow-hidden bg-slate-100 ${isDouble ? 'h-[220px] md:h-[220px]' : 'h-[220px] md:h-[320px]'}`}>
+            <img src={imageUrl} alt={property.title} className="h-full w-full object-cover" />
+            {isRecommended ? (
+              <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white">
+                Рекомендовано
+              </span>
+            ) : null}
           </div>
 
           <div className={isDouble ? 'min-w-0 p-3 lg:p-3.5' : 'min-w-0 p-5 lg:p-6'}>
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-baseline gap-2">
-                  <p className={`leading-none font-extrabold text-gray-900 ${isDouble ? 'text-[24px] lg:text-[26px]' : 'text-[34px]'}`}>
-                    {priceValue > 0 ? priceValue.toLocaleString('uk-UA') : '0'} {currency}
-                  </p>
-                  <p className={`text-gray-500 ${isDouble ? 'text-[14px]' : 'text-[18px]'}`}>{suffix}</p>
-                </div>
+              <div className="flex items-baseline gap-2">
+                <p className={`leading-none font-extrabold text-gray-900 ${isDouble ? 'text-[24px] lg:text-[26px]' : 'text-[34px]'}`}>
+                  {priceValue > 0 ? priceValue.toLocaleString('uk-UA') : '0'} {currency}
+                </p>
+                <p className={`text-gray-500 ${isDouble ? 'text-[14px]' : 'text-[18px]'}`}>{suffix}</p>
               </div>
               <button
                 type="button"

@@ -5,8 +5,10 @@ import {
   BookingsSection,
   EmptySection,
   FavoritesSection,
+  PromotionsSection,
   ProfileHero,
   ProfileSidebarNav,
+  TopUpModal,
   PropertiesSection,
   SecuritySection,
   TransactionsSection,
@@ -27,6 +29,8 @@ const SECTION_SET = new Set<NavigationSection>([
   'bookings-my',
   'bookings-incoming',
   'payments',
+  'promotions-top',
+  'promotions-subscriptions',
   'account',
   'security',
 ]);
@@ -37,6 +41,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+  const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
   const sectionFromQuery = searchParams.get('section');
   const initialSection = sectionFromQuery && SECTION_SET.has(sectionFromQuery as NavigationSection) ? (sectionFromQuery as NavigationSection) : null;
 
@@ -88,6 +93,11 @@ const ProfilePage = () => {
     navigate(ROUTES.login);
   };
 
+  const handleTopUpSubmit = async (amount: number) => {
+    await model.topUpWallet(amount);
+    setIsTopUpModalOpen(false);
+  };
+
   return (
     <div className="bg-[radial-gradient(circle_at_top,#e0ecff,transparent_44%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] pb-14">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -106,6 +116,8 @@ const ProfilePage = () => {
           favoritesCount={model.favoritesCount}
           bookingsCount={model.bookingsCount}
           paidBookingsCount={model.paidBookingsCount}
+          walletTopUpPending={model.walletTopUpPending}
+          onWalletTopUp={() => setIsTopUpModalOpen(true)}
         />
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -113,9 +125,11 @@ const ProfilePage = () => {
             activeSection={navigation.activeSection}
             isPropertiesOpen={navigation.isPropertiesOpen}
             isBookingsOpen={navigation.isBookingsOpen}
+            isPromotionsOpen={navigation.isPromotionsOpen}
             isSettingsOpen={navigation.isSettingsOpen}
             onToggleProperties={navigation.togglePropertiesOpen}
             onToggleBookings={navigation.toggleBookingsOpen}
+            onTogglePromotions={navigation.togglePromotionsOpen}
             onToggleSettings={navigation.toggleSettingsOpen}
             onSelectSection={navigation.setActiveSection}
             onOpenChat={() => openChatWidget({})}
@@ -175,6 +189,19 @@ const ProfilePage = () => {
               />
             ) : null}
 
+            {navigation.isPromotionsSection ? (
+              <PromotionsSection
+                mode={navigation.activeSection === 'promotions-subscriptions' ? 'promotions-subscriptions' : 'promotions-top'}
+                properties={model.propertiesForPromotions}
+                propertiesLoading={model.propertiesForPromotionsLoading}
+                propertiesError={model.propertiesForPromotionsError}
+                walletBalance={model.walletBalance}
+                walletCurrency={model.walletCurrency}
+                subscriptionPlan={model.subscriptionPlan}
+                subscriptionActiveUntil={model.subscriptionActiveUntil}
+              />
+            ) : null}
+
             {navigation.isBookingsSection ? (
               <BookingsSection
                 mode={navigation.activeSection === 'bookings-incoming' ? 'bookings-incoming' : 'bookings-my'}
@@ -207,6 +234,16 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+      <TopUpModal
+        isOpen={isTopUpModalOpen}
+        currency={model.walletCurrency}
+        options={model.topUpOptions}
+        optionsLoading={model.topUpOptionsLoading}
+        optionsError={model.topUpOptionsError}
+        isSubmitting={model.walletTopUpPending}
+        onClose={() => setIsTopUpModalOpen(false)}
+        onSubmit={handleTopUpSubmit}
+      />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import type {
   SearchSortMode,
   SearchViewMode,
 } from '@/types/search';
+import { isTopPromotionActive, resolveTopPromotionUntilMs } from '@/utils/promotions';
 
 export const PAGE_SIZE = 20;
 
@@ -259,6 +260,20 @@ export const resolvePropertyPriceValue = (property: PropertyResponseDto): number
 
 export const sortProperties = (properties: PropertyResponseDto[], sortMode: SearchSortMode) =>
   [...properties].sort((leftProperty, rightProperty) => {
+    const leftIsTop = isTopPromotionActive(leftProperty);
+    const rightIsTop = isTopPromotionActive(rightProperty);
+    if (leftIsTop !== rightIsTop) {
+      return rightIsTop ? 1 : -1;
+    }
+
+    if (leftIsTop && rightIsTop) {
+      const leftTopUntil = resolveTopPromotionUntilMs(leftProperty);
+      const rightTopUntil = resolveTopPromotionUntilMs(rightProperty);
+      if (leftTopUntil !== rightTopUntil) {
+        return rightTopUntil - leftTopUntil;
+      }
+    }
+
     if (sortMode === 'NEWEST') {
       const left = leftProperty.createdAt ? new Date(leftProperty.createdAt).getTime() : 0;
       const right = rightProperty.createdAt ? new Date(rightProperty.createdAt).getTime() : 0;

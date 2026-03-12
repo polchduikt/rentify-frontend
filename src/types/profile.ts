@@ -2,11 +2,14 @@ export type ProfilePropertiesSection = 'properties-published' | 'properties-arch
 
 export type ProfileBookingsSection = 'bookings-my' | 'bookings-incoming';
 
+export type ProfilePromotionsSection = 'promotions-top' | 'promotions-subscriptions';
+
 export type ProfileSettingsSection = 'account' | 'security';
 
 export type NavigationSection =
   | ProfilePropertiesSection
   | ProfileBookingsSection
+  | ProfilePromotionsSection
   | 'favorites'
   | 'payments'
   | ProfileSettingsSection;

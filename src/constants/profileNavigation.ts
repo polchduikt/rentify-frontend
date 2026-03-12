@@ -2,6 +2,7 @@ import type { PropertyStatus } from '@/types/enums';
 import type {
   NavigationSection,
   ProfileBookingsSection,
+  ProfilePromotionsSection,
   ProfilePropertiesSection,
   ProfileSettingsSection,
 } from '@/types/profile';
@@ -27,6 +28,11 @@ export const PROFILE_SETTINGS_NAV_ITEMS: ReadonlyArray<NavigationItem<ProfileSet
   { id: 'security', label: 'Безпека' },
 ];
 
+export const PROFILE_PROMOTIONS_NAV_ITEMS: ReadonlyArray<NavigationItem<ProfilePromotionsSection>> = [
+  { id: 'promotions-top', label: 'Просування оголошень' },
+  { id: 'promotions-subscriptions', label: 'Підписки' },
+];
+
 export const PROFILE_PROPERTIES_TITLE: Record<ProfilePropertiesSection, string> = {
   'properties-published': 'Опубліковані',
   'properties-archived': 'Архівні',
@@ -41,9 +47,13 @@ export const PROFILE_PROPERTIES_STATUS_FILTERS: Record<ProfilePropertiesSection,
 
 const PROPERTIES_SECTIONS = new Set<NavigationSection>(['properties-published', 'properties-archived', 'properties-drafts']);
 const BOOKINGS_SECTIONS = new Set<NavigationSection>(['bookings-my', 'bookings-incoming']);
+const PROMOTIONS_SECTIONS = new Set<NavigationSection>(['promotions-top', 'promotions-subscriptions']);
 
 export const isPropertiesSection = (section: NavigationSection | null): section is ProfilePropertiesSection =>
   section !== null && PROPERTIES_SECTIONS.has(section);
 
 export const isBookingsSection = (section: NavigationSection | null): section is ProfileBookingsSection =>
   section !== null && BOOKINGS_SECTIONS.has(section);
+
+export const isPromotionsSection = (section: NavigationSection | null): section is ProfilePromotionsSection =>
+  section !== null && PROMOTIONS_SECTIONS.has(section);

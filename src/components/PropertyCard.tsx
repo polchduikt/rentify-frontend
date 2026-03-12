@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
+import { isTopPromotionActive } from '@/utils/promotions';
 
 const FALLBACK_PHOTO_URL =
   'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80';
@@ -23,6 +24,7 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
   }, [isFavorite]);
 
   const imageUrl = property.photos?.[0]?.url || FALLBACK_PHOTO_URL;
+  const isRecommended = isTopPromotionActive(property);
   const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
 
@@ -62,6 +64,11 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
       >
         <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
           <img src={imageUrl} alt={property.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+          {isRecommended ? (
+            <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white">
+              Рекомендовано
+            </span>
+          ) : null}
           <button
             onClick={handleFavoriteClick}
             className="absolute top-3 right-3 inline-flex items-center justify-center rounded-lg bg-white/80 p-2 transition hover:bg-white"

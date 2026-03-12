@@ -16,6 +16,8 @@ import {
   useUpdateProfileMutation,
   useUploadAvatarMutation,
   useWalletBalanceQuery,
+  useWalletTopUpMutation,
+  useWalletTopUpOptionsQuery,
   useWalletTransactionsQuery,
 } from '@/hooks/api';
 import { queryKeys } from '@/hooks/api/queryKeys';
@@ -183,6 +185,7 @@ export const useProfilePage = () => {
   });
   const favoritesQuery = useMyFavoritesQuery();
   const walletQuery = useWalletBalanceQuery();
+  const topUpOptionsQuery = useWalletTopUpOptionsQuery();
   const myBookingsQuery = useMyBookingsQuery({
     page: 0,
     size: PROFILE_BOOKINGS_PAGE_SIZE,
@@ -207,6 +210,7 @@ export const useProfilePage = () => {
   const changePasswordMutation = useChangePasswordMutation();
   const uploadAvatarMutation = useUploadAvatarMutation();
   const deleteAvatarMutation = useDeleteAvatarMutation();
+  const walletTopUpMutation = useWalletTopUpMutation();
 
   const profile = profileQuery.data ?? authUser;
 
@@ -525,6 +529,10 @@ export const useProfilePage = () => {
     }
   };
 
+  const topUpWallet = async (amount: number) => {
+    await walletTopUpMutation.mutateAsync({ amount });
+  };
+
   return {
     profile,
     fullName,
@@ -539,6 +547,7 @@ export const useProfilePage = () => {
     isInitialLoading,
     criticalError,
     properties,
+    propertiesForPromotions: propertiesForMetrics,
     favorites,
     myBookings,
     incomingBookings,
@@ -555,6 +564,7 @@ export const useProfilePage = () => {
     promotedPropertiesInPreview,
     walletBalance,
     walletCurrency,
+    topUpOptions: topUpOptionsQuery.data ?? [],
     subscriptionPlan: walletQuery.data?.subscriptionPlan ?? profile?.subscriptionPlan ?? 'FREE',
     subscriptionActiveUntil: walletQuery.data?.subscriptionActiveUntil ?? profile?.subscriptionActiveUntil,
     propertiesLoading: propertiesQuery.isLoading,
@@ -563,12 +573,18 @@ export const useProfilePage = () => {
     myBookingsLoading: myBookingsQuery.isLoading,
     incomingBookingsLoading: incomingBookingsQuery.isLoading,
     paymentsForBookingsLoading: myPaymentsQuery.isLoading,
+    topUpOptionsLoading: topUpOptionsQuery.isLoading,
+    walletTopUpPending: walletTopUpMutation.isPending,
     transactionsLoading:
       transactionsQuery.isLoading || myPaymentsQuery.isLoading || incomingBookingPaymentsState.isLoading,
     profileSaving: updateProfileMutation.isPending,
     passwordSaving: changePasswordMutation.isPending,
     avatarUploading: uploadAvatarMutation.isPending,
     avatarDeleting: deleteAvatarMutation.isPending,
+    propertiesForPromotionsLoading: propertiesMetricsQuery.isLoading,
+    propertiesForPromotionsError: propertiesMetricsQuery.error
+      ? getApiErrorMessage(propertiesMetricsQuery.error, 'Не вдалося завантажити оголошення для просування.')
+      : null,
     propertiesError: propertiesQuery.error ? getApiErrorMessage(propertiesQuery.error, 'Не вдалося завантажити оголошення') : null,
     favoritesError: favoritesQuery.error ? getApiErrorMessage(favoritesQuery.error, 'Не вдалося завантажити обране') : null,
     myBookingsError: myBookingsQuery.error ? getApiErrorMessage(myBookingsQuery.error, 'Не вдалося завантажити ваші бронювання.') : null,
@@ -577,6 +593,9 @@ export const useProfilePage = () => {
       : null,
     paymentsForBookingsError: myPaymentsQuery.error
       ? getApiErrorMessage(myPaymentsQuery.error, 'Не вдалося завантажити статуси оплат.')
+      : null,
+    topUpOptionsError: topUpOptionsQuery.error
+      ? getApiErrorMessage(topUpOptionsQuery.error, 'РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё СЂРµРєРѕРјРµРЅРґРѕРІР°РЅС– СЃСѓРјРё РїРѕРїРѕРІРЅРµРЅРЅСЏ.')
       : null,
     transactionsError,
     isBookingActionPending: (bookingId: number, action: BookingActionType) =>
@@ -596,6 +615,7 @@ export const useProfilePage = () => {
     changePassword,
     uploadAvatar,
     deleteAvatar,
+    topUpWallet,
     cancelBooking,
     confirmIncomingBooking,
     rejectIncomingBooking,

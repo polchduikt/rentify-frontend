@@ -9,13 +9,16 @@ import {
   MessageCircle,
   PlusSquare,
   Settings2,
+  Sparkles,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   PROFILE_BOOKINGS_NAV_ITEMS,
+  PROFILE_PROMOTIONS_NAV_ITEMS,
   PROFILE_PROPERTIES_NAV_ITEMS,
   PROFILE_SETTINGS_NAV_ITEMS,
   isBookingsSection,
+  isPromotionsSection,
 } from '@/constants/profileNavigation';
 import { ROUTES } from '@/config/routes';
 import type { NavigationSection } from '@/types/profile';
@@ -24,9 +27,11 @@ interface ProfileSidebarNavProps {
   activeSection: NavigationSection | null;
   isPropertiesOpen: boolean;
   isBookingsOpen: boolean;
+  isPromotionsOpen: boolean;
   isSettingsOpen: boolean;
   onToggleProperties: () => void;
   onToggleBookings: () => void;
+  onTogglePromotions: () => void;
   onToggleSettings: () => void;
   onSelectSection: (section: NavigationSection) => void;
   onOpenChat: () => void;
@@ -37,9 +42,11 @@ export const ProfileSidebarNav = ({
   activeSection,
   isPropertiesOpen,
   isBookingsOpen,
+  isPromotionsOpen,
   isSettingsOpen,
   onToggleProperties,
   onToggleBookings,
+  onTogglePromotions,
   onToggleSettings,
   onSelectSection,
   onOpenChat,
@@ -152,6 +159,40 @@ export const ProfileSidebarNav = ({
           </span>
           <ChevronRight size={14} className={activeSection === 'payments' ? 'text-blue-500' : 'text-slate-400'} />
         </button>
+
+        <button
+          type="button"
+          onClick={onTogglePromotions}
+          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left font-semibold transition ${
+            isPromotionsSection(activeSection) || isPromotionsOpen
+              ? 'bg-blue-50 text-blue-700'
+              : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            <Sparkles size={16} />
+            Промо-пакети і підписки
+          </span>
+          <ChevronDown size={14} className={`transition ${isPromotionsOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isPromotionsOpen ? (
+          <div className="space-y-1 rounded-2xl bg-slate-50 p-2">
+            {PROFILE_PROMOTIONS_NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectSection(item.id)}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition ${
+                  activeSection === item.id ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                {item.label}
+                <ChevronRight size={14} className={activeSection === item.id ? 'text-blue-500' : 'text-slate-400'} />
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         <button
           type="button"

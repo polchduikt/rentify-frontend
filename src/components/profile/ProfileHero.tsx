@@ -17,6 +17,8 @@ interface ProfileHeroProps {
   favoritesCount: number;
   bookingsCount: number;
   paidBookingsCount: number;
+  walletTopUpPending?: boolean;
+  onWalletTopUp?: () => void;
 }
 
 export const ProfileHero = ({
@@ -34,6 +36,8 @@ export const ProfileHero = ({
   favoritesCount,
   bookingsCount,
   paidBookingsCount,
+  walletTopUpPending = false,
+  onWalletTopUp,
 }: ProfileHeroProps) => (
   <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
     <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-blue-100/70 blur-3xl" />
@@ -69,7 +73,15 @@ export const ProfileHero = ({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <MetricCard title="Баланс" value={formatMoney(walletBalance, walletCurrency)} hint="Доступно на гаманці" icon={Wallet} />
+        <MetricCard
+          title="Баланс"
+          value={formatMoney(walletBalance, walletCurrency)}
+          hint="Доступно на гаманці"
+          icon={Wallet}
+          actionLabel="Поповнити"
+          actionLoading={walletTopUpPending}
+          onAction={onWalletTopUp}
+        />
         <MetricCard
           title="Оголошення"
           value={String(propertiesCount)}

@@ -2,6 +2,7 @@ import { Layers, MapPin, ZoomIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
+import { isTopPromotionActive } from '@/utils/promotions';
 import { resolveCompactRooms, resolveMapAddressLine, resolveMapPropertyMeta, resolveMapPropertyPrice } from '@/utils/searchMap';
 
 interface SearchMapPropertyCardProps {
@@ -15,6 +16,7 @@ const FALLBACK_IMAGE =
 export const SearchMapPropertyCard = ({ property, onClose }: SearchMapPropertyCardProps) => {
   const { value: selectedPrice, suffix: selectedPriceSuffix, currency: selectedCurrency } = resolveMapPropertyPrice(property);
   const selectedRoomsCompact = resolveCompactRooms(property);
+  const isRecommended = isTopPromotionActive(property);
 
   if (!property) {
     return (
@@ -48,6 +50,11 @@ export const SearchMapPropertyCard = ({ property, onClose }: SearchMapPropertyCa
                 alt={property.title}
                 className="h-[240px] w-full object-cover"
               />
+              {isRecommended ? (
+                <span className="absolute left-4 top-4 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white">
+                  Рекомендовано
+                </span>
+              ) : null}
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent p-4">
                 <div className="flex items-end justify-between gap-3">
                   <div>

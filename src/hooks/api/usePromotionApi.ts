@@ -3,16 +3,18 @@ import { promotionService } from '@/services/promotionService';
 import type { PurchaseSubscriptionRequestDto, PurchaseTopPromotionRequestDto } from '@/types/promotion';
 import { queryKeys } from './queryKeys';
 
-export const useTopPromotionPackagesQuery = () =>
+export const useTopPromotionPackagesQuery = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.promotions.topPackages(),
     queryFn: () => promotionService.getTopPromotionPackages(),
+    enabled,
   });
 
-export const useSubscriptionPackagesQuery = () =>
+export const useSubscriptionPackagesQuery = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.promotions.subscriptionPackages(),
     queryFn: () => promotionService.getSubscriptionPackages(),
+    enabled,
   });
 
 export const usePurchaseTopPromotionMutation = () => {

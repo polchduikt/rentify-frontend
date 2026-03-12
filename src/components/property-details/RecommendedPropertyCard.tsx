@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
+import { isTopPromotionActive } from '@/utils/promotions';
 import { FALLBACK_IMAGE } from './constants';
 import { formatPrice } from './utils';
 
@@ -18,6 +19,7 @@ export const RecommendedPropertyCard = ({ property, isFavorite = false }: Recomm
   const removeFromFavoritesMutation = useRemoveFromFavoritesMutation();
 
   const image = property.photos?.[0]?.url || FALLBACK_IMAGE;
+  const isRecommended = isTopPromotionActive(property);
   const price = Number(property.pricing?.pricePerMonth || property.pricing?.pricePerNight || 0);
   const currency = property.pricing?.currency || 'UAH';
   const city = property.address?.location?.city || 'Місто не вказано';
@@ -47,6 +49,11 @@ export const RecommendedPropertyCard = ({ property, isFavorite = false }: Recomm
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="relative">
         <img src={image} alt={property.title} className="h-44 w-full object-cover" />
+        {isRecommended ? (
+          <span className="absolute left-2 top-2 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white">
+            Рекомендовано
+          </span>
+        ) : null}
         <button
           onClick={handleFavoriteClick}
           className="absolute top-2 right-2 inline-flex items-center justify-center rounded-lg bg-white/80 p-1.5 transition hover:bg-white"

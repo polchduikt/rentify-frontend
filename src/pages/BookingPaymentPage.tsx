@@ -10,6 +10,7 @@ import {
 import { ROUTES } from '@/config/routes';
 import { useBookingPaymentPage } from '@/hooks';
 import { diffNights } from '@/utils/bookingDates';
+import { formatLocalTime } from '@/utils/time';
 
 const formatDate = (value?: string): string => {
   if (!value) return '-';
@@ -140,7 +141,7 @@ const BookingPaymentPage = () => {
                         {property.rooms || 0} кімн. • {property.areaSqm || 0} м²
                       </span>
                       <span className="rounded-full bg-slate-100 px-2 py-1">
-                        Заїзд {property.checkInTime || '--:--'} / Виїзд {property.checkOutTime || '--:--'}
+                        Заїзд {formatLocalTime(property.checkInTime)} / Виїзд {formatLocalTime(property.checkOutTime)}
                       </span>
                     </div>
                   </div>

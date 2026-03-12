@@ -3,6 +3,13 @@ import type { LocationSuggestionDto } from '@/types/location';
 import type { PropertyCreateRequestDto } from '@/types/property';
 import type { PropertyCreateFormValues } from '@/types/propertyCreate';
 
+export interface PropertyLocationRefIds {
+  cityId?: number;
+  districtId?: number;
+  metroStationId?: number;
+  residentialComplexId?: number;
+}
+
 const numberText = z
   .string()
   .trim()
@@ -138,6 +145,13 @@ const toPositiveNumber = (value?: string): number | undefined => {
   return parsed && parsed > 0 ? parsed : undefined;
 };
 
+const toPositiveInteger = (value?: number): number | undefined => {
+  if (value == null || !Number.isFinite(value) || value <= 0) {
+    return undefined;
+  }
+  return Math.round(value);
+};
+
 const toLocationRefIds = (suggestion?: LocationSuggestionDto) => {
   if (!suggestion) {
     return {
@@ -149,10 +163,10 @@ const toLocationRefIds = (suggestion?: LocationSuggestionDto) => {
   }
 
   return {
-    cityId: suggestion.type === 'CITY' ? suggestion.id : suggestion.cityId,
-    districtId: suggestion.type === 'DISTRICT' ? suggestion.id : undefined,
-    metroStationId: suggestion.type === 'METRO' ? suggestion.id : undefined,
-    residentialComplexId: suggestion.type === 'RESIDENTIAL_COMPLEX' ? suggestion.id : undefined,
+    cityId: toPositiveInteger(suggestion.type === 'CITY' ? suggestion.id : suggestion.cityId),
+    districtId: toPositiveInteger(suggestion.type === 'DISTRICT' ? suggestion.id : undefined),
+    metroStationId: toPositiveInteger(suggestion.type === 'METRO' ? suggestion.id : undefined),
+    residentialComplexId: toPositiveInteger(suggestion.type === 'RESIDENTIAL_COMPLEX' ? suggestion.id : undefined),
   };
 };
 
@@ -168,9 +182,10 @@ const toIntegerOrUndefined = (value?: string): number | undefined => {
 export const buildCreatePropertyPayload = (
   values: PropertyCreateFormValues,
   selectedLocation: LocationSuggestionDto | undefined,
-  amenitySlugs: string[]
+  amenitySlugs: string[],
+  locationRefIdsOverride?: PropertyLocationRefIds
 ): PropertyCreateRequestDto => {
-  const locationRefIds = toLocationRefIds(selectedLocation);
+  const locationRefIds = locationRefIdsOverride ?? toLocationRefIds(selectedLocation);
   const isShortTerm = values.rentalType === 'SHORT_TERM';
 
   return {

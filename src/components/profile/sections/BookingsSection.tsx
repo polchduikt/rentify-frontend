@@ -22,6 +22,7 @@ import type { PropertyResponseDto } from '@/types/property';
 import type { ProfileBookingsSection, SectionNotice } from '@/types/profile';
 import { resolveAvatarUrl } from '@/utils/avatar';
 import { getApiErrorMessage } from '@/utils/errors';
+import { formatLocalTime } from '@/utils/time';
 import { useBookingPaymentStatuses } from './bookings/useBookingPaymentStatuses';
 import { formatDate, formatDateTime, formatMoney } from '../formatters';
 
@@ -300,7 +301,7 @@ const BookingDetailsBlock = ({ booking, viewMode }: { booking: BookingDto; viewM
             </span>
             <span className="inline-flex items-center gap-1">
               <Clock3 size={12} />
-              {property.checkInTime || '--:--'} / {property.checkOutTime || '--:--'}
+              {formatLocalTime(property.checkInTime)} / {formatLocalTime(property.checkOutTime)}
             </span>
           </div>
         </div>

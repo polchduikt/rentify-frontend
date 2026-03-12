@@ -5,6 +5,8 @@ interface CreatePropertyStepActionsProps {
   isSubmitting: boolean;
   isLastStep: boolean;
   isStepComplete: boolean;
+  submitLabel?: string;
+  submittingLabel?: string;
   onPrev: () => void;
   onNext: () => void;
   onPublish: () => void;
@@ -15,6 +17,8 @@ export const CreatePropertyStepActions = ({
   isSubmitting,
   isLastStep,
   isStepComplete,
+  submitLabel = 'Опублікувати',
+  submittingLabel = 'Публікація...',
   onPrev,
   onNext,
   onPublish,
@@ -50,12 +54,12 @@ export const CreatePropertyStepActions = ({
         {isSubmitting ? (
           <>
             <Loader2 size={16} className="animate-spin" />
-            Публікація...
+            {submittingLabel}
           </>
         ) : (
           <>
             <Upload size={16} />
-            Опублікувати
+            {submitLabel}
           </>
         )}
       </button>

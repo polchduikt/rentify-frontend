@@ -8,6 +8,7 @@ import type { UnavailableDateRangeDto, PropertyResponseDto } from '@/types/prope
 import type { PublicUserProfileDto } from '@/types/user';
 import { addDays, diffNights, toIsoDate } from '@/utils/bookingDates';
 import { getApiErrorMessage } from '@/utils/errors';
+import { formatLocalTime } from '@/utils/time';
 import { PROPERTY_TYPE_LABELS } from './constants';
 import { formatCreatedAt, formatPrice } from './utils';
 
@@ -350,7 +351,7 @@ export const PropertyShortTermBookingSidebar = ({
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-700">
             <Clock3 size={15} className="text-slate-400" />
-            Заїзд: {property.checkInTime || '--:--'}, Виїзд: {property.checkOutTime || '--:--'}
+            Заїзд: {formatLocalTime(property.checkInTime)}, Виїзд: {formatLocalTime(property.checkOutTime)}
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-700">
             <BedDouble size={15} className="text-slate-400" />

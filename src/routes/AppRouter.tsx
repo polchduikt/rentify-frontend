@@ -5,6 +5,7 @@ import AuthLayout from '@/layouts/AuthLayout';
 import MainLayout from '@/layouts/MainLayout';
 import BookingPaymentPage from '@/pages/BookingPaymentPage';
 import CreatePropertyPage from '@/pages/CreatePropertyPage';
+import EditPropertyPage from '@/pages/EditPropertyPage';
 import FavoritesPage from '@/pages/FavoritesPage';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
@@ -77,6 +78,7 @@ const AppRouter = () => (
 
         <Route element={<ProtectedRoute />}>
           <Route path={ROUTES.createProperty} element={<CreatePropertyPage />} />
+          <Route path={ROUTES.editPropertyPattern} element={<EditPropertyPage />} />
           <Route path={ROUTES.profile} element={<ProfilePage />} />
           <Route path={ROUTES.favorites} element={<FavoritesPage />} />
           <Route path={ROUTES.bookingPaymentPattern} element={<BookingPaymentPage />} />

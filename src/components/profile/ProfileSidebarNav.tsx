@@ -1,14 +1,32 @@
-import { ChevronDown, ChevronRight, CreditCard, FileText, Heart, LogOut, MessageCircle, PlusSquare, Settings2 } from 'lucide-react';
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  CreditCard,
+  FileText,
+  Heart,
+  LogOut,
+  MessageCircle,
+  PlusSquare,
+  Settings2,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PROFILE_PROPERTIES_NAV_ITEMS, PROFILE_SETTINGS_NAV_ITEMS } from '@/constants/profileNavigation';
+import {
+  PROFILE_BOOKINGS_NAV_ITEMS,
+  PROFILE_PROPERTIES_NAV_ITEMS,
+  PROFILE_SETTINGS_NAV_ITEMS,
+  isBookingsSection,
+} from '@/constants/profileNavigation';
 import { ROUTES } from '@/config/routes';
 import type { NavigationSection } from '@/types/profile';
 
 interface ProfileSidebarNavProps {
   activeSection: NavigationSection | null;
   isPropertiesOpen: boolean;
+  isBookingsOpen: boolean;
   isSettingsOpen: boolean;
   onToggleProperties: () => void;
+  onToggleBookings: () => void;
   onToggleSettings: () => void;
   onSelectSection: (section: NavigationSection) => void;
   onLogout: () => void;
@@ -17,8 +35,10 @@ interface ProfileSidebarNavProps {
 export const ProfileSidebarNav = ({
   activeSection,
   isPropertiesOpen,
+  isBookingsOpen,
   isSettingsOpen,
   onToggleProperties,
+  onToggleBookings,
   onToggleSettings,
   onSelectSection,
   onLogout,
@@ -84,6 +104,40 @@ export const ProfileSidebarNav = ({
           </span>
           <ChevronRight size={14} className={activeSection === 'favorites' ? 'text-blue-500' : 'text-slate-400'} />
         </button>
+
+        <button
+          type="button"
+          onClick={onToggleBookings}
+          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left font-semibold transition ${
+            isBookingsSection(activeSection) || isBookingsOpen
+              ? 'bg-blue-50 text-blue-700'
+              : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            <CalendarDays size={16} />
+            Бронювання
+          </span>
+          <ChevronDown size={14} className={`transition ${isBookingsOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isBookingsOpen ? (
+          <div className="space-y-1 rounded-2xl bg-slate-50 p-2">
+            {PROFILE_BOOKINGS_NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectSection(item.id)}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition ${
+                  activeSection === item.id ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                {item.label}
+                <ChevronRight size={14} className={activeSection === item.id ? 'text-blue-500' : 'text-slate-400'} />
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         <button
           type="button"

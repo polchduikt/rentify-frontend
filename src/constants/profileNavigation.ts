@@ -1,5 +1,10 @@
 import type { PropertyStatus } from '@/types/enums';
-import type { NavigationSection, ProfilePropertiesSection, ProfileSettingsSection } from '@/types/profile';
+import type {
+  NavigationSection,
+  ProfileBookingsSection,
+  ProfilePropertiesSection,
+  ProfileSettingsSection,
+} from '@/types/profile';
 
 interface NavigationItem<TSection extends NavigationSection> {
   id: TSection;
@@ -10,6 +15,11 @@ export const PROFILE_PROPERTIES_NAV_ITEMS: ReadonlyArray<NavigationItem<ProfileP
   { id: 'properties-published', label: 'Опубліковані' },
   { id: 'properties-archived', label: 'Архівні' },
   { id: 'properties-drafts', label: 'Чернетки' },
+];
+
+export const PROFILE_BOOKINGS_NAV_ITEMS: ReadonlyArray<NavigationItem<ProfileBookingsSection>> = [
+  { id: 'bookings-my', label: 'Мої бронювання' },
+  { id: 'bookings-incoming', label: 'Бронювання моїх оголошень' },
 ];
 
 export const PROFILE_SETTINGS_NAV_ITEMS: ReadonlyArray<NavigationItem<ProfileSettingsSection>> = [
@@ -30,6 +40,10 @@ export const PROFILE_PROPERTIES_STATUS_FILTERS: Record<ProfilePropertiesSection,
 };
 
 const PROPERTIES_SECTIONS = new Set<NavigationSection>(['properties-published', 'properties-archived', 'properties-drafts']);
+const BOOKINGS_SECTIONS = new Set<NavigationSection>(['bookings-my', 'bookings-incoming']);
 
 export const isPropertiesSection = (section: NavigationSection | null): section is ProfilePropertiesSection =>
   section !== null && PROPERTIES_SECTIONS.has(section);
+
+export const isBookingsSection = (section: NavigationSection | null): section is ProfileBookingsSection =>
+  section !== null && BOOKINGS_SECTIONS.has(section);

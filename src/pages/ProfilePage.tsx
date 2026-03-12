@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AccountSection,
+  BookingsSection,
   ChatSection,
   EmptySection,
   FavoritesSection,
@@ -15,15 +16,32 @@ import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfilePage } from '@/hooks';
 import { useProfileNavigation } from '@/hooks/profile';
+import type { NavigationSection } from '@/types/profile';
 import { resolveAvatarUrl } from '@/utils/avatar';
+
+const SECTION_SET = new Set<NavigationSection>([
+  'properties-published',
+  'properties-archived',
+  'properties-drafts',
+  'chat',
+  'favorites',
+  'bookings-my',
+  'bookings-incoming',
+  'payments',
+  'account',
+  'security',
+]);
 
 const ProfilePage = () => {
   const model = useProfilePage();
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+  const sectionFromQuery = searchParams.get('section');
+  const initialSection = sectionFromQuery && SECTION_SET.has(sectionFromQuery as NavigationSection) ? (sectionFromQuery as NavigationSection) : null;
 
-  const navigation = useProfileNavigation({ properties: model.properties });
+  const navigation = useProfileNavigation({ properties: model.properties, initialSection });
   const avatarSrc = useMemo(() => resolveAvatarUrl(model.profile?.avatarUrl), [model.profile?.avatarUrl]);
 
   useEffect(() => {
@@ -81,15 +99,17 @@ const ProfilePage = () => {
           activePropertiesInPreview={model.activePropertiesInPreview}
           favoritesCount={model.favoritesCount}
           bookingsCount={model.bookingsCount}
-          promotedPropertiesInPreview={model.promotedPropertiesInPreview}
+          paidBookingsCount={model.paidBookingsCount}
         />
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
           <ProfileSidebarNav
             activeSection={navigation.activeSection}
             isPropertiesOpen={navigation.isPropertiesOpen}
+            isBookingsOpen={navigation.isBookingsOpen}
             isSettingsOpen={navigation.isSettingsOpen}
             onToggleProperties={navigation.togglePropertiesOpen}
+            onToggleBookings={navigation.toggleBookingsOpen}
             onToggleSettings={navigation.toggleSettingsOpen}
             onSelectSection={navigation.setActiveSection}
             onLogout={handleLogout}
@@ -147,6 +167,27 @@ const ProfilePage = () => {
                 transactions={model.transactions}
                 transactionsLoading={model.transactionsLoading}
                 transactionsError={model.transactionsError}
+              />
+            ) : null}
+
+            {navigation.isBookingsSection ? (
+              <BookingsSection
+                mode={navigation.activeSection === 'bookings-incoming' ? 'bookings-incoming' : 'bookings-my'}
+                myBookings={model.myBookings}
+                incomingBookings={model.incomingBookings}
+                myBookingsCount={model.myBookingsCount}
+                incomingBookingsCount={model.incomingBookingsCount}
+                paymentStatusByBookingId={model.paymentStatusByBookingId}
+                myBookingsLoading={model.myBookingsLoading}
+                incomingBookingsLoading={model.incomingBookingsLoading}
+                myBookingsError={model.myBookingsError}
+                incomingBookingsError={model.incomingBookingsError}
+                paymentsForBookingsError={model.paymentsForBookingsError}
+                bookingsNotice={model.bookingsNotice}
+                isActionPending={model.isBookingActionPending}
+                onCancelBooking={model.cancelBooking}
+                onConfirmIncomingBooking={model.confirmIncomingBooking}
+                onRejectIncomingBooking={model.rejectIncomingBooking}
               />
             ) : null}
 

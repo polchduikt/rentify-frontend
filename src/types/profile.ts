@@ -1,9 +1,12 @@
 export type ProfilePropertiesSection = 'properties-published' | 'properties-archived' | 'properties-drafts';
 
+export type ProfileBookingsSection = 'bookings-my' | 'bookings-incoming';
+
 export type ProfileSettingsSection = 'account' | 'security';
 
 export type NavigationSection =
   | ProfilePropertiesSection
+  | ProfileBookingsSection
   | 'chat'
   | 'favorites'
   | 'payments'

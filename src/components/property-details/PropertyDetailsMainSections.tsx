@@ -241,7 +241,7 @@ export const PropertyDetailsMainSections = ({
           </p>
           {mapCoordsLoading ? <p className="mt-1 text-xs text-slate-500">Визначаю координати на мапі...</p> : null}
           <Link
-              to={`${ROUTES.searchMap}?city=${encodeURIComponent(city)}&rentalType=LONG_TERM`}
+              to={`${ROUTES.searchMap}?city=${encodeURIComponent(city)}&rentalType=${encodeURIComponent(property.rentalType || 'LONG_TERM')}`}
               className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
           >
             Подивитися інші пропозиції

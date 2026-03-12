@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   PROFILE_PROPERTIES_STATUS_FILTERS,
   PROFILE_PROPERTIES_TITLE,
+  isBookingsSection as isBookingsNavigationSection,
   isPropertiesSection as isPropertiesNavigationSection,
 } from '@/constants/profileNavigation';
 import type { PropertyResponseDto } from '@/types/property';
@@ -9,12 +10,14 @@ import type { NavigationSection } from '@/types/profile';
 
 interface UseProfileNavigationParams {
   properties: PropertyResponseDto[];
+  initialSection?: NavigationSection | null;
 }
 
-export const useProfileNavigation = ({ properties }: UseProfileNavigationParams) => {
-  const [activeSection, setActiveSection] = useState<NavigationSection | null>(null);
-  const [isPropertiesOpen, setIsPropertiesOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+export const useProfileNavigation = ({ properties, initialSection = null }: UseProfileNavigationParams) => {
+  const [activeSection, setActiveSection] = useState<NavigationSection | null>(initialSection);
+  const [isPropertiesOpen, setIsPropertiesOpen] = useState(() => isPropertiesNavigationSection(initialSection));
+  const [isBookingsOpen, setIsBookingsOpen] = useState(() => isBookingsNavigationSection(initialSection));
+  const [isSettingsOpen, setIsSettingsOpen] = useState(() => initialSection === 'account' || initialSection === 'security');
 
   const propertiesForActiveTab = useMemo(() => {
     if (!isPropertiesNavigationSection(activeSection)) {
@@ -32,16 +35,20 @@ export const useProfileNavigation = ({ properties }: UseProfileNavigationParams)
   }, [activeSection]);
 
   const isPropertiesSection = isPropertiesNavigationSection(activeSection);
+  const isBookingsSection = isBookingsNavigationSection(activeSection);
 
   return {
     activeSection,
     setActiveSection,
     isPropertiesOpen,
     togglePropertiesOpen: () => setIsPropertiesOpen((prev) => !prev),
+    isBookingsOpen,
+    toggleBookingsOpen: () => setIsBookingsOpen((prev) => !prev),
     isSettingsOpen,
     toggleSettingsOpen: () => setIsSettingsOpen((prev) => !prev),
     propertiesForActiveTab,
     propertiesTabTitle,
     isPropertiesSection,
+    isBookingsSection,
   };
 };

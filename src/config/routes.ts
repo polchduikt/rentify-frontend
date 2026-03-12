@@ -5,6 +5,8 @@ export const ROUTES = {
   createProperty: '/properties/new',
   propertyDetailsPattern: '/properties/:id',
   propertyDetails: (id: number | string) => `/properties/${id}`,
+  bookingPaymentPattern: '/bookings/:bookingId/payment',
+  bookingPayment: (bookingId: number | string) => `/bookings/${bookingId}/payment`,
   profile: '/profile',
   favorites: '/favorites',
   login: '/login',

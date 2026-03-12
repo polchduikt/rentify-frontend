@@ -16,7 +16,7 @@ interface ProfileHeroProps {
   activePropertiesInPreview: number;
   favoritesCount: number;
   bookingsCount: number;
-  promotedPropertiesInPreview: number;
+  paidBookingsCount: number;
 }
 
 export const ProfileHero = ({
@@ -33,7 +33,7 @@ export const ProfileHero = ({
   activePropertiesInPreview,
   favoritesCount,
   bookingsCount,
-  promotedPropertiesInPreview,
+  paidBookingsCount,
 }: ProfileHeroProps) => (
   <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
     <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-blue-100/70 blur-3xl" />
@@ -69,30 +69,15 @@ export const ProfileHero = ({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <MetricCard
-          title="Баланс"
-          value={formatMoney(walletBalance, walletCurrency)}
-          hint="Доступно на гаманці"
-          icon={Wallet}
-        />
+        <MetricCard title="Баланс" value={formatMoney(walletBalance, walletCurrency)} hint="Доступно на гаманці" icon={Wallet} />
         <MetricCard
           title="Оголошення"
           value={String(propertiesCount)}
           hint={`${activePropertiesInPreview} активних у прев'ю`}
           icon={LayoutGrid}
         />
-        <MetricCard
-          title="Обране"
-          value={String(favoritesCount)}
-          hint="Збережені пропозиції"
-          icon={Heart}
-        />
-        <MetricCard
-          title="Бронювання"
-          value={String(bookingsCount)}
-          hint={`${promotedPropertiesInPreview} топ-оголошень у прев'ю`}
-          icon={BellRing}
-        />
+        <MetricCard title="Обране" value={String(favoritesCount)} hint="Збережені пропозиції" icon={Heart} />
+        <MetricCard title="Бронювання" value={String(bookingsCount)} hint={`${paidBookingsCount} оплачених бронювань`} icon={BellRing} />
       </div>
     </div>
   </section>

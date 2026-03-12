@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FALLBACK_IMAGE, resolveLocationFallback } from '@/components/property-details/constants';
+import { useAuth } from '@/contexts/AuthContext';
 import { parseCoordinate } from '@/components/property-details/utils';
 import { usePropertyByIdQuery, usePublicProfileQuery, useSearchPropertiesQuery, useMyFavoritesQuery } from '@/hooks/api';
 import type { AmenityDto } from '@/types/property';
@@ -15,6 +16,7 @@ const PROPERTY_ERROR_MESSAGE =
   '\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u043e\u0433\u043e\u043b\u043e\u0448\u0435\u043d\u043d\u044f';
 
 export const usePropertyDetailsPage = () => {
+  const { isAuthenticated } = useAuth();
   const { id } = useParams<{ id: string }>();
   const numericId = Number(id);
   const isValidId = Number.isFinite(numericId) && numericId > 0;
@@ -26,16 +28,17 @@ export const usePropertyDetailsPage = () => {
 
   const propertyQuery = usePropertyByIdQuery(numericId, isValidId);
   const property = propertyQuery.data ?? null;
+  const recommendationRentalType = property?.rentalType;
 
   const ownerQuery = usePublicProfileQuery(property?.hostId ?? 0, Boolean(property?.hostId));
-  const favoritesQuery = useMyFavoritesQuery();
+  const favoritesQuery = useMyFavoritesQuery(isAuthenticated);
   const recommendationsQuery = useSearchPropertiesQuery(
     {
       city: property?.address?.location?.city,
-      rentalType: 'LONG_TERM',
+      rentalType: recommendationRentalType,
     },
     { page: 0, size: 18, sort: 'createdAt,desc' },
-    Boolean(property?.address?.location?.city)
+    Boolean(property?.address?.location?.city && recommendationRentalType)
   );
 
   const photos = useMemo(() => {
@@ -64,8 +67,12 @@ export const usePropertyDetailsPage = () => {
 
   const recommended = useMemo(() => {
     const items = recommendationsQuery.data?.content ?? [];
-    return items.filter((item) => item.id !== property?.id && item.rentalType === 'LONG_TERM');
-  }, [recommendationsQuery.data?.content, property?.id]);
+    return items.filter(
+      (item) =>
+        item.id !== property?.id &&
+        (!recommendationRentalType || item.rentalType === recommendationRentalType)
+    );
+  }, [recommendationsQuery.data?.content, property?.id, recommendationRentalType]);
 
   const canSlidePrev = recommendedStart > 0;
   const canSlideNext = recommendedStart + RECOMMENDATION_CARDS_PER_VIEW < recommended.length;

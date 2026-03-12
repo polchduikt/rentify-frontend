@@ -44,4 +44,9 @@ export type TopPromotionPackageType = 'TOP_7_DAYS' | 'TOP_14_DAYS' | 'TOP_30_DAY
 
 export type WalletTransactionDirection = 'CREDIT' | 'DEBIT';
 
-export type WalletTransactionType = 'TOP_UP' | 'TOP_PROMOTION' | 'SUBSCRIPTION';
+export type WalletTransactionType =
+  | 'TOP_UP'
+  | 'TOP_PROMOTION'
+  | 'SUBSCRIPTION'
+  | 'BOOKING_PAYMENT'
+  | 'BOOKING_REFUND';

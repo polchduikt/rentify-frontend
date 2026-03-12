@@ -1,3 +1,4 @@
+import { useQueries } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -17,7 +18,11 @@ import {
   useWalletBalanceQuery,
   useWalletTransactionsQuery,
 } from '@/hooks/api';
+import { queryKeys } from '@/hooks/api/queryKeys';
+import { paymentService } from '@/services/paymentService';
+import type { PaymentResponseDto } from '@/types/payment';
 import type { PasswordFormState, ProfileFormState, SectionNotice } from '@/types/profile';
+import type { WalletTransactionDto } from '@/types/wallet';
 import { getApiErrorMessage } from '@/utils/errors';
 import { buildLatestPaymentStatusByBookingId } from '@/utils/payments';
 
@@ -26,6 +31,8 @@ const PROFILE_PROPERTIES_METRICS_PAGE_SIZE = 300;
 const PROFILE_TRANSACTIONS_PAGE_SIZE = 5;
 const PROFILE_BOOKINGS_PAGE_SIZE = 24;
 const MAX_AVATAR_FILE_SIZE = 5 * 1024 * 1024;
+const TENANT_PAYMENT_TRANSACTION_ID_OFFSET = 1_000_000_000;
+const HOST_PAYMENT_TRANSACTION_ID_OFFSET = 2_000_000_000;
 
 const normalizeValue = (value: string | null | undefined) => value?.trim() ?? '';
 const resolveTotalCount = (totalElements: unknown, fallbackLength: number): number => {
@@ -34,6 +41,111 @@ const resolveTotalCount = (totalElements: unknown, fallbackLength: number): numb
     return fallbackLength;
   }
   return Math.max(normalizedTotal, fallbackLength);
+};
+
+type PaymentRawShape = PaymentResponseDto & {
+  booking_id?: unknown;
+  bookingID?: unknown;
+  created_at?: unknown;
+  updated_at?: unknown;
+  booking?: { id?: unknown } | null;
+};
+
+const normalizePositiveId = (value: unknown): number | null => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+};
+
+const resolvePaymentBookingId = (payment: PaymentResponseDto): number | null => {
+  const raw = payment as PaymentRawShape;
+  return (
+    normalizePositiveId(raw.bookingId) ??
+    normalizePositiveId(raw.bookingID) ??
+    normalizePositiveId(raw.booking_id) ??
+    normalizePositiveId(raw.booking?.id)
+  );
+};
+
+const resolvePaymentDateTime = (payment: PaymentResponseDto): string => {
+  const raw = payment as PaymentRawShape;
+  const value = raw.createdAt ?? raw.created_at ?? raw.updatedAt ?? raw.updated_at;
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value;
+  }
+  return new Date().toISOString();
+};
+
+const dedupePaymentsById = (payments: PaymentResponseDto[]): PaymentResponseDto[] => {
+  const byId = new Map<number, PaymentResponseDto>();
+  for (const payment of payments) {
+    const paymentId = Number(payment.id);
+    if (Number.isFinite(paymentId) && paymentId > 0) {
+      byId.set(paymentId, payment);
+    }
+  }
+  return Array.from(byId.values());
+};
+
+type PaymentTransactionRole = 'tenant' | 'host';
+
+const toSyntheticPaymentTransactions = (
+  payments: PaymentResponseDto[],
+  userId: number,
+  role: PaymentTransactionRole,
+  idOffset: number,
+): WalletTransactionDto[] =>
+  payments
+    .filter((payment) => payment.status === 'PAID' || payment.status === 'REFUNDED')
+    .map((payment) => {
+      const isRefund = payment.status === 'REFUNDED';
+      const bookingId = resolvePaymentBookingId(payment);
+      const createdAt = resolvePaymentDateTime(payment);
+      const bookingLabel = bookingId != null ? `#${bookingId}` : '';
+      const isHostRole = role === 'host';
+      const direction = isHostRole ? (isRefund ? 'DEBIT' : 'CREDIT') : isRefund ? 'CREDIT' : 'DEBIT';
+
+      const description = isHostRole
+        ? isRefund
+          ? `Повернення орендарю за бронювання ${bookingLabel}`.trim()
+          : `Надходження за бронювання ${bookingLabel}`.trim()
+        : isRefund
+          ? `Повернення за бронювання ${bookingLabel}`.trim()
+          : `Оплата бронювання ${bookingLabel}`.trim();
+
+      return {
+        id: idOffset + payment.id,
+        userId,
+        direction,
+        type: isRefund ? 'BOOKING_REFUND' : 'BOOKING_PAYMENT',
+        amount: payment.amount,
+        currency: payment.currency,
+        description,
+        referenceType: bookingId != null ? 'BOOKING' : 'PAYMENT',
+        referenceId: bookingId ?? 0,
+        createdAt,
+      };
+    });
+
+const mergeFinancialTransactions = (
+  walletTransactions: WalletTransactionDto[],
+  paymentTransactions: WalletTransactionDto[],
+): WalletTransactionDto[] => {
+  const knownWalletSignatures = new Set(
+    walletTransactions.map(
+      (transaction) =>
+        `${transaction.referenceType}|${transaction.referenceId}|${transaction.direction}|${transaction.amount}|${transaction.createdAt}`,
+    ),
+  );
+
+  const filteredPaymentTransactions = paymentTransactions.filter((transaction) => {
+    const signature =
+      `${transaction.referenceType}|${transaction.referenceId}|${transaction.direction}|${transaction.amount}|${transaction.createdAt}`;
+    return !knownWalletSignatures.has(signature);
+  });
+
+  return [...walletTransactions, ...filteredPaymentTransactions].sort(
+    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+  );
 };
 
 const toProfileForm = (source?: { firstName?: string; lastName?: string; phone?: string }): ProfileFormState => ({
@@ -131,7 +243,51 @@ export const useProfilePage = () => {
   const myBookings = myBookingsQuery.data?.content ?? [];
   const incomingBookings = incomingBookingsQuery.data?.content ?? [];
   const myPayments = myPaymentsQuery.data ?? [];
-  const transactions = transactionsQuery.data?.content ?? [];
+  const walletTransactions = transactionsQuery.data?.content ?? [];
+
+  const incomingBookingPaymentsState = useQueries({
+    queries: incomingBookings.map((booking) => ({
+      queryKey: queryKeys.payments.byBooking(booking.id),
+      queryFn: () => paymentService.getPaymentsByBooking(booking.id),
+      enabled: booking.id > 0,
+    })),
+    combine: (results) => ({
+      payments: dedupePaymentsById(results.flatMap((query) => query.data ?? [])),
+      isLoading: results.some((query) => query.isLoading || query.isFetching),
+      firstError: results.find((query) => query.error)?.error ?? null,
+    }),
+  });
+
+  const syntheticTenantPaymentTransactions = useMemo(
+    () =>
+      toSyntheticPaymentTransactions(
+        dedupePaymentsById(myPayments),
+        Number(profile?.id ?? authUser?.id ?? 0),
+        'tenant',
+        TENANT_PAYMENT_TRANSACTION_ID_OFFSET,
+      ),
+    [authUser?.id, myPayments, profile?.id],
+  );
+
+  const syntheticHostPaymentTransactions = useMemo(
+    () =>
+      toSyntheticPaymentTransactions(
+        incomingBookingPaymentsState.payments,
+        Number(profile?.id ?? authUser?.id ?? 0),
+        'host',
+        HOST_PAYMENT_TRANSACTION_ID_OFFSET,
+      ),
+    [authUser?.id, incomingBookingPaymentsState.payments, profile?.id],
+  );
+
+  const transactions = useMemo(
+    () =>
+      mergeFinancialTransactions(walletTransactions, [
+        ...syntheticTenantPaymentTransactions,
+        ...syntheticHostPaymentTransactions,
+      ]),
+    [syntheticHostPaymentTransactions, syntheticTenantPaymentTransactions, walletTransactions],
+  );
 
   const activePropertiesInPreview = propertiesForMetrics.filter((property) => String(property.status).toUpperCase() === 'ACTIVE').length;
   const promotedPropertiesInPreview = properties.filter((property) => property.isTopPromoted).length;
@@ -148,6 +304,16 @@ export const useProfilePage = () => {
 
   const walletBalance = Number(walletQuery.data?.balance ?? profile?.balance ?? 0);
   const walletCurrency = walletQuery.data?.currency ?? 'UAH';
+  const transactionsError = transactionsQuery.error
+    ? getApiErrorMessage(transactionsQuery.error, 'Не вдалося завантажити транзакції')
+    : myPaymentsQuery.error
+      ? getApiErrorMessage(myPaymentsQuery.error, 'Не вдалося завантажити платежі бронювань.')
+      : incomingBookingPaymentsState.firstError
+        ? getApiErrorMessage(
+            incomingBookingPaymentsState.firstError,
+            'Не вдалося завантажити платежі за вашими оголошеннями.',
+          )
+        : null;
 
   const isInitialLoading = profileQuery.isLoading && !profile;
   const criticalError = !profile && profileQuery.error ? getApiErrorMessage(profileQuery.error, 'Не вдалося завантажити профіль') : null;
@@ -397,7 +563,8 @@ export const useProfilePage = () => {
     myBookingsLoading: myBookingsQuery.isLoading,
     incomingBookingsLoading: incomingBookingsQuery.isLoading,
     paymentsForBookingsLoading: myPaymentsQuery.isLoading,
-    transactionsLoading: transactionsQuery.isLoading,
+    transactionsLoading:
+      transactionsQuery.isLoading || myPaymentsQuery.isLoading || incomingBookingPaymentsState.isLoading,
     profileSaving: updateProfileMutation.isPending,
     passwordSaving: changePasswordMutation.isPending,
     avatarUploading: uploadAvatarMutation.isPending,
@@ -411,7 +578,7 @@ export const useProfilePage = () => {
     paymentsForBookingsError: myPaymentsQuery.error
       ? getApiErrorMessage(myPaymentsQuery.error, 'Не вдалося завантажити статуси оплат.')
       : null,
-    transactionsError: transactionsQuery.error ? getApiErrorMessage(transactionsQuery.error, 'Не вдалося завантажити транзакції') : null,
+    transactionsError,
     isBookingActionPending: (bookingId: number, action: BookingActionType) =>
       bookingAction?.bookingId === bookingId && bookingAction?.action === action,
     setProfileField: (field: keyof ProfileFormState, value: string) =>

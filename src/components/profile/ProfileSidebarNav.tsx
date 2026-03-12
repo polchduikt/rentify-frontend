@@ -79,34 +79,6 @@ export const ProfileSidebarNav = ({
 
         <button
           type="button"
-          onClick={() => onSelectSection('chat')}
-          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
-            activeSection === 'chat' ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
-          }`}
-        >
-          <span className="inline-flex items-center gap-2">
-            <MessageCircle size={16} />
-            Чат
-          </span>
-          <ChevronRight size={14} className={activeSection === 'chat' ? 'text-blue-500' : 'text-slate-400'} />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onSelectSection('favorites')}
-          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
-            activeSection === 'favorites' ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
-          }`}
-        >
-          <span className="inline-flex items-center gap-2">
-            <Heart size={16} />
-            Обране
-          </span>
-          <ChevronRight size={14} className={activeSection === 'favorites' ? 'text-blue-500' : 'text-slate-400'} />
-        </button>
-
-        <button
-          type="button"
           onClick={onToggleBookings}
           className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left font-semibold transition ${
             isBookingsSection(activeSection) || isBookingsOpen
@@ -138,6 +110,34 @@ export const ProfileSidebarNav = ({
             ))}
           </div>
         ) : null}
+
+        <button
+          type="button"
+          onClick={() => onSelectSection('chat')}
+          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
+            activeSection === 'chat' ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            <MessageCircle size={16} />
+            Чат
+          </span>
+          <ChevronRight size={14} className={activeSection === 'chat' ? 'text-blue-500' : 'text-slate-400'} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onSelectSection('favorites')}
+          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
+            activeSection === 'favorites' ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            <Heart size={16} />
+            Обране
+          </span>
+          <ChevronRight size={14} className={activeSection === 'favorites' ? 'text-blue-500' : 'text-slate-400'} />
+        </button>
 
         <button
           type="button"

@@ -10,6 +10,7 @@ import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import PlaceholderPage from '@/pages/PlaceholderPage';
 import ProfilePage from '@/pages/ProfilePage';
+import PublicProfilePage from '@/pages/PublicProfilePage';
 import PropertyDetailsPage from '@/pages/PropertyDetailsPage';
 import RegisterPage from '@/pages/RegisterPage';
 import SearchPage from '@/pages/SearchPage';
@@ -55,6 +56,7 @@ const AppRouter = () => (
         <Route path={ROUTES.home} element={<HomePage />} />
         <Route path={ROUTES.search} element={<SearchPage />} />
         <Route path={ROUTES.propertyDetailsPattern} element={<PropertyDetailsPage />} />
+        <Route path={ROUTES.publicProfilePattern} element={<PublicProfilePage />} />
 
         <Route
           path={ROUTES.about}

@@ -319,7 +319,12 @@ export const PropertyShortTermBookingSidebar = ({
               </span>
             )}
             <div>
-              <p className="font-bold text-slate-900">{ownerName}</p>
+              <Link
+                to={ROUTES.publicProfile(property.hostId)}
+                className="font-bold text-slate-900 transition hover:text-blue-700 hover:underline"
+              >
+                {ownerName}
+              </Link>
               <p className="text-sm text-slate-500">На платформі з {formatCreatedAt(owner?.createdAt)}</p>
             </div>
           </div>

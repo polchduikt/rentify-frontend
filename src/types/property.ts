@@ -154,6 +154,7 @@ export interface PropertyRuleDto {
 
 export interface PropertySearchCriteriaDto {
   propertyId?: number;
+  hostId?: number;
   cityId?: number;
   districtId?: number;
   metroStationId?: number;

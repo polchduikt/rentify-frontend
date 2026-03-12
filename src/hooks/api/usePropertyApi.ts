@@ -9,10 +9,11 @@ import type {
 } from '@/types/property';
 import { queryKeys } from './queryKeys';
 
-export const useAllPropertiesQuery = (page?: PageQuery) =>
+export const useAllPropertiesQuery = (page?: PageQuery, enabled = true) =>
   useQuery({
     queryKey: queryKeys.properties.all(page),
     queryFn: () => propertyService.getAllProperties(page),
+    enabled,
   });
 
 export const useMyPropertiesQuery = (page?: PageQuery) =>

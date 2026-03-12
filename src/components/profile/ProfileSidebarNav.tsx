@@ -29,6 +29,7 @@ interface ProfileSidebarNavProps {
   onToggleBookings: () => void;
   onToggleSettings: () => void;
   onSelectSection: (section: NavigationSection) => void;
+  onOpenChat: () => void;
   onLogout: () => void;
 }
 
@@ -41,6 +42,7 @@ export const ProfileSidebarNav = ({
   onToggleBookings,
   onToggleSettings,
   onSelectSection,
+  onOpenChat,
   onLogout,
 }: ProfileSidebarNavProps) => (
   <aside className="space-y-4 lg:sticky lg:top-24 lg:h-fit">
@@ -113,16 +115,14 @@ export const ProfileSidebarNav = ({
 
         <button
           type="button"
-          onClick={() => onSelectSection('chat')}
-          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
-            activeSection === 'chat' ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-100'
-          }`}
+          onClick={onOpenChat}
+          className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
         >
           <span className="inline-flex items-center gap-2">
             <MessageCircle size={16} />
             Чат
           </span>
-          <ChevronRight size={14} className={activeSection === 'chat' ? 'text-blue-500' : 'text-slate-400'} />
+          <ChevronRight size={14} className="text-slate-400" />
         </button>
 
         <button

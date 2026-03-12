@@ -7,7 +7,6 @@ export type ProfileSettingsSection = 'account' | 'security';
 export type NavigationSection =
   | ProfilePropertiesSection
   | ProfileBookingsSection
-  | 'chat'
   | 'favorites'
   | 'payments'
   | ProfileSettingsSection;

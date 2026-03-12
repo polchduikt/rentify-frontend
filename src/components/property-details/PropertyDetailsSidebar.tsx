@@ -12,6 +12,8 @@ interface PropertyDetailsSidebarProps {
   ownerInitial: string;
   pricePerMonth: number;
   currency: string;
+  onContactHost: () => void;
+  disableContactHost?: boolean;
 }
 
 export const PropertyDetailsSidebar = ({
@@ -22,6 +24,8 @@ export const PropertyDetailsSidebar = ({
   ownerInitial,
   pricePerMonth,
   currency,
+  onContactHost,
+  disableContactHost = false,
 }: PropertyDetailsSidebarProps) => (
   <aside className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -47,10 +51,12 @@ export const PropertyDetailsSidebar = ({
       <div className="mt-4 space-y-2">
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+          onClick={onContactHost}
+          disabled={disableContactHost}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           <MessageCircle size={16} />
-          Написати власнику
+          {disableContactHost ? 'Це ваше оголошення' : 'Написати власнику'}
         </button>
         <button
           type="button"

@@ -1,9 +1,11 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type {
   AuthenticationRequestDto,
   GoogleOAuthRequestDto,
   RegisterRequestDto,
 } from '@/types/auth';
+import { queryKeys } from '@/hooks/api/queryKeys';
 import type { UserResponseDto } from '@/types/user';
 import { authService } from '@/services/authService';
 import { AUTH_SESSION_EXPIRED_EVENT } from '@/services/api';
@@ -24,9 +26,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<UserResponseDto | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const setProfileCache = useCallback(
+    (profile: UserResponseDto) => {
+      queryClient.setQueryData(queryKeys.auth.profile(), profile);
+      queryClient.setQueryData(queryKeys.users.profile(), profile);
+    },
+    [queryClient],
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -48,9 +59,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const profile = await authService.fetchProfile(storedToken);
         if (isMounted) {
           setUser(profile);
+          setProfileCache(profile);
         }
       } catch {
         authService.logout();
+        queryClient.clear();
         if (isMounted) {
           setToken(null);
           setUser(null);
@@ -67,10 +80,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [queryClient, setProfileCache]);
 
   useEffect(() => {
     const onSessionExpired = () => {
+      authService.clearProfileCache();
+      queryClient.clear();
       setToken(null);
       setUser(null);
     };
@@ -80,32 +95,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       window.removeEventListener(AUTH_SESSION_EXPIRED_EVENT, onSessionExpired);
     };
-  }, []);
+  }, [queryClient]);
 
-  const applySession = async (nextToken: string, nextUser: UserResponseDto) => {
+  const applySession = (nextToken: string, nextUser: UserResponseDto) => {
+    authService.clearProfileCache();
+    queryClient.clear();
     setAuthToken(nextToken);
     setToken(nextToken);
     setUser(nextUser);
+    setProfileCache(nextUser);
   };
 
   const login = async (data: AuthenticationRequestDto) => {
     const session = await authService.loginWithProfile(data);
-    await applySession(session.token, session.user);
+    applySession(session.token, session.user);
   };
 
   const register = async (data: RegisterRequestDto) => {
     const session = await authService.registerWithProfile(data);
-    await applySession(session.token, session.user);
+    applySession(session.token, session.user);
   };
 
   const loginWithGoogle = async (data: GoogleOAuthRequestDto) => {
     const session = await authService.loginWithGoogleProfile(data);
-    await applySession(session.token, session.user);
+    applySession(session.token, session.user);
   };
 
   const refreshProfile = async () => {
     const storedToken = getAuthToken();
     if (!storedToken) {
+      authService.clearProfileCache();
+      queryClient.clear();
       setToken(null);
       setUser(null);
       return;
@@ -114,10 +134,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const profile = await authService.fetchProfile(storedToken);
     setToken(storedToken);
     setUser(profile);
+    setProfileCache(profile);
   };
 
   const logout = () => {
     authService.logout();
+    queryClient.clear();
     setToken(null);
     setUser(null);
   };

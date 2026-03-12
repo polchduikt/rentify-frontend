@@ -4,7 +4,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { APP_CONTENT } from '@/constants/appContent';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
-import { getGoogleAvatarUrl } from '@/services/storage';
 import { resolveAvatarUrl } from '@/utils/avatar';
 
 const Navbar = () => {
@@ -15,13 +14,7 @@ const Navbar = () => {
 
   const isSearchActive = location.pathname.startsWith(ROUTES.search);
   const initials = user?.firstName?.charAt(0)?.toUpperCase() ?? user?.email?.charAt(0)?.toUpperCase() ?? 'U';
-  const avatarSrc = useMemo(() => {
-    const direct = resolveAvatarUrl(user?.avatarUrl);
-    if (direct) {
-      return direct;
-    }
-    return resolveAvatarUrl(getGoogleAvatarUrl());
-  }, [user?.avatarUrl]);
+  const avatarSrc = useMemo(() => resolveAvatarUrl(user?.avatarUrl), [user?.avatarUrl]);
 
   useEffect(() => {
     setAvatarLoadFailed(false);

@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AccountSection,
   BookingsSection,
-  ChatSection,
   EmptySection,
   FavoritesSection,
   ProfileHero,
@@ -12,6 +11,7 @@ import {
   SecuritySection,
   TransactionsSection,
 } from '@/components/profile';
+import { openChatWidget } from '@/components/chat';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfilePage } from '@/hooks';
@@ -23,7 +23,6 @@ const SECTION_SET = new Set<NavigationSection>([
   'properties-published',
   'properties-archived',
   'properties-drafts',
-  'chat',
   'favorites',
   'bookings-my',
   'bookings-incoming',
@@ -47,6 +46,13 @@ const ProfilePage = () => {
   useEffect(() => {
     setAvatarLoadFailed(false);
   }, [avatarSrc]);
+
+  useEffect(() => {
+    if (sectionFromQuery !== 'chat') {
+      return;
+    }
+    openChatWidget({});
+  }, [sectionFromQuery]);
 
   if (model.isInitialLoading) {
     return (
@@ -112,6 +118,7 @@ const ProfilePage = () => {
             onToggleBookings={navigation.toggleBookingsOpen}
             onToggleSettings={navigation.toggleSettingsOpen}
             onSelectSection={navigation.setActiveSection}
+            onOpenChat={() => openChatWidget({})}
             onLogout={handleLogout}
           />
 
@@ -150,8 +157,6 @@ const ProfilePage = () => {
                 onSubmit={handlePasswordSubmit}
               />
             ) : null}
-
-            {navigation.activeSection === 'chat' ? <ChatSection /> : null}
 
             {navigation.activeSection === 'favorites' ? (
               <FavoritesSection

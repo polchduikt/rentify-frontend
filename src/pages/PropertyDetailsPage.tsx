@@ -1,11 +1,13 @@
 import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   PropertyDetailsMainSections,
   PropertyDetailsSidebar,
   PropertyShortTermBookingSidebar,
 } from '@/components/property-details';
+import { openChatWidget } from '@/components/chat';
 import { ROUTES } from '@/config/routes';
+import { useAuth } from '@/contexts/AuthContext';
 import { usePropertyDetailsPage } from '@/hooks';
 
 const INVALID_ID_TEXT = 'Некоректний ID оголошення.';
@@ -13,6 +15,23 @@ const BACK_TO_LIST_TEXT = 'До списку оголошень';
 
 const PropertyDetailsPage = () => {
   const model = usePropertyDetailsPage();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleContactHost = () => {
+    if (!model.property) {
+      return;
+    }
+    if (!isAuthenticated) {
+      navigate(ROUTES.login, { state: { from: location } });
+      return;
+    }
+    openChatWidget({
+      propertyId: model.property.id,
+      initialText: `Доброго дня! Цікавить оголошення "${model.property.title}".`,
+    });
+  };
 
   if (!model.isValidId) {
     return (
@@ -81,6 +100,8 @@ const PropertyDetailsPage = () => {
               ownerLoading={model.ownerLoading}
               ownerName={model.ownerName}
               ownerInitial={model.ownerInitial}
+              onContactHost={handleContactHost}
+              disableContactHost={model.isOwnProperty}
             />
           ) : (
             <PropertyDetailsSidebar
@@ -91,6 +112,8 @@ const PropertyDetailsPage = () => {
               ownerInitial={model.ownerInitial}
               pricePerMonth={model.pricePerMonth}
               currency={model.currency}
+              onContactHost={handleContactHost}
+              disableContactHost={model.isOwnProperty}
             />
           )}
         </div>

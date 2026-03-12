@@ -1,4 +1,4 @@
-import { BadgeCheck, BedDouble, CalendarDays, Clock3, Layers, MapPin, Ruler, Star, Users } from 'lucide-react';
+import { BadgeCheck, BedDouble, CalendarDays, Clock3, Layers, MapPin, MessageCircle, Ruler, Star, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
@@ -17,6 +17,8 @@ interface PropertyShortTermBookingSidebarProps {
   ownerLoading: boolean;
   ownerName: string;
   ownerInitial: string;
+  onContactHost: () => void;
+  disableContactHost?: boolean;
 }
 
 const MAX_BOOKING_WINDOW_DAYS = 365;
@@ -50,6 +52,8 @@ export const PropertyShortTermBookingSidebar = ({
   ownerLoading,
   ownerName,
   ownerInitial,
+  onContactHost,
+  disableContactHost = false,
 }: PropertyShortTermBookingSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -322,6 +326,15 @@ export const PropertyShortTermBookingSidebar = ({
         )}
 
         <div className="mt-5 space-y-2">
+          <button
+            type="button"
+            onClick={onContactHost}
+            disabled={disableContactHost}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            <MessageCircle size={16} />
+            {disableContactHost ? 'Це ваше оголошення' : 'Написати власнику'}
+          </button>
           <div className="flex items-center gap-2 text-sm text-slate-700">
             <MapPin size={15} className="text-slate-400" />
             {property.address?.location?.city || 'Місто не вказано'}

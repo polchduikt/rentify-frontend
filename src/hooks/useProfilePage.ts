@@ -5,6 +5,7 @@ import {
   useCancelBookingMutation,
   useChangePasswordMutation,
   useConfirmBookingMutation,
+  useDeleteAccountMutation,
   useDeleteAvatarMutation,
   useIncomingBookingsQuery,
   useMyBookingsQuery,
@@ -208,6 +209,7 @@ export const useProfilePage = () => {
   const rejectBookingMutation = useRejectBookingMutation();
   const updateProfileMutation = useUpdateProfileMutation();
   const changePasswordMutation = useChangePasswordMutation();
+  const deleteAccountMutation = useDeleteAccountMutation();
   const uploadAvatarMutation = useUploadAvatarMutation();
   const deleteAvatarMutation = useDeleteAvatarMutation();
   const walletTopUpMutation = useWalletTopUpMutation();
@@ -533,6 +535,14 @@ export const useProfilePage = () => {
     await walletTopUpMutation.mutateAsync({ amount });
   };
 
+  const deleteAccount = async () => {
+    try {
+      await deleteAccountMutation.mutateAsync({});
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Не вдалося видалити акаунт.'));
+    }
+  };
+
   return {
     profile,
     fullName,
@@ -579,6 +589,7 @@ export const useProfilePage = () => {
       transactionsQuery.isLoading || myPaymentsQuery.isLoading || incomingBookingPaymentsState.isLoading,
     profileSaving: updateProfileMutation.isPending,
     passwordSaving: changePasswordMutation.isPending,
+    accountDeleting: deleteAccountMutation.isPending,
     avatarUploading: uploadAvatarMutation.isPending,
     avatarDeleting: deleteAvatarMutation.isPending,
     propertiesForPromotionsLoading: propertiesMetricsQuery.isLoading,
@@ -613,6 +624,7 @@ export const useProfilePage = () => {
     resetProfileForm: () => setProfileForm(toProfileForm(profile ?? undefined)),
     saveProfile,
     changePassword,
+    deleteAccount,
     uploadAvatar,
     deleteAvatar,
     topUpWallet,

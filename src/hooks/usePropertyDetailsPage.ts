@@ -3,8 +3,18 @@ import { useParams } from 'react-router-dom';
 import { FALLBACK_IMAGE, resolveLocationFallback } from '@/components/property-details/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { parseCoordinate } from '@/components/property-details/utils';
-import { usePropertyByIdQuery, usePublicProfileQuery, useSearchPropertiesQuery, useMyFavoritesQuery } from '@/hooks/api';
+import {
+  useCreateReviewMutation,
+  useMyBookingsQuery,
+  useMyFavoritesQuery,
+  usePropertyByIdQuery,
+  usePropertyReviewsQuery,
+  usePublicProfileQuery,
+  useSearchPropertiesQuery,
+} from '@/hooks/api';
 import type { AmenityDto } from '@/types/property';
+import type { ReviewRequestDto } from '@/types/review';
+import { toIsoDate } from '@/utils/bookingDates';
 import { getApiErrorMessage } from '@/utils/errors';
 import { geocodeAddress } from '@/utils/geocoding';
 
@@ -14,6 +24,16 @@ const FALLBACK_CITY_LABEL = '\u041c\u0456\u0441\u0442\u043e \u043d\u0435 \u0432\
 const FALLBACK_OWNER_LABEL = '\u0412\u043b\u0430\u0441\u043d\u0438\u043a \u043e\u0433\u043e\u043b\u043e\u0448\u0435\u043d\u043d\u044f';
 const PROPERTY_ERROR_MESSAGE =
   '\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u043e\u0433\u043e\u043b\u043e\u0448\u0435\u043d\u043d\u044f';
+const REVIEWS_ERROR_MESSAGE =
+  '\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u0432\u0456\u0434\u0433\u0443\u043a\u0438';
+const REVIEW_REQUIRES_COMPLETED_BOOKING_MESSAGE =
+  '\u0412\u0456\u0434\u0433\u0443\u043a \u043c\u043e\u0436\u043d\u0430 \u0437\u0430\u043b\u0438\u0448\u0438\u0442\u0438 \u043f\u0456\u0441\u043b\u044f \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e\u0433\u043e \u0431\u0440\u043e\u043d\u044e\u0432\u0430\u043d\u043d\u044f \u0442\u0430 \u0443\u0441\u043f\u0456\u0448\u043d\u043e\u0433\u043e \u0432\u0438\u0457\u0437\u0434\u0443.';
+const REVIEW_ALREADY_LEFT_MESSAGE =
+  '\u0412\u0438 \u0432\u0436\u0435 \u0437\u0430\u043b\u0438\u0448\u0438\u043b\u0438 \u0432\u0456\u0434\u0433\u0443\u043a \u0437\u0430 \u0432\u0441\u0456 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0456 \u0431\u0440\u043e\u043d\u044e\u0432\u0430\u043d\u043d\u044f \u0446\u0456\u0454\u0457 \u043f\u0440\u043e\u043f\u043e\u0437\u0438\u0446\u0456\u0457.';
+const REVIEW_LOGIN_MESSAGE =
+  '\u0410\u0432\u0442\u043e\u0440\u0438\u0437\u0443\u0439\u0442\u0435\u0441\u044f, \u0449\u043e\u0431 \u0437\u0430\u043b\u0438\u0448\u0438\u0442\u0438 \u0432\u0456\u0434\u0433\u0443\u043a.';
+const OWN_PROPERTY_REVIEW_MESSAGE =
+  '\u0412\u0438 \u043d\u0435 \u043c\u043e\u0436\u0435\u0442\u0435 \u0437\u0430\u043b\u0438\u0448\u0430\u0442\u0438 \u0432\u0456\u0434\u0433\u0443\u043a \u0434\u043e \u0432\u043b\u0430\u0441\u043d\u043e\u0433\u043e \u043e\u0433\u043e\u043b\u043e\u0448\u0435\u043d\u043d\u044f.';
 
 export const usePropertyDetailsPage = () => {
   const { isAuthenticated, user } = useAuth();
@@ -28,10 +48,23 @@ export const usePropertyDetailsPage = () => {
 
   const propertyQuery = usePropertyByIdQuery(numericId, isValidId);
   const property = propertyQuery.data ?? null;
+  const isShortTerm = property?.rentalType === 'SHORT_TERM';
+  const isOwnProperty = Boolean(property?.hostId && user?.id && property.hostId === user.id);
   const recommendationRentalType = property?.rentalType;
+  const todayIso = useMemo(() => toIsoDate(new Date()), []);
 
   const ownerQuery = usePublicProfileQuery(property?.hostId ?? 0, Boolean(property?.hostId));
   const favoritesQuery = useMyFavoritesQuery(isAuthenticated);
+  const myBookingsQuery = useMyBookingsQuery(
+    { page: 0, size: 200, sort: 'dateTo,desc' },
+    isAuthenticated && isShortTerm
+  );
+  const propertyReviewsQuery = usePropertyReviewsQuery(
+    numericId,
+    { page: 0, size: 200, sort: 'createdAt,desc' },
+    isValidId && isShortTerm
+  );
+  const createReviewMutation = useCreateReviewMutation();
   const recommendationsQuery = useSearchPropertiesQuery(
     {
       city: property?.address?.location?.city,
@@ -159,6 +192,89 @@ export const usePropertyDetailsPage = () => {
   const addressLine = [property?.address?.street, property?.address?.houseNumber, property?.address?.apartment]
     .filter(Boolean)
     .join(', ');
+
+  const propertyReviews = propertyReviewsQuery.data?.content ?? [];
+  const completedMyShortTermBookings = useMemo(() => {
+    if (!property?.id) {
+      return [];
+    }
+
+    const bookings = myBookingsQuery.data?.content ?? [];
+    return bookings.filter(
+      (booking) =>
+        booking.propertyId === property.id &&
+        booking.status === 'COMPLETED' &&
+        booking.dateTo <= todayIso
+    );
+  }, [myBookingsQuery.data?.content, property?.id, todayIso]);
+
+  const reviewedBookingIds = useMemo(() => {
+    if (!user?.id) {
+      return new Set<number>();
+    }
+
+    return new Set(
+      propertyReviews
+        .filter((review) => review.authorId === user.id)
+        .map((review) => Number(review.bookingId))
+        .filter((bookingId) => Number.isFinite(bookingId) && bookingId > 0)
+    );
+  }, [propertyReviews, user?.id]);
+
+  const pendingReviewBooking = useMemo(
+    () => completedMyShortTermBookings.find((booking) => !reviewedBookingIds.has(booking.id)) ?? null,
+    [completedMyShortTermBookings, reviewedBookingIds]
+  );
+
+  const shortTermReviewHint = useMemo(() => {
+    if (!isShortTerm) {
+      return null;
+    }
+    if (!isAuthenticated) {
+      return REVIEW_LOGIN_MESSAGE;
+    }
+    if (isOwnProperty) {
+      return OWN_PROPERTY_REVIEW_MESSAGE;
+    }
+    if (myBookingsQuery.isLoading || propertyReviewsQuery.isLoading) {
+      return null;
+    }
+    if (completedMyShortTermBookings.length === 0) {
+      return REVIEW_REQUIRES_COMPLETED_BOOKING_MESSAGE;
+    }
+    if (!pendingReviewBooking) {
+      return REVIEW_ALREADY_LEFT_MESSAGE;
+    }
+    return null;
+  }, [
+    completedMyShortTermBookings.length,
+    isAuthenticated,
+    isOwnProperty,
+    isShortTerm,
+    myBookingsQuery.isLoading,
+    pendingReviewBooking,
+    propertyReviewsQuery.isLoading,
+  ]);
+
+  const canLeaveShortTermReview =
+    isShortTerm && isAuthenticated && !isOwnProperty && Boolean(pendingReviewBooking);
+
+  const createShortTermReview = async ({ rating, comment }: { rating: number; comment?: string }) => {
+    if (!property?.id || !pendingReviewBooking?.id) {
+      throw new Error(REVIEW_REQUIRES_COMPLETED_BOOKING_MESSAGE);
+    }
+
+    const normalizedComment = comment?.trim();
+    const payload: ReviewRequestDto = {
+      propertyId: property.id,
+      bookingId: pendingReviewBooking.id,
+      rating,
+      ...(normalizedComment ? { comment: normalizedComment } : {}),
+    };
+
+    await createReviewMutation.mutateAsync(payload);
+  };
+
   const pricePerMonth = Number(property?.pricing?.pricePerMonth || property?.pricing?.pricePerNight || 0);
   const currency = property?.pricing?.currency || 'UAH';
 
@@ -174,7 +290,6 @@ export const usePropertyDetailsPage = () => {
   const isFavorite = property?.id ? favoriteIds.has(property.id) : false;
 
   const hasPropertyError = !propertyQuery.isLoading && (Boolean(propertyQuery.error) || !property);
-  const isOwnProperty = Boolean(property?.hostId && user?.id && property.hostId === user.id);
 
   return {
     numericId,
@@ -182,7 +297,7 @@ export const usePropertyDetailsPage = () => {
     isLoading: propertyQuery.isLoading,
     hasPropertyError,
     errorMessage: hasPropertyError ? getApiErrorMessage(propertyQuery.error, PROPERTY_ERROR_MESSAGE) : null,
-    isShortTerm: property?.rentalType === 'SHORT_TERM',
+    isShortTerm,
     property,
     photos,
     activePhoto: photos[activePhotoIndex] || photos[0] || FALLBACK_IMAGE,
@@ -213,6 +328,17 @@ export const usePropertyDetailsPage = () => {
     isFavorite,
     favoriteIds,
     isOwnProperty,
+    propertyReviews,
+    propertyReviewsLoading: propertyReviewsQuery.isLoading,
+    propertyReviewsError: propertyReviewsQuery.error
+      ? getApiErrorMessage(propertyReviewsQuery.error, REVIEWS_ERROR_MESSAGE)
+      : null,
+    canLeaveShortTermReview,
+    shortTermReviewHint,
+    pendingReviewBookingId: pendingReviewBooking?.id ?? null,
+    pendingReviewBookingDateTo: pendingReviewBooking?.dateTo ?? null,
+    createShortTermReview,
+    createShortTermReviewPending: createReviewMutation.isPending,
   };
 };
 

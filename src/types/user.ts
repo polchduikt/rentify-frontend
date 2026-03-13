@@ -8,7 +8,7 @@ export interface ChangePasswordRequestDto {
 }
 
 export interface DeleteAccountRequestDto {
-  currentPassword: string;
+  currentPassword?: string;
 }
 
 export interface PublicUserProfileDto {

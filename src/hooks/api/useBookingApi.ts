@@ -4,10 +4,11 @@ import type { PageQuery } from '@/types/api';
 import type { BookingRequestDto } from '@/types/booking';
 import { queryKeys } from './queryKeys';
 
-export const useMyBookingsQuery = (page?: PageQuery) =>
+export const useMyBookingsQuery = (page?: PageQuery, enabled = true) =>
   useQuery({
     queryKey: queryKeys.bookings.my(page),
     queryFn: () => bookingService.getMyBookings(page),
+    enabled,
   });
 
 export const useIncomingBookingsQuery = (page?: PageQuery) =>

@@ -88,6 +88,12 @@ const ProfilePage = () => {
     void model.changePassword();
   };
 
+  const handleDeleteAccount = async () => {
+    await model.deleteAccount();
+    logout();
+    navigate(ROUTES.login, { replace: true });
+  };
+
   const handleLogout = () => {
     logout();
     navigate(ROUTES.login);
@@ -167,8 +173,10 @@ const ProfilePage = () => {
                 passwordForm={model.passwordForm}
                 passwordNotice={model.passwordNotice}
                 passwordSaving={model.passwordSaving}
+                accountDeleting={model.accountDeleting}
                 onPasswordFieldChange={model.setPasswordField}
                 onSubmit={handlePasswordSubmit}
+                onDeleteAccount={handleDeleteAccount}
               />
             ) : null}
 

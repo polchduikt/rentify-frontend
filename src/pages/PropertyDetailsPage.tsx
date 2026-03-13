@@ -4,6 +4,7 @@ import {
   PropertyDetailsMainSections,
   PropertyDetailsSidebar,
   PropertyShortTermBookingSidebar,
+  PropertyShortTermReviewsSection,
 } from '@/components/property-details';
 import { openChatWidget } from '@/components/chat';
 import { ROUTES } from '@/config/routes';
@@ -91,6 +92,21 @@ const PropertyDetailsPage = () => {
             onSlideNext={model.slideRecommendationsNext}
             isFavorite={model.isFavorite}
             favoriteIds={model.favoriteIds}
+            shortTermReviewsSection={
+              model.isShortTerm ? (
+                <PropertyShortTermReviewsSection
+                  reviews={model.propertyReviews}
+                  reviewsLoading={model.propertyReviewsLoading}
+                  reviewsError={model.propertyReviewsError}
+                  canLeaveReview={model.canLeaveShortTermReview}
+                  reviewHint={model.shortTermReviewHint}
+                  pendingReviewBookingId={model.pendingReviewBookingId}
+                  pendingReviewBookingDateTo={model.pendingReviewBookingDateTo}
+                  isSubmittingReview={model.createShortTermReviewPending}
+                  onSubmitReview={model.createShortTermReview}
+                />
+              ) : null
+            }
           />
 
           {model.isShortTerm ? (

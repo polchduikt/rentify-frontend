@@ -3,6 +3,7 @@ import type { ZonedDateTimeString } from './scalars';
 export interface ReviewDto {
   id: number;
   propertyId: number;
+  bookingId: number;
   authorId: number;
   rating: number;
   authorFirstName: string;

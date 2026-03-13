@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Heart, MapPin, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 import { PROPERTY_CREATE_AMENITY_CATEGORY_LABELS } from '@/constants/propertyCreateUi';
@@ -31,6 +31,7 @@ interface PropertyDetailsMainSectionsProps {
   onSlideNext: () => void;
   isFavorite?: boolean;
   favoriteIds?: Set<number>;
+  shortTermReviewsSection?: ReactNode;
 }
 
 export const PropertyDetailsMainSections = ({
@@ -53,6 +54,7 @@ export const PropertyDetailsMainSections = ({
   onSlideNext,
   isFavorite = false,
   favoriteIds = new Set(),
+  shortTermReviewsSection = null,
 }: PropertyDetailsMainSectionsProps) => {
   const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
   const addToFavoritesMutation = useAddToFavoritesMutation();
@@ -293,6 +295,8 @@ export const PropertyDetailsMainSections = ({
               </div>
           )}
         </section>
+
+        {shortTermReviewsSection}
       </div>
   );
 }

@@ -3,6 +3,7 @@ import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-lea
 import L from 'leaflet';
 import type { LeafletMouseEvent } from 'leaflet';
 import { DEFAULT_MAP_CENTER } from '@/constants/propertyCreateOptions';
+import type { MapPickerProps } from './MapPicker.types';
 
 const mapPinIcon = L.divIcon({
   className: 'rentify-map-pin',
@@ -11,11 +12,6 @@ const mapPinIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
-interface MapPickerProps {
-  lat?: number;
-  lng?: number;
-  onPick: (lat: number, lng: number) => void;
-}
 
 const MapClickHandler = ({ onPick }: { onPick: (lat: number, lng: number) => void }) => {
   useMapEvents({

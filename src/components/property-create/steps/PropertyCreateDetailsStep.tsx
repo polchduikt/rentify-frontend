@@ -1,9 +1,6 @@
-import type { CreatePropertyPageModel } from '@/hooks/useCreatePropertyPage';
 import { PROPERTY_CREATE_INPUT_CLASS, PROPERTY_CREATE_LABEL_CLASS } from '@/constants/propertyCreateUi';
+import type { PropertyCreateDetailsStepProps } from './PropertyCreateDetailsStep.types';
 
-interface PropertyCreateDetailsStepProps {
-  model: CreatePropertyPageModel;
-}
 
 export const PropertyCreateDetailsStep = ({ model }: PropertyCreateDetailsStepProps) => {
   const {

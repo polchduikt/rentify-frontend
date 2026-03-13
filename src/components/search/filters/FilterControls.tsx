@@ -1,11 +1,5 @@
-import { COLLAPSIBLE_LIMIT } from './constants';
-
-export interface ChipOption {
-  key: string;
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}
+import { COLLAPSIBLE_LIMIT } from '@/constants/searchFilters';
+import type { ChipOption } from '@/types/search';
 
 export const FilterButton = ({
   label,

@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import { resolvePropertyPriceValue } from '@/hooks/search/searchPageUtils';
+import { resolvePropertyPriceValue } from '@/utils/search/searchPageUtils';
 import type { PropertyMapPinDto, PropertyResponseDto } from '@/types/property';
 
 export const toFiniteNumber = (value: unknown): number | null => {

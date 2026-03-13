@@ -27,7 +27,7 @@ export const FEATURES = [
   {
     icon: Shield,
     title: 'Надійні оголошення',
-    description: 'Модеровані обʼєкти та прозора інформація про власників.',
+    description: 'Модеровані об’єкти та прозора інформація про власників.',
     colorClass: 'bg-emerald-50 text-emerald-700',
   },
   {

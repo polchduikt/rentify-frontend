@@ -1,22 +1,10 @@
 import { BadgeCheck, BedDouble, Building2, CalendarDays, Layers, MessageCircle, Phone, Ruler, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PROPERTY_TYPE_LABELS } from '@/constants/propertyDetails';
 import { ROUTES } from '@/config/routes';
-import type { PropertyResponseDto } from '@/types/property';
-import type { PublicUserProfileDto } from '@/types/user';
-import { PROPERTY_TYPE_LABELS } from './constants';
-import { formatCreatedAt, formatPrice } from './utils';
+import { formatPropertyCreatedAt, formatPropertyPrice } from '@/utils/propertyDetails';
+import type { PropertyDetailsSidebarProps } from './PropertyDetailsSidebar.types';
 
-interface PropertyDetailsSidebarProps {
-  property: PropertyResponseDto;
-  owner?: PublicUserProfileDto;
-  ownerLoading: boolean;
-  ownerName: string;
-  ownerInitial: string;
-  pricePerMonth: number;
-  currency: string;
-  onContactHost: () => void;
-  disableContactHost?: boolean;
-}
 
 export const PropertyDetailsSidebar = ({
   property,
@@ -50,7 +38,7 @@ export const PropertyDetailsSidebar = ({
             >
               {ownerName}
             </Link>
-            <p className="text-sm text-slate-500">На платформі з {formatCreatedAt(owner?.createdAt)}</p>
+            <p className="text-sm text-slate-500">На платформі з {formatPropertyCreatedAt(owner?.createdAt)}</p>
           </div>
         </div>
       )}
@@ -77,7 +65,7 @@ export const PropertyDetailsSidebar = ({
 
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Ціна оренди</p>
-      <p className="mt-2 text-4xl font-black text-slate-900">{formatPrice(pricePerMonth, currency)}</p>
+      <p className="mt-2 text-4xl font-black text-slate-900">{formatPropertyPrice(pricePerMonth, currency)}</p>
       <p className="mt-1 text-sm text-slate-500">на місяць</p>
 
       <div className="mt-5 space-y-2">
@@ -99,7 +87,7 @@ export const PropertyDetailsSidebar = ({
         </div>
         <div className="flex items-center gap-2 text-sm text-slate-700">
           <CalendarDays size={16} className="text-slate-400" />
-          Опубліковано {formatCreatedAt(property.createdAt)}
+          Опубліковано {formatPropertyCreatedAt(property.createdAt)}
         </div>
       </div>
 
@@ -112,7 +100,7 @@ export const PropertyDetailsSidebar = ({
           <strong>{Number(property.averageRating || 0).toFixed(1)}</strong>
         </div>
         <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
-          <span>Відгуків</span>
+          <span>Р’ідгуків</span>
           <strong>{property.reviewCount || 0}</strong>
         </div>
         <div className="mt-2 flex items-center justify-between text-sm text-slate-700">

@@ -1,10 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { PROPERTY_CREATE_INPUT_CLASS, PROPERTY_CREATE_LABEL_CLASS } from '@/constants/propertyCreateUi';
-import type { CreatePropertyPageModel } from '@/hooks/useCreatePropertyPage';
+import type { PropertyCreatePricingStepProps } from './PropertyCreatePricingStep.types';
 
-interface PropertyCreatePricingStepProps {
-  model: CreatePropertyPageModel;
-}
 
 export const PropertyCreatePricingStep = ({ model }: PropertyCreatePricingStepProps) => {
   const {

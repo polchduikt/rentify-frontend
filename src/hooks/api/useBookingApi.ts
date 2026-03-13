@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { bookingService } from '@/services/bookingService';
 import type { PageQuery } from '@/types/api';
 import type { BookingRequestDto } from '@/types/booking';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useMyBookingsQuery = (page?: PageQuery, enabled = true) =>
   useQuery({

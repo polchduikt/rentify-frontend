@@ -1,17 +1,10 @@
 import { Layers, MapPin, ZoomIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEARCH_PROPERTY_FALLBACK_IMAGE } from '@/constants/propertyImages';
 import { ROUTES } from '@/config/routes';
-import type { PropertyResponseDto } from '@/types/property';
 import { isTopPromotionActive } from '@/utils/promotions';
 import { resolveCompactRooms, resolveMapAddressLine, resolveMapPropertyMeta, resolveMapPropertyPrice } from '@/utils/searchMap';
-
-interface SearchMapPropertyCardProps {
-  property: PropertyResponseDto | null;
-  onClose: () => void;
-}
-
-const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
+import type { SearchMapPropertyCardProps } from './SearchMapPropertyCard.types';
 
 export const SearchMapPropertyCard = ({ property, onClose }: SearchMapPropertyCardProps) => {
   const { value: selectedPrice, suffix: selectedPriceSuffix, currency: selectedCurrency } = resolveMapPropertyPrice(property);
@@ -46,7 +39,7 @@ export const SearchMapPropertyCard = ({ property, onClose }: SearchMapPropertyCa
           >
             <div className="relative overflow-hidden rounded-[20px]">
               <img
-                src={property.photos?.[0]?.url || FALLBACK_IMAGE}
+                src={property.photos?.[0]?.url || SEARCH_PROPERTY_FALLBACK_IMAGE}
                 alt={property.title}
                 className="h-[240px] w-full object-cover"
               />

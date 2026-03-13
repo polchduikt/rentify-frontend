@@ -14,26 +14,13 @@ import {
   TransactionsSection,
 } from '@/components/profile';
 import { openChatWidget } from '@/components/chat';
+import { PROFILE_PAGE_SECTION_SET } from '@/constants/profilePage';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfilePage } from '@/hooks';
 import { useProfileNavigation } from '@/hooks/profile';
 import type { NavigationSection } from '@/types/profile';
 import { resolveAvatarUrl } from '@/utils/avatar';
-
-const SECTION_SET = new Set<NavigationSection>([
-  'properties-published',
-  'properties-archived',
-  'properties-drafts',
-  'favorites',
-  'bookings-my',
-  'bookings-incoming',
-  'payments',
-  'promotions-top',
-  'promotions-subscriptions',
-  'account',
-  'security',
-]);
 
 const ProfilePage = () => {
   const model = useProfilePage();
@@ -43,7 +30,10 @@ const ProfilePage = () => {
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
   const sectionFromQuery = searchParams.get('section');
-  const initialSection = sectionFromQuery && SECTION_SET.has(sectionFromQuery as NavigationSection) ? (sectionFromQuery as NavigationSection) : null;
+  const initialSection =
+    sectionFromQuery && PROFILE_PAGE_SECTION_SET.has(sectionFromQuery as NavigationSection)
+      ? (sectionFromQuery as NavigationSection)
+      : null;
 
   const navigation = useProfileNavigation({ properties: model.properties, initialSection });
   const avatarSrc = useMemo(() => resolveAvatarUrl(model.profile?.avatarUrl), [model.profile?.avatarUrl]);
@@ -160,7 +150,7 @@ const ProfilePage = () => {
                 profileForm={model.profileForm}
                 isProfileDirty={model.isProfileDirty}
                 profileSaving={model.profileSaving}
-                onAvatarUpload={(file) => void model.uploadAvatar(file)}
+                onAvatarUpload={(file: File) => void model.uploadAvatar(file)}
                 onAvatarDelete={() => void model.deleteAvatar()}
                 onProfileFieldChange={model.setProfileField}
                 onSubmit={handleProfileSubmit}

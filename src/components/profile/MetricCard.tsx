@@ -1,15 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
+import type { MetricCardProps } from './MetricCard.types';
 
-interface MetricCardProps {
-  title: string;
-  value: string;
-  hint: string;
-  icon: LucideIcon;
-  actionLabel?: string;
-  actionDisabled?: boolean;
-  actionLoading?: boolean;
-  onAction?: () => void;
-}
 
 export const MetricCard = ({
   title,

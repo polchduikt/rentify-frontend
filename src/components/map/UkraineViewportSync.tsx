@@ -4,6 +4,7 @@ import { useMap, useMapEvents } from 'react-leaflet';
 import { UKRAINE_LOCKED_MIN_ZOOM } from '@/constants/searchMap';
 import type { SearchMapBounds } from '@/types/search';
 import { UKRAINE_VIEW_BOUNDS } from '@/utils/ukraineMask';
+import type { UkraineViewportSyncProps } from './UkraineViewportSync.types';
 
 const extractBounds = (map: L.Map): SearchMapBounds => {
   const bounds = map.getBounds();
@@ -15,10 +16,6 @@ const extractBounds = (map: L.Map): SearchMapBounds => {
   };
 };
 
-interface UkraineViewportSyncProps {
-  onBoundsChange: (bounds: SearchMapBounds) => void;
-  onMapClick?: () => void;
-}
 
 export const UkraineViewportSync = ({ onBoundsChange, onMapClick }: UkraineViewportSyncProps) => {
   const map = useMap();

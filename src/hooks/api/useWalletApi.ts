@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { walletService } from '@/services/walletService';
 import type { PageQuery } from '@/types/api';
 import type { WalletTopUpRequestDto } from '@/types/wallet';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useWalletBalanceQuery = () =>
   useQuery({

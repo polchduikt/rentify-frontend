@@ -1,23 +1,8 @@
 import { LoaderCircle, Star } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
-import type { LocalDateString } from '@/types/scalars';
-import type { ReviewDto } from '@/types/review';
+import { SHORT_TERM_REVIEW_DEFAULT_RATING, SHORT_TERM_REVIEW_MAX_COMMENT_LENGTH } from '@/constants/reviews';
 import { getApiErrorMessage } from '@/utils/errors';
-
-interface PropertyShortTermReviewsSectionProps {
-  reviews: ReviewDto[];
-  reviewsLoading: boolean;
-  reviewsError: string | null;
-  canLeaveReview: boolean;
-  reviewHint: string | null;
-  pendingReviewBookingId: number | null;
-  pendingReviewBookingDateTo: LocalDateString | null;
-  isSubmittingReview: boolean;
-  onSubmitReview: (payload: { rating: number; comment?: string }) => Promise<void>;
-}
-
-const DEFAULT_REVIEW_RATING = 5;
-const MAX_COMMENT_LENGTH = 2000;
+import type { PropertyShortTermReviewsSectionProps } from './PropertyShortTermReviewsSection.types';
 
 const formatReviewDate = (value?: string | null) => {
   if (!value) {
@@ -47,7 +32,7 @@ export const PropertyShortTermReviewsSection = ({
   isSubmittingReview,
   onSubmitReview,
 }: PropertyShortTermReviewsSectionProps) => {
-  const [rating, setRating] = useState(DEFAULT_REVIEW_RATING);
+  const [rating, setRating] = useState(SHORT_TERM_REVIEW_DEFAULT_RATING);
   const [comment, setComment] = useState('');
   const [submitNotice, setSubmitNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -79,7 +64,7 @@ export const PropertyShortTermReviewsSection = ({
         comment: comment.trim() ? comment.trim() : undefined,
       });
       setComment('');
-      setRating(DEFAULT_REVIEW_RATING);
+      setRating(SHORT_TERM_REVIEW_DEFAULT_RATING);
       setSubmitNotice({
         type: 'success',
         message: 'Дякуємо, ваш відгук опубліковано.',
@@ -172,10 +157,10 @@ export const PropertyShortTermReviewsSection = ({
             </div>
 
             <label className="block space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Коментар (необов'язково)</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Коментар (необов’язково)</span>
               <textarea
                 value={comment}
-                maxLength={MAX_COMMENT_LENGTH}
+                maxLength={SHORT_TERM_REVIEW_MAX_COMMENT_LENGTH}
                 onChange={(event) => {
                   setComment(event.target.value);
                   setSubmitNotice(null);
@@ -184,7 +169,7 @@ export const PropertyShortTermReviewsSection = ({
                 className="min-h-[110px] w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               <span className="block text-right text-[11px] text-slate-500">
-                {comment.length}/{MAX_COMMENT_LENGTH}
+                {comment.length}/{SHORT_TERM_REVIEW_MAX_COMMENT_LENGTH}
               </span>
             </label>
 

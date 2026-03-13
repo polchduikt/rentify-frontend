@@ -1,16 +1,6 @@
 import { ChevronLeft, ChevronRight, Loader2, Upload } from 'lucide-react';
+import type { CreatePropertyStepActionsProps } from './CreatePropertyStepActions.types';
 
-interface CreatePropertyStepActionsProps {
-  canGoPrev: boolean;
-  isSubmitting: boolean;
-  isLastStep: boolean;
-  isStepComplete: boolean;
-  submitLabel?: string;
-  submittingLabel?: string;
-  onPrev: () => void;
-  onNext: () => void;
-  onPublish: () => void;
-}
 
 export const CreatePropertyStepActions = ({
   canGoPrev,

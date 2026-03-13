@@ -2,13 +2,10 @@ import { ExternalLink, Home, LoaderCircle, ReceiptText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import { useBookingByIdQuery, usePropertyByIdQuery } from '@/hooks/api';
-import { formatDate } from '../../formatters';
-import { isBookingReference, isPropertyReference, resolveReferenceTypeLabel } from './utils';
+import { formatDate } from '@/utils/profileFormatters';
+import { isBookingReference, isPropertyReference, resolveReferenceTypeLabel } from '@/utils/profileTransactions';
+import type { TransactionReferenceInfoProps } from './TransactionReferenceInfo.types';
 
-interface TransactionReferenceInfoProps {
-  referenceType?: string | null;
-  referenceId?: number | null;
-}
 
 const PropertyReferenceInfo = ({ propertyId }: { propertyId: number }) => {
   const propertyQuery = usePropertyByIdQuery(propertyId, propertyId > 0);

@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { PhotoUploader } from '@/components/property-create/PhotoUploader';
 import { PROPERTY_CREATE_AMENITY_CATEGORY_LABELS } from '@/constants/propertyCreateUi';
-import type { CreatePropertyPageModel } from '@/hooks/useCreatePropertyPage';
+import type { PropertyCreateAmenitiesStepProps } from './PropertyCreateAmenitiesStep.types';
 
-interface PropertyCreateAmenitiesStepProps {
-  model: CreatePropertyPageModel;
-}
 
 export const PropertyCreateAmenitiesStep = ({ model }: PropertyCreateAmenitiesStepProps) => {
   const [dragIndex, setDragIndex] = useState<number | null>(null);

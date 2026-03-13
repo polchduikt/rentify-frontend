@@ -1,29 +1,6 @@
 import { Camera, Trash2 } from 'lucide-react';
-import type { FormEvent } from 'react';
-import type { ProfileFormState, SectionNotice } from '@/types/profile';
-import type { UserResponseDto } from '@/types/user';
 import { Notice } from '../Notice';
-
-interface AccountSectionProps {
-  profile: UserResponseDto;
-  fullName: string;
-  initials: string;
-  avatarSrc: string;
-  avatarLoadFailed: boolean;
-  onAvatarError: () => void;
-  avatarUploading: boolean;
-  avatarDeleting: boolean;
-  avatarNotice: SectionNotice;
-  profileNotice: SectionNotice;
-  profileForm: ProfileFormState;
-  isProfileDirty: boolean;
-  profileSaving: boolean;
-  onAvatarUpload: (file: File) => void;
-  onAvatarDelete: () => void;
-  onProfileFieldChange: (field: keyof ProfileFormState, value: string) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onReset: () => void;
-}
+import type { AccountSectionProps } from './AccountSection.types';
 
 export const AccountSection = ({
   profile,
@@ -97,7 +74,7 @@ export const AccountSection = ({
     <form onSubmit={onSubmit} className="mt-5 space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm">
-          <span className="mb-1.5 block font-semibold text-slate-700">Ім'я</span>
+          <span className="mb-1.5 block font-semibold text-slate-700">Ім’я</span>
           <input
             value={profileForm.firstName}
             onChange={(event) => onProfileFieldChange('firstName', event.target.value)}

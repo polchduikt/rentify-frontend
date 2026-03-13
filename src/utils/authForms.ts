@@ -8,7 +8,7 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  firstName: z.string().trim().min(2, 'Імʼя має містити щонайменше 2 символи').max(50, 'Імʼя занадто довге'),
+  firstName: z.string().trim().min(2, 'Ім’я має містити щонайменше 2 символи').max(50, 'Ім’я занадто довге'),
   lastName: z.string().trim().min(2, 'Прізвище має містити щонайменше 2 символи').max(50, 'Прізвище занадто довге'),
   phone: z
     .string()

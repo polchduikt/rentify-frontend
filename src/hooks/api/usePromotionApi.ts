@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { promotionService } from '@/services/promotionService';
 import type { PurchaseSubscriptionRequestDto, PurchaseTopPromotionRequestDto } from '@/types/promotion';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useTopPromotionPackagesQuery = (enabled = true) =>
   useQuery({

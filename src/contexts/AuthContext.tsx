@@ -5,7 +5,7 @@ import type {
   GoogleOAuthRequestDto,
   RegisterRequestDto,
 } from '@/types/auth';
-import { queryKeys } from '@/hooks/api/queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 import type { UserResponseDto } from '@/types/user';
 import { authService } from '@/services/authService';
 import { AUTH_SESSION_EXPIRED_EVENT } from '@/services/api';

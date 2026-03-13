@@ -1,13 +1,12 @@
 import { MessageCircle, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { FLOATING_CHAT_WIDGET_PANEL_CLASS_NAME } from '@/constants/chatUi';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
+import type { ChatOpenRequest } from '@/types/chat';
 import { ChatPanel } from './ChatPanel';
-import { CHAT_OPEN_EVENT, type ChatOpenRequest } from './chatEvents';
-
-const WIDGET_PANEL_CLASS_NAME =
-  'fixed bottom-24 right-4 z-[70] h-[min(72vh,620px)] w-[min(calc(100vw-1.5rem),680px)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:right-6';
+import { CHAT_OPEN_EVENT } from './chatEvents';
 
 export const FloatingChatWidget = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -50,7 +49,7 @@ export const FloatingChatWidget = () => {
   return (
     <>
       {isOpen ? (
-        <section className={WIDGET_PANEL_CLASS_NAME}>
+        <section className={FLOATING_CHAT_WIDGET_PANEL_CLASS_NAME}>
           <header className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
             <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
               <MessageCircle size={16} className="text-blue-600" />

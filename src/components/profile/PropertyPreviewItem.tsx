@@ -1,17 +1,12 @@
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { FALLBACK_IMAGE } from '@/components/property-details/constants';
+import { FALLBACK_IMAGE } from '@/constants/propertyDetails';
+import { PROPERTY_STATUS_LABELS } from '@/constants/profileUi';
 import { ROUTES } from '@/config/routes';
-import type { PropertyResponseDto } from '@/types/property';
 import { isTopPromotionActive } from '@/utils/promotions';
-import { PROPERTY_STATUS_LABELS } from './constants';
-import { formatDate, formatMoney } from './formatters';
+import { formatDate, formatMoney } from '@/utils/profileFormatters';
+import type { PropertyPreviewItemProps } from './PropertyPreviewItem.types';
 
-interface PropertyPreviewItemProps {
-  property: PropertyResponseDto;
-  onDelete?: (property: PropertyResponseDto) => void;
-  isDeleting?: boolean;
-}
 
 const formatPromotionUntilDate = (value?: string): string | null => {
   if (!value) {
@@ -48,7 +43,7 @@ export const PropertyPreviewItem = ({ property, onDelete, isDeleting = false }: 
 
   const metaParts = [
     property.rooms != null ? `${property.rooms} кімн.` : null,
-    property.areaSqm != null ? `${Number(property.areaSqm)} м²` : null,
+    property.areaSqm != null ? `${Number(property.areaSqm)} РјВІ` : null,
     property.floor != null ? `${property.floor}${property.totalFloors != null ? ` / ${property.totalFloors}` : ''}` : null,
   ].filter(Boolean);
 

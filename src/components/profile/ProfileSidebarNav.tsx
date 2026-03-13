@@ -21,22 +21,8 @@ import {
   isPromotionsSection,
 } from '@/constants/profileNavigation';
 import { ROUTES } from '@/config/routes';
-import type { NavigationSection } from '@/types/profile';
+import type { ProfileSidebarNavProps } from './ProfileSidebarNav.types';
 
-interface ProfileSidebarNavProps {
-  activeSection: NavigationSection | null;
-  isPropertiesOpen: boolean;
-  isBookingsOpen: boolean;
-  isPromotionsOpen: boolean;
-  isSettingsOpen: boolean;
-  onToggleProperties: () => void;
-  onToggleBookings: () => void;
-  onTogglePromotions: () => void;
-  onToggleSettings: () => void;
-  onSelectSection: (section: NavigationSection) => void;
-  onOpenChat: () => void;
-  onLogout: () => void;
-}
 
 export const ProfileSidebarNav = ({
   activeSection,
@@ -228,7 +214,7 @@ export const ProfileSidebarNav = ({
             >
               <span className="inline-flex items-center gap-2">
                 <LogOut size={14} />
-                Вихід
+                Р’ихід
               </span>
               <ChevronRight size={14} className="text-rose-400" />
             </button>

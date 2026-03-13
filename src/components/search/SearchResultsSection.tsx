@@ -1,33 +1,8 @@
 import { ChevronLeft, ChevronRight, LayoutGrid, List, Map, RotateCw } from 'lucide-react';
 import { PropertyListItem } from '@/components/search/PropertyListItem';
 import { SearchResultsMap } from '@/components/search/SearchResultsMap';
-import type { PropertyMapPinDto, PropertyResponseDto } from '@/types/property';
-import type { SearchMapBounds, SearchPaginationItem, SearchViewMode } from '@/types/search';
+import type { SearchResultsSectionProps } from './SearchResultsSection.types';
 
-interface SearchResultsSectionProps {
-  loading: boolean;
-  error: string | null;
-  filtered: PropertyResponseDto[];
-  visibleItems: PropertyResponseDto[];
-  viewMode: SearchViewMode;
-  mapPinsLoading: boolean;
-  mapPinsError: string | null;
-  mapPins: PropertyMapPinDto[];
-  selectedMapPropertyId?: number;
-  selectedMapProperty: PropertyResponseDto | null;
-  currentPage: number;
-  totalPages: number;
-  visibleCount: number;
-  paginationItems: SearchPaginationItem[];
-  onViewModeChange: (mode: SearchViewMode) => void;
-  onOpenMapPage: () => void;
-  onMapPropertySelect: (propertyId: number) => void;
-  onMapBoundsChange: (bounds: SearchMapBounds) => void;
-  onShowMore: () => void;
-  onPrevPage: () => void;
-  onNextPage: () => void;
-  onPageChange: (page: number) => void;
-}
 
 export const SearchResultsSection = ({
   loading,
@@ -73,7 +48,7 @@ export const SearchResultsSection = ({
                   viewMode === 'single' ? 'bg-gray-900 text-white' : 'text-gray-700'
                 }`}
               >
-                <List size={16} /> 1 в ряд
+                <List size={16} /> 1 РІ ряд
               </button>
               <button
                 type="button"
@@ -82,7 +57,7 @@ export const SearchResultsSection = ({
                   viewMode === 'double' ? 'bg-gray-900 text-white' : 'text-gray-700'
                 }`}
               >
-                <LayoutGrid size={16} /> 2 в ряд
+                <LayoutGrid size={16} /> 2 РІ ряд
               </button>
             </div>
           )}

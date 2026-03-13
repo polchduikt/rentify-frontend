@@ -10,7 +10,7 @@ import {
   PropertyCreateLocationStep,
   PropertyCreatePricingStep,
 } from '@/components/property-create/steps';
-import { useCreatePropertyPage } from '@/hooks/useCreatePropertyPage';
+import { useCreatePropertyPage } from '@/hooks/property-create';
 
 type EditPropertyPageModel = ReturnType<typeof useCreatePropertyPage>;
 

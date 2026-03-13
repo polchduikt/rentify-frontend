@@ -1,7 +1,5 @@
-interface CreatePropertyStatusBannersProps {
-  submitError: string;
-  submitSuccess: string;
-}
+
+import type { CreatePropertyStatusBannersProps } from './CreatePropertyStatusBanners.types';
 
 export const CreatePropertyStatusBanners = ({ submitError, submitSuccess }: CreatePropertyStatusBannersProps) => (
   <>

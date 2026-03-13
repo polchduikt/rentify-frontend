@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { amenityService } from '@/services/amenityService';
 import type { AmenityCategory } from '@/types/enums';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useAmenitiesQuery = (category?: AmenityCategory) =>
   useQuery({

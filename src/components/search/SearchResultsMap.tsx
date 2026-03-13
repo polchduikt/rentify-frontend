@@ -8,24 +8,11 @@ import { UkraineMaskLayer } from '@/components/map/UkraineMaskLayer';
 import { PropertyListItem } from '@/components/search/PropertyListItem';
 import { UKRAINE_LOCKED_MIN_ZOOM, UKRAINE_MAP_CENTER, UKRAINE_MAX_ZOOM } from '@/constants/searchMap';
 import { usePricePinIcons } from '@/hooks/map/usePricePinIcons';
-import type { PropertyMapPinDto, PropertyResponseDto } from '@/types/property';
-import type { SearchMapBounds } from '@/types/search';
 import { toPinPosition } from '@/utils/searchMap';
 import { UKRAINE_VIEW_BOUNDS } from '@/utils/ukraineMask';
+import type { SearchResultsMapProps, SearchResultsMapSelectionSyncProps } from './SearchResultsMap.types';
 
-interface SearchResultsMapProps {
-  loading: boolean;
-  pins: PropertyMapPinDto[];
-  selectedPropertyId?: number;
-  selectedProperty: PropertyResponseDto | null;
-  onSelectProperty: (propertyId: number) => void;
-  onMapBoundsChange: (bounds: SearchMapBounds) => void;
-}
 
-interface SearchResultsMapSelectionSyncProps {
-  pins: PropertyMapPinDto[];
-  selectedPropertyId?: number;
-}
 
 const SearchResultsMapSelectionSync = ({ pins, selectedPropertyId }: SearchResultsMapSelectionSyncProps) => {
   const map = useMap();

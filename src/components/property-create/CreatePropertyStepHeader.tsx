@@ -1,8 +1,6 @@
 import { PROPERTY_CREATE_STEP_TITLES } from '@/constants/propertyCreateUi';
+import type { CreatePropertyStepHeaderProps } from './CreatePropertyStepHeader.types';
 
-interface CreatePropertyStepHeaderProps {
-  step: number;
-}
 
 export const CreatePropertyStepHeader = ({ step }: CreatePropertyStepHeaderProps) => (
   <div className="mb-6 border-b border-slate-200 pb-6">

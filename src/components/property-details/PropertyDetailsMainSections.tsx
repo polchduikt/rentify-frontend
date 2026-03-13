@@ -1,38 +1,16 @@
 import { ChevronLeft, ChevronRight, Heart, MapPin, Sparkles } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 import { Link } from 'react-router-dom';
+import { MARKET_TYPE_LABELS, PROPERTY_TYPE_LABELS } from '@/constants/propertyDetails';
 import { PROPERTY_CREATE_AMENITY_CATEGORY_LABELS } from '@/constants/propertyCreateUi';
 import { ROUTES } from '@/config/routes';
-import type { AmenityDto, PropertyResponseDto } from '@/types/property';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
+import { formatPropertyCreatedAt, yesNo } from '@/utils/propertyDetails';
 import { MapInvalidateSize } from './MapInvalidateSize';
-import { MARKET_TYPE_LABELS, PROPERTY_TYPE_LABELS } from './constants';
-import { formatCreatedAt, yesNo } from './utils';
 import { RecommendedPropertyCard } from './RecommendedPropertyCard';
+import type { PropertyDetailsMainSectionsProps } from './PropertyDetailsMainSections.types';
 
-interface PropertyDetailsMainSectionsProps {
-  property: PropertyResponseDto;
-  activePhoto: string;
-  photos: string[];
-  activePhotoIndex: number;
-  onPhotoSelect: (index: number) => void;
-  city: string;
-  addressLine: string;
-  groupedAmenities: Array<{ category: string; amenities: AmenityDto[] }>;
-  mapCenter: [number, number];
-  hasExactMapCoords: boolean;
-  mapCoordsLoading: boolean;
-  recommendationsLoading: boolean;
-  recommendedVisible: PropertyResponseDto[];
-  canSlidePrev: boolean;
-  canSlideNext: boolean;
-  onSlidePrev: () => void;
-  onSlideNext: () => void;
-  isFavorite?: boolean;
-  favoriteIds?: Set<number>;
-  shortTermReviewsSection?: ReactNode;
-}
 
 export const PropertyDetailsMainSections = ({
   property,
@@ -147,7 +125,7 @@ export const PropertyDetailsMainSections = ({
             </div>
             <div className="rounded-2xl bg-slate-100 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Площа</p>
-              <p className="mt-1 text-xl font-bold text-slate-900">{property.areaSqm ? `${property.areaSqm} м²` : '-'}</p>
+              <p className="mt-1 text-xl font-bold text-slate-900">{property.areaSqm ? `${property.areaSqm} РјВІ` : '-'}</p>
             </div>
             <div className="rounded-2xl bg-slate-100 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Поверх</p>
@@ -157,7 +135,7 @@ export const PropertyDetailsMainSections = ({
             </div>
             <div className="rounded-2xl bg-slate-100 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Опубліковано</p>
-              <p className="mt-1 text-xl font-bold text-slate-900">{formatCreatedAt(property.createdAt)}</p>
+              <p className="mt-1 text-xl font-bold text-slate-900">{formatPropertyCreatedAt(property.createdAt)}</p>
             </div>
           </div>
         </section>

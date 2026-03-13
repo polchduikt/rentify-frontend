@@ -1,17 +1,13 @@
 import { useState } from 'react';
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { FALLBACK_IMAGE } from '@/constants/propertyDetails';
 import { ROUTES } from '@/config/routes';
-import type { PropertyResponseDto } from '@/types/property';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
 import { isTopPromotionActive } from '@/utils/promotions';
-import { FALLBACK_IMAGE } from './constants';
-import { formatPrice } from './utils';
+import { formatPropertyPrice } from '@/utils/propertyDetails';
+import type { RecommendedPropertyCardProps } from './RecommendedPropertyCard.types';
 
-interface RecommendedPropertyCardProps {
-  property: PropertyResponseDto;
-  isFavorite?: boolean;
-}
 
 export const RecommendedPropertyCard = ({ property, isFavorite = false }: RecommendedPropertyCardProps) => {
   const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
@@ -67,7 +63,7 @@ export const RecommendedPropertyCard = ({ property, isFavorite = false }: Recomm
         </button>
       </div>
       <div className="p-4">
-        <p className="text-xl font-black text-slate-900">{formatPrice(price, currency)}</p>
+        <p className="text-xl font-black text-slate-900">{formatPropertyPrice(price, currency)}</p>
         <p className="mt-1 text-sm text-slate-600">
           {city}
           {street ? <span className="text-slate-400"> • {street}</span> : null}

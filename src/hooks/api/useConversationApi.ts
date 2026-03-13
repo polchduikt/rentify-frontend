@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { conversationService } from '@/services/conversationService';
 import type { SendMessageRequestDto } from '@/types/conversation';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useMyConversationsQuery = (enabled = true, refetchInterval?: number) =>
   useQuery({

@@ -3,7 +3,7 @@ import { userService } from '@/services/userService';
 import { authService } from '@/services/authService';
 import { clearGoogleAvatarUrl } from '@/services/storage';
 import type { ChangePasswordRequestDto, DeleteAccountRequestDto, UpdateUserRequestDto } from '@/types/user';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useMyProfileQuery = (enabled = true) =>
   useQuery({

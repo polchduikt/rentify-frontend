@@ -1,25 +1,8 @@
 import { BellRing, CalendarDays, Heart, LayoutGrid, Wallet } from 'lucide-react';
 import { MetricCard } from './MetricCard';
-import { formatDate, formatMoney } from './formatters';
+import { formatDate, formatMoney } from '@/utils/profileFormatters';
+import type { ProfileHeroProps } from './ProfileHero.types';
 
-interface ProfileHeroProps {
-  avatarSrc: string;
-  avatarLoadFailed: boolean;
-  onAvatarError: () => void;
-  initials: string;
-  fullName: string;
-  email: string;
-  createdAt?: string;
-  walletBalance: number;
-  walletCurrency: string;
-  propertiesCount: number;
-  activePropertiesInPreview: number;
-  favoritesCount: number;
-  bookingsCount: number;
-  paidBookingsCount: number;
-  walletTopUpPending?: boolean;
-  onWalletTopUp?: () => void;
-}
 
 export const ProfileHero = ({
   avatarSrc,
@@ -85,7 +68,7 @@ export const ProfileHero = ({
         <MetricCard
           title="Оголошення"
           value={String(propertiesCount)}
-          hint={`${activePropertiesInPreview} активних у прев'ю`}
+          hint={`${activePropertiesInPreview} активних у прев’ю`}
           icon={LayoutGrid}
         />
         <MetricCard title="Обране" value={String(favoritesCount)} hint="Збережені пропозиції" icon={Heart} />

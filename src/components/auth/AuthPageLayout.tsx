@@ -1,14 +1,5 @@
-import type { ReactNode } from 'react';
+import type { AuthPageLayoutProps } from './AuthPageLayout.types';
 
-interface AuthPageLayoutProps {
-  photoUrl: string;
-  imageAlt: string;
-  overlayClassName: string;
-  leftEyebrow: string;
-  leftTitle: string;
-  leftContent: ReactNode;
-  rightContent: ReactNode;
-}
 
 export const AuthPageLayout = ({
   photoUrl,

@@ -1,0 +1,42 @@
+import type { ReactNode } from 'react';
+import type { AmenityCategory, RentalType } from '@/types/enums';
+import type { LocationSuggestionDto } from '@/types/location';
+import type { AmenityCategoryGroupDto } from '@/types/property';
+import type { SearchExtraFilters, SearchSortMode } from '@/types/search';
+
+export interface SearchFiltersPanelProps {
+  mode?: 'default' | 'map';
+  mapFormAction?: ReactNode;
+  cityInput: string;
+  rentalType?: RentalType;
+  priceFrom: string;
+  priceTo: string;
+  roomsMin: string;
+  roomsMax: string;
+  areaFrom: string;
+  areaTo: string;
+  extra: SearchExtraFilters;
+  sortMode: SearchSortMode;
+  extraCount: number;
+  filteredCount: number;
+  suggestions: LocationSuggestionDto[];
+  suggestionsLoading: boolean;
+  amenitiesGrouped: AmenityCategoryGroupDto[];
+  amenitiesLoading: boolean;
+  onCityInputChange: (value: string) => void;
+  onLocationSuggestionSelect: (suggestion: LocationSuggestionDto) => void;
+  onRentalTypeChange: (value: string) => void;
+  onPriceFromChange: (value: string) => void;
+  onPriceToChange: (value: string) => void;
+  onRoomsSelect: (value: string) => void;
+  onRoomsMaxChange: (value: string) => void;
+  onAreaFromChange: (value: string) => void;
+  onAreaToChange: (value: string) => void;
+  onExtraDraftChange: (patch: Partial<SearchExtraFilters>) => void;
+  onExtraImmediateChange: (patch: Partial<SearchExtraFilters>) => void;
+  onAmenitySlugToggle: (slug: string) => void;
+  onAmenityCategoryToggle: (category: AmenityCategory) => void;
+  onSortModeChange: (mode: SearchSortMode) => void;
+  onCommitFilters: () => void;
+  onResetAllFilters: () => void;
+}

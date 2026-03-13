@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { reviewService } from '@/services/reviewService';
 import type { PageQuery } from '@/types/api';
 import type { ReviewRequestDto } from '@/types/review';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const usePropertyReviewsQuery = (propertyId: number, page?: PageQuery, enabled = true) =>
   useQuery({

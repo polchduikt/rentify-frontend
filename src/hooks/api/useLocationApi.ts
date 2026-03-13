@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { locationService, type LocationSuggestQuery } from '@/services/locationService';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useLocationSuggestQuery = (query: LocationSuggestQuery, enabled = true) =>
   useQuery({

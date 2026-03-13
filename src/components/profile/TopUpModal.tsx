@@ -1,21 +1,10 @@
 import { X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { FALLBACK_TOP_UP_OPTIONS, MIN_TOP_UP_AMOUNT } from '@/constants/profileUi';
 import { getApiErrorMessage } from '@/utils/errors';
-import { formatMoney } from './formatters';
+import { formatMoney } from '@/utils/profileFormatters';
+import type { TopUpModalProps } from './TopUpModal.types';
 
-interface TopUpModalProps {
-  isOpen: boolean;
-  currency: string;
-  options: number[];
-  optionsLoading: boolean;
-  optionsError: string | null;
-  isSubmitting: boolean;
-  onClose: () => void;
-  onSubmit: (amount: number) => Promise<void>;
-}
-
-const MIN_TOP_UP_AMOUNT = 1;
-const FALLBACK_OPTIONS = [200, 500, 1000];
 
 const normalizeOptions = (options: number[]): number[] => {
   const unique = new Set<number>();
@@ -51,7 +40,7 @@ export const TopUpModal = ({
 
   const preparedOptions = useMemo(() => {
     const normalized = normalizeOptions(options);
-    return normalized.length > 0 ? normalized : FALLBACK_OPTIONS;
+    return normalized.length > 0 ? normalized : FALLBACK_TOP_UP_OPTIONS;
   }, [options]);
 
   const parsedAmount = Number(amountInput);

@@ -1,7 +1,4 @@
-interface PlaceholderPageProps {
-  title: string;
-  description: string;
-}
+import type { PlaceholderPageProps } from './PlaceholderPage.types';
 
 const PlaceholderPage = ({ title, description }: PlaceholderPageProps) => (
   <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6 lg:px-8">

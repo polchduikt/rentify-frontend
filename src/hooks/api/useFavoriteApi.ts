@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { favoriteService } from '@/services/favoriteService';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useMyFavoritesQuery = (enabled = true) =>
   useQuery({

@@ -1,19 +1,8 @@
 import { ShieldAlert, ShieldCheck } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
-import type { PasswordFormState, SectionNotice } from '@/types/profile';
+import { useState } from 'react';
+import { ACCOUNT_DELETE_CONFIRM_WORD } from '@/constants/profileSecurity';
 import { Notice } from '../Notice';
-
-interface SecuritySectionProps {
-  passwordForm: PasswordFormState;
-  passwordNotice: SectionNotice;
-  passwordSaving: boolean;
-  accountDeleting: boolean;
-  onPasswordFieldChange: (field: keyof PasswordFormState, value: string) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onDeleteAccount: () => Promise<void>;
-}
-
-const CONFIRM_WORD = 'підтвердити';
+import type { SecuritySectionProps } from './SecuritySection.types';
 
 export const SecuritySection = ({
   passwordForm,
@@ -28,13 +17,13 @@ export const SecuritySection = ({
   const [confirmWord, setConfirmWord] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const isConfirmWordValid = confirmWord.trim().toLowerCase() === CONFIRM_WORD;
+  const isConfirmWordValid = confirmWord.trim().toLowerCase() === ACCOUNT_DELETE_CONFIRM_WORD;
 
   const handleDelete = async () => {
     setDeleteError(null);
 
     if (!isConfirmWordValid) {
-      setDeleteError('Введіть слово "підтвердити".');
+      setDeleteError(`Введіть слово "${ACCOUNT_DELETE_CONFIRM_WORD}".`);
       return;
     }
 
@@ -126,7 +115,7 @@ export const SecuritySection = ({
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
             <h4 className="text-lg font-bold text-slate-900">Підтвердження видалення</h4>
             <p className="mt-2 text-sm text-slate-600">
-              Введіть слово <span className="font-semibold text-slate-900">підтвердити</span>.
+              Введіть слово <span className="font-semibold text-slate-900">{ACCOUNT_DELETE_CONFIRM_WORD}</span>.
             </p>
 
             <div className="mt-4 space-y-3">
@@ -137,7 +126,7 @@ export const SecuritySection = ({
                   value={confirmWord}
                   onChange={(event) => setConfirmWord(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
-                  placeholder="підтвердити"
+                  placeholder={ACCOUNT_DELETE_CONFIRM_WORD}
                 />
               </label>
             </div>

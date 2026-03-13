@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import type { AuthenticationRequestDto, GoogleOAuthRequestDto, RegisterRequestDto } from '@/types/auth';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useAuthProfileQuery = (enabled = true) =>
   useQuery({

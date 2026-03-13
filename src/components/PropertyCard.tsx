@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 import { BedDouble, Expand, Heart, Layers, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PROPERTY_CARD_FALLBACK_IMAGE } from '@/constants/propertyImages';
 import { ROUTES } from '@/config/routes';
-import type { PropertyResponseDto } from '@/types/property';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
 import { isTopPromotionActive } from '@/utils/promotions';
+import type { PropertyCardProps } from './PropertyCard.types';
 
-const FALLBACK_PHOTO_URL =
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80';
-
-interface PropertyCardProps {
-  property: PropertyResponseDto;
-  isFavorite?: boolean;
-}
 
 const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
   const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
@@ -23,7 +17,7 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
     setIsLocalFavorite(isFavorite);
   }, [isFavorite]);
 
-  const imageUrl = property.photos?.[0]?.url || FALLBACK_PHOTO_URL;
+  const imageUrl = property.photos?.[0]?.url || PROPERTY_CARD_FALLBACK_IMAGE;
   const isRecommended = isTopPromotionActive(property);
   const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
@@ -106,7 +100,7 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
             {property.areaSqm != null && (
               <span className="inline-flex items-center gap-1.5">
                 <Expand size={14} className="text-slate-400" />
-                {Number(property.areaSqm)} м²
+                {Number(property.areaSqm)} РјВІ
               </span>
             )}
             {property.floor != null && (

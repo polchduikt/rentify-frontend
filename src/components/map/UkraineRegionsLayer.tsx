@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GeoJSON } from 'react-leaflet';
 import type { FeatureCollection, Geometry } from 'geojson';
-
-const REGIONS_GEOJSON_URL =
-  'https://raw.githubusercontent.com/ultra-ukraine/ukraine-geojson/main/ukraine_regions.geojson';
+import { UKRAINE_REGIONS_GEOJSON_URL } from '@/constants/map';
 
 export const UkraineRegionsLayer = () => {
   const [regionsGeoJson, setRegionsGeoJson] = useState<FeatureCollection<Geometry> | null>(null);
@@ -12,7 +10,7 @@ export const UkraineRegionsLayer = () => {
     const controller = new AbortController();
     const load = async () => {
       try {
-        const response = await fetch(REGIONS_GEOJSON_URL, { signal: controller.signal });
+        const response = await fetch(UKRAINE_REGIONS_GEOJSON_URL, { signal: controller.signal });
         if (!response.ok) {
           return;
         }

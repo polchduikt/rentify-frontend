@@ -1,28 +1,17 @@
 import { BadgeCheck, BedDouble, CalendarDays, Clock3, Layers, MapPin, MessageCircle, Ruler, Star, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { PROPERTY_TYPE_LABELS } from '@/constants/propertyDetails';
+import { MAX_BOOKING_WINDOW_DAYS } from '@/constants/propertyDetailsPage';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateBookingMutation, useUnavailableRangesQuery } from '@/hooks/api';
-import type { UnavailableDateRangeDto, PropertyResponseDto } from '@/types/property';
-import type { PublicUserProfileDto } from '@/types/user';
+import type { UnavailableDateRangeDto } from '@/types/property';
 import { addDays, diffNights, toIsoDate } from '@/utils/bookingDates';
 import { getApiErrorMessage } from '@/utils/errors';
+import { formatPropertyCreatedAt, formatPropertyPrice } from '@/utils/propertyDetails';
 import { formatLocalTime } from '@/utils/time';
-import { PROPERTY_TYPE_LABELS } from './constants';
-import { formatCreatedAt, formatPrice } from './utils';
-
-interface PropertyShortTermBookingSidebarProps {
-  property: PropertyResponseDto;
-  owner?: PublicUserProfileDto;
-  ownerLoading: boolean;
-  ownerName: string;
-  ownerInitial: string;
-  onContactHost: () => void;
-  disableContactHost?: boolean;
-}
-
-const MAX_BOOKING_WINDOW_DAYS = 365;
+import type { PropertyShortTermBookingSidebarProps } from './PropertyShortTermBookingSidebar.types';
 
 const isRangeUnavailable = (dateFrom: string, dateTo: string, ranges: UnavailableDateRangeDto[]): boolean =>
   ranges.some((range) => {
@@ -170,7 +159,7 @@ export const PropertyShortTermBookingSidebar = ({
     <aside className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Короткострокове бронювання</p>
-        <p className="mt-2 text-4xl font-black text-slate-900">{formatPrice(nightlyPrice, currency)}</p>
+        <p className="mt-2 text-4xl font-black text-slate-900">{formatPropertyPrice(nightlyPrice, currency)}</p>
         <p className="mt-1 text-sm text-slate-500">за ніч</p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -240,7 +229,7 @@ export const PropertyShortTermBookingSidebar = ({
         <div className="mt-5 rounded-2xl bg-slate-100 p-4">
           <div className="flex items-center justify-between text-sm text-slate-700">
             <span>{nights} ночей</span>
-            <strong>{formatPrice(estimatedTotal, currency)}</strong>
+            <strong>{formatPropertyPrice(estimatedTotal, currency)}</strong>
           </div>
           <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
             <span>Статус</span>
@@ -326,7 +315,7 @@ export const PropertyShortTermBookingSidebar = ({
               >
                 {ownerName}
               </Link>
-              <p className="text-sm text-slate-500">На платформі з {formatCreatedAt(owner?.createdAt)}</p>
+              <p className="text-sm text-slate-500">На платформі з {formatPropertyCreatedAt(owner?.createdAt)}</p>
             </div>
           </div>
         )}

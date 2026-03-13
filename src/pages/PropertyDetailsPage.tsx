@@ -7,12 +7,10 @@ import {
   PropertyShortTermReviewsSection,
 } from '@/components/property-details';
 import { openChatWidget } from '@/components/chat';
+import { PROPERTY_DETAILS_BACK_TO_LIST_TEXT, PROPERTY_DETAILS_INVALID_ID_TEXT } from '@/constants/propertyDetailsPage';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePropertyDetailsPage } from '@/hooks';
-
-const INVALID_ID_TEXT = 'Некоректний ID оголошення.';
-const BACK_TO_LIST_TEXT = 'До списку оголошень';
 
 const PropertyDetailsPage = () => {
   const model = usePropertyDetailsPage();
@@ -37,7 +35,7 @@ const PropertyDetailsPage = () => {
   if (!model.isValidId) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">{INVALID_ID_TEXT}</div>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">{PROPERTY_DETAILS_INVALID_ID_TEXT}</div>
       </div>
     );
   }
@@ -68,7 +66,7 @@ const PropertyDetailsPage = () => {
           className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900"
         >
           <ArrowLeft size={16} />
-          {BACK_TO_LIST_TEXT}
+          {PROPERTY_DETAILS_BACK_TO_LIST_TEXT}
         </Link>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">

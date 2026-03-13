@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { ImagePlus, Trash2 } from 'lucide-react';
+import { PROPERTY_CREATE_MAX_FILES } from '@/constants/propertyCreate';
+import type { PhotoUploaderProps } from './PhotoUploader.types';
 
-const MAX_FILES = 12;
-
-interface PhotoUploaderProps {
-  files: File[];
-  onChange: (files: File[]) => void;
-}
 
 export const PhotoUploader = ({ files, onChange }: PhotoUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -26,7 +22,7 @@ export const PhotoUploader = ({ files, onChange }: PhotoUploaderProps) => {
     }
 
     const validImages = Array.from(nextFiles).filter((file) => file.type.startsWith('image/'));
-    onChange([...files, ...validImages].slice(0, MAX_FILES));
+    onChange([...files, ...validImages].slice(0, PROPERTY_CREATE_MAX_FILES));
   };
 
   const removeAt = (index: number) => {
@@ -41,7 +37,7 @@ export const PhotoUploader = ({ files, onChange }: PhotoUploaderProps) => {
         className="flex h-28 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-sm font-medium text-slate-700 transition hover:border-blue-400 hover:bg-blue-50"
       >
         <ImagePlus size={18} />
-        Додати фото ({files.length}/{MAX_FILES})
+        Додати фото ({files.length}/{PROPERTY_CREATE_MAX_FILES})
       </button>
 
       <input

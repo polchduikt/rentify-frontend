@@ -2,24 +2,13 @@ import { useState } from 'react';
 import { ArrowRight, CalendarClock, Home, MessageCircle, Phone, Share2, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { openChatWidget } from '@/components/chat';
+import { PUBLIC_PROFILE_FALLBACK_PROPERTY_IMAGE } from '@/constants/publicProfile';
 import { ROUTES } from '@/config/routes';
 import { usePublicProfilePage } from '@/hooks';
 import type { PropertyResponseDto } from '@/types/property';
+import { formatPublicProfilePropertyAddress, formatPublicProfilePropertyPrice } from '@/utils/publicProfile';
 
-const FALLBACK_PROPERTY_IMAGE =
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80';
-
-const formatPropertyPrice = (property: PropertyResponseDto) => {
-  const price = Number(property.pricing?.pricePerMonth || property.pricing?.pricePerNight || 0);
-  const currency = property.pricing?.currency || 'UAH';
-  return `${price.toLocaleString('uk-UA')} ${currency}`;
-};
-
-const formatPropertyAddress = (property: PropertyResponseDto) => {
-  const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
-  const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
-  return street || city;
-};
+const formatPropertyAddress = (property: PropertyResponseDto) => formatPublicProfilePropertyAddress(property);
 
 const PublicProfilePropertyCard = ({ property }: { property: PropertyResponseDto }) => (
   <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
@@ -30,13 +19,13 @@ const PublicProfilePropertyCard = ({ property }: { property: PropertyResponseDto
     >
       <div className="aspect-[4/3] overflow-hidden bg-slate-100">
         <img
-          src={property.photos?.[0]?.url || FALLBACK_PROPERTY_IMAGE}
+          src={property.photos?.[0]?.url || PUBLIC_PROFILE_FALLBACK_PROPERTY_IMAGE}
           alt={property.title}
           className="h-full w-full object-cover transition hover:scale-[1.02]"
         />
       </div>
       <div className="space-y-2 p-4">
-        <p className="text-2xl font-black text-slate-900">{formatPropertyPrice(property)}</p>
+        <p className="text-2xl font-black text-slate-900">{formatPublicProfilePropertyPrice(property)}</p>
         <p className="line-clamp-1 text-lg font-bold text-slate-900">{property.title}</p>
         <p className="line-clamp-1 text-sm text-slate-600">{formatPropertyAddress(property)}</p>
         <span className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700">

@@ -1,12 +1,11 @@
 import { ChevronLeft, ChevronRight, Home } from 'lucide-react';
 import { useRef } from 'react';
-import type { PropertyResponseDto } from '@/types/property';
 import PropertyCard from '@/components/PropertyCard';
-
-const CARD_CLASS = 'w-[85vw] shrink-0 snap-start sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]';
+import { PROPERTY_SLIDER_CARD_CLASS } from '@/constants/homeUi';
+import type { PropertySliderProps } from './PropertySlider.types';
 
 const PropertyCardSkeleton = () => (
-  <div className={`overflow-hidden rounded-2xl border border-slate-200 bg-white animate-pulse ${CARD_CLASS}`}>
+  <div className={`overflow-hidden rounded-2xl border border-slate-200 bg-white animate-pulse ${PROPERTY_SLIDER_CARD_CLASS}`}>
     <div className="aspect-[3/2] bg-slate-200" />
     <div className="space-y-3 p-5">
       <div className="h-5 w-2/3 rounded bg-slate-200" />
@@ -17,11 +16,6 @@ const PropertyCardSkeleton = () => (
   </div>
 );
 
-interface PropertySliderProps {
-  items: PropertyResponseDto[];
-  loading: boolean;
-  favoriteIds?: Set<number>;
-}
 
 const PropertySlider = ({ items, loading, favoriteIds = new Set() }: PropertySliderProps) => {
   const sliderRef = useRef<HTMLDivElement | null>(null);
@@ -59,7 +53,7 @@ const PropertySlider = ({ items, loading, favoriteIds = new Set() }: PropertySli
           </div>
         ) : (
           items.map((property) => (
-            <div key={property.id} className={CARD_CLASS}>
+            <div key={property.id} className={PROPERTY_SLIDER_CARD_CLASS}>
               <PropertyCard property={property} isFavorite={favoriteIds.has(property.id)} />
             </div>
           ))

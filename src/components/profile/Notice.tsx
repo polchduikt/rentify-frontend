@@ -1,7 +1,5 @@
-interface NoticeProps {
-  type: 'success' | 'error';
-  message: string;
-}
+
+import type { NoticeProps } from './Notice.types';
 
 export const Notice = ({ type, message }: NoticeProps) => (
   <div

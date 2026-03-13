@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { MapPicker } from '@/components/property-create/MapPicker';
 import { PROPERTY_CREATE_INPUT_CLASS, PROPERTY_CREATE_LABEL_CLASS } from '@/constants/propertyCreateUi';
-import type { CreatePropertyPageModel } from '@/hooks/useCreatePropertyPage';
+import type { PropertyCreateLocationStepProps } from './PropertyCreateLocationStep.types';
 
-interface PropertyCreateLocationStepProps {
-  model: CreatePropertyPageModel;
-}
 
 export const PropertyCreateLocationStep = ({ model }: PropertyCreateLocationStepProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -139,7 +136,7 @@ export const PropertyCreateLocationStep = ({ model }: PropertyCreateLocationStep
           Оберіть точку на карті
         </div>
         <MapPicker lat={model.selectedCoords?.lat} lng={model.selectedCoords?.lng} onPick={model.onPickCoordinates} />
-        <p className="mt-2 text-xs text-slate-500">Натисніть на мапі, щоб зафіксувати координати обʼєкта.</p>
+        <p className="mt-2 text-xs text-slate-500">Натисніть на мапі, щоб зафіксувати координати об’єкта.</p>
         {model.isReverseGeocoding ? <p className="mt-1 text-xs text-blue-600">Оновлюю адресу за вибраною точкою...</p> : null}
         {model.reverseGeocodingError ? <p className="mt-1 text-xs text-amber-700">{model.reverseGeocodingError}</p> : null}
       </div>

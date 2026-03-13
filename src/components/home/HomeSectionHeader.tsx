@@ -1,11 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import type { HomeSectionHeaderProps } from './HomeSectionHeader.types';
 
-interface HomeSectionHeaderProps {
-  title: string;
-  subtitle: string;
-  linkTo: string;
-}
 
 const HomeSectionHeader = ({ title, subtitle, linkTo }: HomeSectionHeaderProps) => (
   <div className="mb-6 flex items-end justify-between gap-4">

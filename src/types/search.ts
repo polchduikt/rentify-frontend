@@ -8,6 +8,13 @@ export type SearchMainPanel = 'price' | 'rooms' | 'area' | null;
 
 export type SearchPaginationItem = number | 'dots-left' | 'dots-right';
 
+export interface ChipOption {
+  key: string;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}
+
 export interface SearchMapBounds {
   southWestLat: number;
   southWestLng: number;

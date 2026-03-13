@@ -1,26 +1,13 @@
 import { useState } from 'react';
 import { BedDouble, Heart, Layers, MapPin, Square } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEARCH_PROPERTY_FALLBACK_IMAGE } from '@/constants/propertyImages';
+import { SEARCH_PROPERTY_TYPE_LABELS } from '@/constants/searchUi';
 import { ROUTES } from '@/config/routes';
 import type { PropertyResponseDto } from '@/types/property';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
 import { isTopPromotionActive } from '@/utils/promotions';
-
-const FALLBACK_PHOTO_URL =
-  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
-
-const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  APARTMENT: 'Квартира',
-  HOUSE: 'Будинок',
-  ROOM: 'Кімната',
-  STUDIO: 'Студія',
-};
-
-interface PropertyListItemProps {
-  property: PropertyResponseDto;
-  variant?: 'single' | 'double';
-  isFavorite?: boolean;
-}
+import type { PropertyListItemProps } from './PropertyListItem.types';
 
 const resolveMeta = (property: PropertyResponseDto): string[] => {
   const parts: string[] = [];
@@ -29,7 +16,7 @@ const resolveMeta = (property: PropertyResponseDto): string[] => {
     parts.push(`${property.rooms} кімнати`);
   }
   if (property.areaSqm != null) {
-    parts.push(`${Number(property.areaSqm)} м²`);
+    parts.push(`${Number(property.areaSqm)} РјВІ`);
   }
   if (property.floor != null) {
     parts.push(property.totalFloors != null ? `${property.floor} поверх з ${property.totalFloors}` : `${property.floor} поверх`);
@@ -79,12 +66,12 @@ export const PropertyListItem = ({ property, variant = 'single', isFavorite = fa
   const addToFavoritesMutation = useAddToFavoritesMutation();
   const removeFromFavoritesMutation = useRemoveFromFavoritesMutation();
 
-  const imageUrl = property.photos?.[0]?.url ?? FALLBACK_PHOTO_URL;
+  const imageUrl = property.photos?.[0]?.url ?? SEARCH_PROPERTY_FALLBACK_IMAGE;
   const { value: priceValue, suffix } = resolvePropertyPrice(property);
   const currency = property.pricing?.currency || 'UAH';
   const { city, street } = resolveAddress(property);
   const meta = resolveMeta(property);
-  const propertyTypeLabel = PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType || 'Нерухомість';
+  const propertyTypeLabel = SEARCH_PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType || 'Нерухомість';
   const isDouble = variant === 'double';
   const isRecommended = isTopPromotionActive(property);
   const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;
@@ -175,7 +162,7 @@ export const PropertyListItem = ({ property, variant = 'single', isFavorite = fa
                 {meta.map((item) => (
                   <span key={item} className="flex items-center gap-1.5">
                     {item.includes('кімнати') ? <BedDouble size={16} className="text-gray-500" /> : null}
-                    {item.includes('м²') ? <Square size={16} className="text-gray-500" /> : null}
+                    {item.includes('РјВІ') ? <Square size={16} className="text-gray-500" /> : null}
                     {item.includes('поверх') ? <Layers size={16} className="text-gray-500" /> : null}
                     {item}
                   </span>

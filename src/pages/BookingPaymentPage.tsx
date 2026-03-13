@@ -10,29 +10,12 @@ import {
 import { ROUTES } from '@/config/routes';
 import { useBookingPaymentPage } from '@/hooks';
 import { diffNights } from '@/utils/bookingDates';
+import {
+  formatBookingPaymentDate,
+  formatBookingPaymentDateTime,
+  formatBookingPaymentMoney,
+} from '@/utils/bookingPayment';
 import { formatLocalTime } from '@/utils/time';
-
-const formatDate = (value?: string): string => {
-  if (!value) return '-';
-  const date = new Date(`${value}T00:00:00`);
-  if (!Number.isFinite(date.getTime())) return value;
-  return date.toLocaleDateString('uk-UA', { day: '2-digit', month: 'long', year: 'numeric' });
-};
-
-const formatDateTime = (value?: string): string => {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return value;
-  return date.toLocaleString('uk-UA', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-const formatMoney = (value: number, currency: string) => `${Number(value || 0).toLocaleString('uk-UA')} ${currency}`;
 
 const BookingPaymentPage = () => {
   const model = useBookingPaymentPage();
@@ -113,7 +96,7 @@ const BookingPaymentPage = () => {
                 <div className="rounded-2xl bg-slate-100 p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Період</p>
                   <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
+                    {formatBookingPaymentDate(booking.dateFrom)} - {formatBookingPaymentDate(booking.dateTo)}
                   </p>
                 </div>
                 <div className="rounded-2xl bg-slate-100 p-4">
@@ -165,8 +148,8 @@ const BookingPaymentPage = () => {
                     {model.payments.map((payment) => (
                       <div key={payment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-100 px-3 py-2.5">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">{formatMoney(Number(payment.amount || 0), payment.currency || currency)}</p>
-                          <p className="text-xs text-slate-500">{formatDateTime(payment.createdAt)}</p>
+                          <p className="text-sm font-semibold text-slate-900">{formatBookingPaymentMoney(Number(payment.amount || 0), payment.currency || currency)}</p>
+                          <p className="text-xs text-slate-500">{formatBookingPaymentDateTime(payment.createdAt)}</p>
                         </div>
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -186,7 +169,7 @@ const BookingPaymentPage = () => {
           <aside className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">До оплати</p>
-              <p className="mt-2 text-4xl font-black text-slate-900">{formatMoney(totalPrice, currency)}</p>
+              <p className="mt-2 text-4xl font-black text-slate-900">{formatBookingPaymentMoney(totalPrice, currency)}</p>
 
               <div className="mt-5 space-y-2 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">
                 <div className="flex items-center justify-between">
@@ -194,7 +177,7 @@ const BookingPaymentPage = () => {
                     <CalendarDays size={14} />
                     {nights} ночей
                   </span>
-                  <strong>{formatMoney(totalPrice, currency)}</strong>
+                  <strong>{formatBookingPaymentMoney(totalPrice, currency)}</strong>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Статус бронювання</span>

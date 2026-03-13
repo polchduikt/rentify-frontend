@@ -1,15 +1,9 @@
 import { useState } from 'react';
 import type { PropertyResponseDto } from '@/types/property';
+import type { PropertiesSectionProps } from './PropertiesSection.types';
 import { useDeletePropertyMutation } from '@/hooks/api';
 import { getApiErrorMessage } from '@/utils/errors';
 import { PropertyPreviewItem } from '../PropertyPreviewItem';
-
-interface PropertiesSectionProps {
-  title: string;
-  properties: PropertyResponseDto[];
-  propertiesLoading: boolean;
-  propertiesError: string | null;
-}
 
 export const PropertiesSection = ({ title, properties, propertiesLoading, propertiesError }: PropertiesSectionProps) => {
   const [propertyToDelete, setPropertyToDelete] = useState<PropertyResponseDto | null>(null);

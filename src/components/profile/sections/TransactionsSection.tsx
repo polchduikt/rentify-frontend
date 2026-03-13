@@ -1,33 +1,13 @@
 import { CalendarDays, CreditCard, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import type { WalletTransactionDto } from '@/types/wallet';
-import { TRANSACTION_DIRECTION_STYLES } from '../constants';
-import { formatDateTime, formatMoney } from '../formatters';
-import {
-  TRANSACTION_DIRECTION_BADGE_STYLES,
-  TRANSACTION_DIRECTION_LABELS,
-  TRANSACTION_TYPE_LABELS,
-} from './transactions/constants';
+import { TRANSACTION_DIRECTION_BADGE_STYLES, TRANSACTION_DIRECTION_LABELS, TRANSACTION_TYPE_LABELS } from '@/constants/profileTransactions';
+import { TRANSACTION_DIRECTION_STYLES } from '@/constants/profileUi';
+import { formatDateTime, formatMoney } from '@/utils/profileFormatters';
+import { groupTransactionsByDate, matchesTransactionFilter, resolveTransactionTitle, type TransactionsFilter } from '@/utils/profileTransactions';
 import { TransactionReferenceInfo } from './transactions/TransactionReferenceInfo';
-import {
-  groupTransactionsByDate,
-  matchesTransactionFilter,
-  resolveTransactionTitle,
-  type TransactionsFilter,
-} from './transactions/utils';
+import type { TransactionsSectionProps, TabButtonProps } from './TransactionsSection.types';
 
-interface TransactionsSectionProps {
-  transactions: WalletTransactionDto[];
-  transactionsLoading: boolean;
-  transactionsError: string | null;
-}
 
-interface TabButtonProps {
-  active: boolean;
-  label: string;
-  count: number;
-  onClick: () => void;
-}
 
 const TabButton = ({ active, label, count, onClick }: TabButtonProps) => (
   <button
@@ -140,7 +120,7 @@ export const TransactionsSection = ({
                       ) : null}
 
                       <div className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-2">
-                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Пов'язано з</p>
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Пов’язано з</p>
                         <TransactionReferenceInfo referenceType={transaction.referenceType} referenceId={transaction.referenceId} />
                       </div>
                     </article>

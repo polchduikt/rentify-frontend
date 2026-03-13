@@ -115,7 +115,7 @@ const RegisterPage = () => {
                 type="text"
                 autoComplete="given-name"
                 placeholder="Іван"
-                label="Імʼя"
+                label="Ім’я"
                 error={errors.firstName?.message}
                 {...register('firstName')}
               />
@@ -136,7 +136,7 @@ const RegisterPage = () => {
               autoComplete="tel"
               placeholder="+380XXXXXXXXX"
               label="Телефон"
-              hint="(необовʼязково)"
+              hint="(необов’язково)"
               error={errors.phone?.message}
               {...register('phone')}
             />

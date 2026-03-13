@@ -1,10 +1,7 @@
-import type { CreatePropertyPageModel } from '@/hooks/useCreatePropertyPage';
 import { MARKET_TYPE_OPTIONS, PROPERTY_TYPE_OPTIONS, RENTAL_TYPE_OPTIONS } from '@/constants/propertyCreateOptions';
 import { PROPERTY_CREATE_INPUT_CLASS, PROPERTY_CREATE_LABEL_CLASS } from '@/constants/propertyCreateUi';
+import type { PropertyCreateBasicsStepProps } from './PropertyCreateBasicsStep.types';
 
-interface PropertyCreateBasicsStepProps {
-  model: CreatePropertyPageModel;
-}
 
 export const PropertyCreateBasicsStep = ({ model }: PropertyCreateBasicsStepProps) => {
   const {
@@ -112,7 +109,7 @@ export const PropertyCreateBasicsStep = ({ model }: PropertyCreateBasicsStepProp
         <textarea
           id="description"
           rows={7}
-          placeholder="Опишіть переваги обʼєкта, транспорт, інфраструктуру, умови..."
+          placeholder="Опишіть переваги об’єкта, транспорт, інфраструктуру, умови..."
           className={`${PROPERTY_CREATE_INPUT_CLASS} resize-y`}
           {...register('description')}
         />

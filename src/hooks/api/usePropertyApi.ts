@@ -7,7 +7,7 @@ import type {
   PropertySearchCriteriaDto,
   PropertyStatusUpdateRequestDto,
 } from '@/types/property';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@/api/queryKeys';
 
 export const useAllPropertiesQuery = (page?: PageQuery, enabled = true) =>
   useQuery({

@@ -1,14 +1,8 @@
 import { Link } from 'react-router-dom';
 import { PropertyListItem } from '@/components/search/PropertyListItem';
 import { ROUTES } from '@/config/routes';
-import type { FavoriteResponseDto } from '@/types/favorite';
+import type { FavoritesSectionProps } from './FavoritesSection.types';
 
-interface FavoritesSectionProps {
-  favorites: FavoriteResponseDto[];
-  favoritesCount: number;
-  favoritesLoading: boolean;
-  favoritesError: string | null;
-}
 
 export const FavoritesSection = ({
   favorites,

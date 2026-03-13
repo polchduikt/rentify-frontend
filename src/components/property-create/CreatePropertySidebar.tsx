@@ -1,16 +1,12 @@
 import { Check, Lock } from 'lucide-react';
 import { PROPERTY_CREATE_STEP_DESCRIPTIONS, PROPERTY_CREATE_STEP_TITLES } from '@/constants/propertyCreateUi';
+import type { CreatePropertySidebarProps } from './CreatePropertySidebar.types';
 
-interface CreatePropertySidebarProps {
-  step: number;
-  stepLocks: boolean[];
-  onStepClick: (nextStep: number) => void;
-}
 
 export const CreatePropertySidebar = ({ step, stepLocks, onStepClick }: CreatePropertySidebarProps) => (
   <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-600">Майстер оголошення</p>
-    <h1 className="mt-2 text-xl font-bold text-slate-900">Створення нового обʼєкта</h1>
+    <h1 className="mt-2 text-xl font-bold text-slate-900">Створення нового об’єкта</h1>
     <p className="mt-2 text-sm text-slate-500">{PROPERTY_CREATE_STEP_DESCRIPTIONS[step]}</p>
 
     <div className="mt-6 space-y-2">

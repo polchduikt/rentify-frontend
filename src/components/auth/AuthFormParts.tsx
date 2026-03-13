@@ -1,11 +1,6 @@
-import type { InputHTMLAttributes, ReactNode } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import type { AuthFieldProps, AuthPasswordFieldProps } from './AuthFormParts.types';
 
-interface AuthFieldProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  error?: string;
-  hint?: ReactNode;
-}
 
 export const AuthField = ({ label, error, hint, className = '', id, ...props }: AuthFieldProps) => (
   <div>
@@ -22,13 +17,6 @@ export const AuthField = ({ label, error, hint, className = '', id, ...props }: 
   </div>
 );
 
-interface AuthPasswordFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
-  label: string;
-  showPassword: boolean;
-  onToggleShow: () => void;
-  error?: string;
-  trailingAction?: ReactNode;
-}
 
 export const AuthPasswordField = ({
   label,

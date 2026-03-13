@@ -68,6 +68,7 @@ const SearchPage = () => {
         totalPages={model.totalPages}
         visibleCount={model.visibleCount}
         paginationItems={model.paginationItems}
+        favoriteIds={model.favoriteIds}
         onViewModeChange={model.setViewMode}
         onOpenMapPage={() => {
           navigate(`${ROUTES.searchMap}${location.search}`);

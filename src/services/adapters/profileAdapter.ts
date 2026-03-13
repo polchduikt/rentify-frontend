@@ -82,11 +82,11 @@ export const toSyntheticPaymentTransactions = (
 
       const description = isHostRole
         ? isRefund
-          ? `РџРѕРІРµСЂРЅРµРЅРЅСЏ РѕСЂРµРЅРґР°СЂСЋ Р·Р° Р±СЂРѕРЅСЋРІР°РЅРЅСЏ ${bookingLabel}`.trim()
-          : `РќР°РґС…РѕРґР¶РµРЅРЅСЏ Р·Р° Р±СЂРѕРЅСЋРІР°РЅРЅСЏ ${bookingLabel}`.trim()
+          ? `Повернення орендарю за бронювання ${bookingLabel}`.trim()
+          : `Надходження за бронювання ${bookingLabel}`.trim()
         : isRefund
-          ? `РџРѕРІРµСЂРЅРµРЅРЅСЏ Р·Р° Р±СЂРѕРЅСЋРІР°РЅРЅСЏ ${bookingLabel}`.trim()
-          : `РћРїР»Р°С‚Р° Р±СЂРѕРЅСЋРІР°РЅРЅСЏ ${bookingLabel}`.trim();
+          ? `Повернення за бронювання ${bookingLabel}`.trim()
+          : `Оплата бронювання ${bookingLabel}`.trim();
 
       return {
         id: idOffset + payment.id,
@@ -132,7 +132,7 @@ export const toProfileForm = (source?: ProfileIdentitySource): ProfileFormState 
 
 export const resolveProfileFullName = (source?: ProfileIdentitySource): string => {
   const name = [source?.firstName, source?.lastName].filter(Boolean).join(' ').trim();
-  return name || source?.email || 'РљРѕСЂРёСЃС‚СѓРІР°С‡';
+  return name || source?.email || 'Користувач';
 };
 
 export const resolveProfileInitials = (source?: ProfileIdentitySource): string => {

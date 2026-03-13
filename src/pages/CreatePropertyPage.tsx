@@ -35,7 +35,7 @@ const CreatePropertyPage = () => {
   const isLastStep = model.step === model.totalSteps - 1;
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="create-property-page-shell min-h-screen bg-slate-100 px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-[1400px] gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
         <CreatePropertySidebar step={model.step} stepLocks={model.stepLocks} onStepClick={model.goToStep} />
 

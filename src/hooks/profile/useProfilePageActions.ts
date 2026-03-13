@@ -60,12 +60,12 @@ export const useProfilePageActions = ({
       await cancelBookingMutation.mutateAsync(bookingId);
       setBookingsNotice({
         type: 'success',
-        message: 'Р‘СЂРѕРЅСЋРІР°РЅРЅСЏ СЃРєР°СЃРѕРІР°РЅРѕ.',
+        message: 'Бронювання скасовано.',
       });
     } catch (error) {
       setBookingsNotice({
         type: 'error',
-        message: getApiErrorMessage(error, 'РќРµ РІРґР°Р»РѕСЃСЏ СЃРєР°СЃСѓРІР°С‚Рё Р±СЂРѕРЅСЋРІР°РЅРЅСЏ.'),
+        message: getApiErrorMessage(error, 'Не вдалося скасувати бронювання.'),
       });
     } finally {
       setBookingAction((prev) => (prev?.bookingId === bookingId && prev.action === 'cancel' ? null : prev));
@@ -80,12 +80,12 @@ export const useProfilePageActions = ({
       await confirmBookingMutation.mutateAsync(bookingId);
       setBookingsNotice({
         type: 'success',
-        message: 'Р‘СЂРѕРЅСЋРІР°РЅРЅСЏ РїС–РґС‚РІРµСЂРґР¶РµРЅРѕ.',
+        message: 'Бронювання підтверджено.',
       });
     } catch (error) {
       setBookingsNotice({
         type: 'error',
-        message: getApiErrorMessage(error, 'РќРµ РІРґР°Р»РѕСЃСЏ РїС–РґС‚РІРµСЂРґРёС‚Рё Р±СЂРѕРЅСЋРІР°РЅРЅСЏ.'),
+        message: getApiErrorMessage(error, 'Не вдалося підтвердити бронювання.'),
       });
     } finally {
       setBookingAction((prev) => (prev?.bookingId === bookingId && prev.action === 'confirm' ? null : prev));
@@ -100,12 +100,12 @@ export const useProfilePageActions = ({
       await rejectBookingMutation.mutateAsync(bookingId);
       setBookingsNotice({
         type: 'success',
-        message: 'Р‘СЂРѕРЅСЋРІР°РЅРЅСЏ РІС–РґС…РёР»РµРЅРѕ.',
+        message: 'Бронювання відхилено.',
       });
     } catch (error) {
       setBookingsNotice({
         type: 'error',
-        message: getApiErrorMessage(error, 'РќРµ РІРґР°Р»РѕСЃСЏ РІС–РґС…РёР»РёС‚Рё Р±СЂРѕРЅСЋРІР°РЅРЅСЏ.'),
+        message: getApiErrorMessage(error, 'Не вдалося відхилити бронювання.'),
       });
     } finally {
       setBookingAction((prev) => (prev?.bookingId === bookingId && prev.action === 'reject' ? null : prev));
@@ -125,7 +125,7 @@ export const useProfilePageActions = ({
     if (!firstName || !lastName) {
       setProfileNotice({
         type: 'error',
-        message: "Р†РјвЂ™СЏ С‚Р° РїСЂС–Р·РІРёС‰Рµ С” РѕР±РѕРІвЂ™СЏР·РєРѕРІРёРјРё.",
+        message: "Ім'я та прізвище є обов'язковими.",
       });
       return;
     }
@@ -139,12 +139,12 @@ export const useProfilePageActions = ({
       await Promise.all([refreshProfile(), refetchProfile()]);
       setProfileNotice({
         type: 'success',
-        message: 'РџСЂРѕС„С–Р»СЊ РѕРЅРѕРІР»РµРЅРѕ.',
+        message: 'Профіль оновлено.',
       });
     } catch (error) {
       setProfileNotice({
         type: 'error',
-        message: getApiErrorMessage(error, 'РќРµ РІРґР°Р»РѕСЃСЏ Р·Р±РµСЂРµРіС‚Рё Р·РјС–РЅРё РїСЂРѕС„С–Р»СЋ.'),
+        message: getApiErrorMessage(error, 'Не вдалося зберегти зміни профілю.'),
       });
     }
   };
@@ -155,7 +155,7 @@ export const useProfilePageActions = ({
     if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
       setPasswordNotice({
         type: 'error',
-        message: 'Р—Р°РїРѕРІРЅС–С‚СЊ СѓСЃС– РїРѕР»СЏ РґР»СЏ Р·РјС–РЅРё РїР°СЂРѕР»СЏ.',
+        message: 'Заповніть усі поля для зміни пароля.',
       });
       return;
     }
@@ -163,7 +163,7 @@ export const useProfilePageActions = ({
     if (passwordForm.newPassword.length < 8) {
       setPasswordNotice({
         type: 'error',
-        message: 'РќРѕРІРёР№ РїР°СЂРѕР»СЊ РјР°С” РјС–СЃС‚РёС‚Рё С‰РѕРЅР°Р№РјРµРЅС€Рµ 8 СЃРёРјРІРѕР»С–РІ.',
+        message: 'Новий пароль має містити щонайменше 8 символів.',
       });
       return;
     }
@@ -171,7 +171,7 @@ export const useProfilePageActions = ({
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setPasswordNotice({
         type: 'error',
-        message: 'РџС–РґС‚РІРµСЂРґР¶РµРЅРЅСЏ РїР°СЂРѕР»СЏ РЅРµ СЃРїС–РІРїР°РґР°С”.',
+        message: 'Підтвердження пароля не співпадає.',
       });
       return;
     }
@@ -189,12 +189,12 @@ export const useProfilePageActions = ({
       });
       setPasswordNotice({
         type: 'success',
-        message: 'РџР°СЂРѕР»СЊ СѓСЃРїС–С€РЅРѕ Р·РјС–РЅРµРЅРѕ.',
+        message: 'Пароль успішно змінено.',
       });
     } catch (error) {
       setPasswordNotice({
         type: 'error',
-        message: getApiErrorMessage(error, 'РќРµ РІРґР°Р»РѕСЃСЏ Р·РјС–РЅРёС‚Рё РїР°СЂРѕР»СЊ.'),
+        message: getApiErrorMessage(error, 'Не вдалося змінити пароль.'),
       });
     }
   };
@@ -205,7 +205,7 @@ export const useProfilePageActions = ({
     if (!file.type.startsWith('image/')) {
       setAvatarNotice({
         type: 'error',
-        message: 'РћР±РµСЂС–С‚СЊ С„Р°Р№Р» Р·РѕР±СЂР°Р¶РµРЅРЅСЏ.',
+        message: 'Оберіть файл зображення.',
       });
       return;
     }
@@ -213,7 +213,7 @@ export const useProfilePageActions = ({
     if (file.size > MAX_AVATAR_FILE_SIZE) {
       setAvatarNotice({
         type: 'error',
-        message: 'Р РѕР·РјС–СЂ С„Р°Р№Р»Сѓ РјР°С” Р±СѓС‚Рё РґРѕ 5 MB.',
+        message: 'Розмір файлу має бути до 5 MB.',
       });
       return;
     }
@@ -223,12 +223,12 @@ export const useProfilePageActions = ({
       await Promise.all([refreshProfile(), refetchProfile()]);
       setAvatarNotice({
         type: 'success',
-        message: 'РђРІР°С‚Р°СЂ РѕРЅРѕРІР»РµРЅРѕ.',
+        message: 'Аватар оновлено.',
       });
     } catch (error) {
       setAvatarNotice({
         type: 'error',
-        message: getApiErrorMessage(error, 'РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё Р°РІР°С‚Р°СЂ.'),
+        message: getApiErrorMessage(error, 'Не вдалося завантажити аватар.'),
       });
     }
   };
@@ -239,7 +239,7 @@ export const useProfilePageActions = ({
     if (!profile?.avatarUrl) {
       setAvatarNotice({
         type: 'error',
-        message: 'РђРІР°С‚Р°СЂ РІР¶Рµ РІС–РґСЃСѓС‚РЅС–Р№.',
+        message: 'Аватар вже відсутній.',
       });
       return;
     }
@@ -249,12 +249,12 @@ export const useProfilePageActions = ({
       await Promise.all([refreshProfile(), refetchProfile()]);
       setAvatarNotice({
         type: 'success',
-        message: 'РђРІР°С‚Р°СЂ РІРёРґР°Р»РµРЅРѕ.',
+        message: 'Аватар видалено.',
       });
     } catch (error) {
       setAvatarNotice({
         type: 'error',
-        message: getApiErrorMessage(error, 'РќРµ РІРґР°Р»РѕСЃСЏ РІРёРґР°Р»РёС‚Рё Р°РІР°С‚Р°СЂ.'),
+        message: getApiErrorMessage(error, 'Не вдалося видалити аватар.'),
       });
     }
   };
@@ -267,7 +267,7 @@ export const useProfilePageActions = ({
     try {
       await deleteAccountMutation.mutateAsync({});
     } catch (error) {
-      throw new Error(getApiErrorMessage(error, 'РќРµ РІРґР°Р»РѕСЃСЏ РІРёРґР°Р»РёС‚Рё Р°РєР°СѓРЅС‚.'));
+      throw new Error(getApiErrorMessage(error, 'Не вдалося видалити акаунт.'));
     }
   };
 

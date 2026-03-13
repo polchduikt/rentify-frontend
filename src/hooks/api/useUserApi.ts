@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { userService } from '@/services/userService';
 import { authService } from '@/services/authService';
-import { clearGoogleAvatarUrl } from '@/services/storage';
+import { clearGoogleAvatarUrl, setGoogleAvatarFallbackDisabled } from '@/services/storage';
 import type { ChangePasswordRequestDto, DeleteAccountRequestDto, UpdateUserRequestDto } from '@/types/user';
 import { queryKeys } from '@/api/queryKeys';
 
@@ -53,6 +53,7 @@ export const useUploadAvatarMutation = () => {
   return useMutation({
     mutationFn: (file: File) => userService.uploadAvatar(file),
     onSuccess: () => {
+      setGoogleAvatarFallbackDisabled(false);
       void queryClient.invalidateQueries({ queryKey: queryKeys.users.profile() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile() });
     },
@@ -65,9 +66,10 @@ export const useDeleteAvatarMutation = () => {
   return useMutation({
     mutationFn: () => userService.deleteAvatar(),
     onSuccess: () => {
+      const currentProfileData = queryClient.getQueryData(queryKeys.users.profile()) as any;
+      setGoogleAvatarFallbackDisabled(true, currentProfileData?.id);
       clearGoogleAvatarUrl();
       authService.clearProfileCache();
-      const currentProfileData = queryClient.getQueryData(queryKeys.users.profile()) as any;
       if (currentProfileData) {
         const updatedData = { ...currentProfileData, avatarUrl: null };
         queryClient.setQueryData(queryKeys.users.profile(), updatedData);

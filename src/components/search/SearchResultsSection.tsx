@@ -19,6 +19,7 @@ export const SearchResultsSection = ({
   totalPages,
   visibleCount,
   paginationItems,
+  favoriteIds,
   onViewModeChange,
   onOpenMapPage,
   onMapPropertySelect,
@@ -48,7 +49,7 @@ export const SearchResultsSection = ({
                   viewMode === 'single' ? 'bg-gray-900 text-white' : 'text-gray-700'
                 }`}
               >
-                <List size={16} /> 1 РІ ряд
+                <List size={16} /> 1 в ряд
               </button>
               <button
                 type="button"
@@ -57,7 +58,7 @@ export const SearchResultsSection = ({
                   viewMode === 'double' ? 'bg-gray-900 text-white' : 'text-gray-700'
                 }`}
               >
-                <LayoutGrid size={16} /> 2 РІ ряд
+                <LayoutGrid size={16} /> 2 в ряд
               </button>
             </div>
           )}
@@ -106,7 +107,7 @@ export const SearchResultsSection = ({
         <>
           <div className={viewMode === 'single' ? 'space-y-4' : 'grid grid-cols-1 items-stretch gap-5 xl:grid-cols-2'}>
             {visibleItems.map((property) => (
-              <PropertyListItem key={property.id} property={property} variant={viewMode} />
+              <PropertyListItem key={property.id} property={property} variant={viewMode} isFavorite={favoriteIds.has(property.id)} />
             ))}
           </div>
 

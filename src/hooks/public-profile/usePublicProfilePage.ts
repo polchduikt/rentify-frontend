@@ -14,8 +14,8 @@ import { getApiErrorMessage } from '@/utils/errors';
 import { resolveAvatarUrl } from '@/utils/avatar';
 
 const PUBLIC_PROPERTIES_PAGE_SIZE = 24;
-const PROFILE_ERROR_MESSAGE = 'РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РїСѓР±Р»С–С‡РЅРёР№ РїСЂРѕС„С–Р»СЊ.';
-const PROPERTIES_ERROR_MESSAGE = 'РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РѕРіРѕР»РѕС€РµРЅРЅСЏ РєРѕСЂРёСЃС‚СѓРІР°С‡Р°.';
+const PROFILE_ERROR_MESSAGE = 'Не вдалося завантажити публічний профіль.';
+const PROPERTIES_ERROR_MESSAGE = 'Не вдалося завантажити оголошення користувача.';
 
 export const usePublicProfilePage = () => {
   const { user } = useAuth();
@@ -71,7 +71,7 @@ export const usePublicProfilePage = () => {
 
   const criticalError =
     !isValidUserId
-      ? 'РќРµРєРѕСЂРµРєС‚РЅРёР№ С–РґРµРЅС‚РёС„С–РєР°С‚РѕСЂ РєРѕСЂРёСЃС‚СѓРІР°С‡Р°.'
+      ? 'Некоректний ідентифікатор користувача.'
       : profileQuery.error
         ? getApiErrorMessage(profileQuery.error, PROFILE_ERROR_MESSAGE)
         : null;

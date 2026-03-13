@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BedDouble, Heart, Layers, MapPin, Square } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEARCH_PROPERTY_FALLBACK_IMAGE } from '@/constants/propertyImages';
@@ -16,7 +16,7 @@ const resolveMeta = (property: PropertyResponseDto): string[] => {
     parts.push(`${property.rooms} кімнати`);
   }
   if (property.areaSqm != null) {
-    parts.push(`${Number(property.areaSqm)} РјВІ`);
+    parts.push(`${Number(property.areaSqm)} м²`);
   }
   if (property.floor != null) {
     parts.push(property.totalFloors != null ? `${property.floor} поверх з ${property.totalFloors}` : `${property.floor} поверх`);
@@ -65,6 +65,10 @@ export const PropertyListItem = ({ property, variant = 'single', isFavorite = fa
   const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
   const addToFavoritesMutation = useAddToFavoritesMutation();
   const removeFromFavoritesMutation = useRemoveFromFavoritesMutation();
+
+  useEffect(() => {
+    setIsLocalFavorite(isFavorite);
+  }, [isFavorite]);
 
   const imageUrl = property.photos?.[0]?.url ?? SEARCH_PROPERTY_FALLBACK_IMAGE;
   const { value: priceValue, suffix } = resolvePropertyPrice(property);
@@ -162,7 +166,7 @@ export const PropertyListItem = ({ property, variant = 'single', isFavorite = fa
                 {meta.map((item) => (
                   <span key={item} className="flex items-center gap-1.5">
                     {item.includes('кімнати') ? <BedDouble size={16} className="text-gray-500" /> : null}
-                    {item.includes('РјВІ') ? <Square size={16} className="text-gray-500" /> : null}
+                    {item.includes('м²') ? <Square size={16} className="text-gray-500" /> : null}
                     {item.includes('поверх') ? <Layers size={16} className="text-gray-500" /> : null}
                     {item}
                   </span>

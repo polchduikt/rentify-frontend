@@ -125,7 +125,7 @@ export const PropertyDetailsMainSections = ({
             </div>
             <div className="rounded-2xl bg-slate-100 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Площа</p>
-              <p className="mt-1 text-xl font-bold text-slate-900">{property.areaSqm ? `${property.areaSqm} РјВІ` : '-'}</p>
+              <p className="mt-1 text-xl font-bold text-slate-900">{property.areaSqm ? `${property.areaSqm} м²` : '-'}</p>
             </div>
             <div className="rounded-2xl bg-slate-100 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Поверх</p>

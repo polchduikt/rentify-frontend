@@ -100,7 +100,7 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
             {property.areaSqm != null && (
               <span className="inline-flex items-center gap-1.5">
                 <Expand size={14} className="text-slate-400" />
-                {Number(property.areaSqm)} РјВІ
+                {Number(property.areaSqm)} м²
               </span>
             )}
             {property.floor != null && (

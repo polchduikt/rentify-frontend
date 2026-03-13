@@ -3,10 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import {
   useAmenitiesGroupedQuery,
   useLocationSuggestQuery,
+  useMyFavoritesQuery,
   usePropertyByIdQuery,
   useSearchPropertiesQuery,
   useSearchPropertyMapPinsQuery,
 } from '@/hooks/api';
+import { useAuth } from '@/contexts/AuthContext';
 import type { AmenityCategory } from '@/types/enums';
 import type { LocationSuggestionDto } from '@/types/location';
 import type { SearchExtraFilters, SearchMapBounds, SearchSortMode, SearchViewMode } from '@/types/search';
@@ -47,6 +49,7 @@ const areBoundsEqual = (left: SearchMapBounds | null, right: SearchMapBounds): b
   Math.abs(left.northEastLng - right.northEastLng) < 0.000001;
 
 export const useSearchPage = () => {
+  const { isAuthenticated } = useAuth();
   const [params, setParams] = useSearchParams();
 
   const [draftFilters, setDraftFilters] = useState(() => createFiltersFromSearchParams(params));
@@ -85,6 +88,12 @@ export const useSearchPage = () => {
     draftFilters.cityInput.trim().length >= 2
   );
   const amenitiesGroupedQuery = useAmenitiesGroupedQuery();
+  const favoritesQuery = useMyFavoritesQuery(isAuthenticated);
+
+  const favoriteIds = useMemo(
+    () => new Set(favoritesQuery.data?.map((favorite) => favorite.propertyId) ?? []),
+    [favoritesQuery.data]
+  );
 
   const filtered = useMemo(() => {
     const source = propertiesQuery.data?.content ?? [];
@@ -219,6 +228,7 @@ export const useSearchPage = () => {
     totalPages,
     visibleCount,
     paginationItems,
+    favoriteIds,
     extraCount,
     setCityInput: (value: string) =>
       setDraftFilters((prev) => ({

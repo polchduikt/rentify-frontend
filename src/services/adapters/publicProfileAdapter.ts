@@ -1,7 +1,7 @@
 import type { PublicUserProfileDto } from '@/types/user';
 
-const FALLBACK_USER_NAME = 'РљРѕСЂРёСЃС‚СѓРІР°С‡ Rentify';
-const FALLBACK_JOINED_AT = 'РЅРµРґР°РІРЅРѕ';
+const FALLBACK_USER_NAME = 'Користувач Rentify';
+const FALLBACK_JOINED_AT = 'недавно';
 
 export const toPositiveId = (value: unknown): number | null => {
   const numeric = Number(value);

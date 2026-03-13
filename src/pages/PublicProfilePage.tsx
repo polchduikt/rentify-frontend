@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { openChatWidget } from '@/components/chat';
 import { PUBLIC_PROFILE_FALLBACK_PROPERTY_IMAGE } from '@/constants/publicProfile';
 import { ROUTES } from '@/config/routes';
+import { useTheme } from '@/contexts/ThemeContext';
 import { usePublicProfilePage } from '@/hooks';
 import type { PropertyResponseDto } from '@/types/property';
 import { formatPublicProfilePropertyAddress, formatPublicProfilePropertyPrice } from '@/utils/publicProfile';
@@ -38,6 +39,7 @@ const PublicProfilePropertyCard = ({ property }: { property: PropertyResponseDto
 
 const PublicProfilePage = () => {
   const model = usePublicProfilePage();
+  const { theme } = useTheme();
   const [isShareSuccess, setIsShareSuccess] = useState(false);
 
   const handleOpenChat = () => {
@@ -86,7 +88,13 @@ const PublicProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#dbeafe,transparent_42%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] pb-14">
+    <div
+      className={`public-profile-page-shell min-h-screen pb-14 ${
+        theme === 'dark'
+          ? 'bg-[radial-gradient(circle_at_top,#1e293b,transparent_50%),linear-gradient(180deg,#020617_0%,#0b1120_100%)]'
+          : 'bg-[radial-gradient(circle_at_top,#dbeafe,transparent_42%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)]'
+      }`}
+    >
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
           <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">

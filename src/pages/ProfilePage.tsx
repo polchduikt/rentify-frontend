@@ -17,6 +17,7 @@ import { openChatWidget } from '@/components/chat';
 import { PROFILE_PAGE_SECTION_SET } from '@/constants/profilePage';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useProfilePage } from '@/hooks';
 import { useProfileNavigation } from '@/hooks/profile';
 import type { NavigationSection } from '@/types/profile';
@@ -25,6 +26,7 @@ import { resolveAvatarUrl } from '@/utils/avatar';
 const ProfilePage = () => {
   const model = useProfilePage();
   const { logout } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
@@ -95,7 +97,13 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="bg-[radial-gradient(circle_at_top,#e0ecff,transparent_44%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] pb-14">
+    <div
+      className={`profile-page-shell pb-14 ${
+        theme === 'dark'
+          ? 'bg-[radial-gradient(circle_at_top,#1e293b,transparent_50%),linear-gradient(180deg,#020617_0%,#0b1120_100%)]'
+          : 'bg-[radial-gradient(circle_at_top,#e0ecff,transparent_44%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]'
+      }`}
+    >
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <ProfileHero
           avatarSrc={avatarSrc}

@@ -214,7 +214,7 @@ export const ProfileSidebarNav = ({
             >
               <span className="inline-flex items-center gap-2">
                 <LogOut size={14} />
-                Р’ихід
+                Вихід
               </span>
               <ChevronRight size={14} className="text-rose-400" />
             </button>

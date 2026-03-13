@@ -6,12 +6,23 @@ import type {
   UpdateUserRequestDto,
   UserResponseDto,
 } from '@/types/user';
+import { normalizeUserProfile } from './adapters/userAdapter';
 import api from './api';
+import { getGoogleAvatarUrl, isGoogleAvatarFallbackDisabled } from './storage';
+
+const resolveGoogleAvatarFallback = (user: UserResponseDto): string | undefined => {
+  const userId = Number(user.id);
+  const hasValidUserId = Number.isFinite(userId) && userId > 0;
+  if (isGoogleAvatarFallbackDisabled(hasValidUserId ? userId : undefined)) {
+    return undefined;
+  }
+  return getGoogleAvatarUrl() ?? undefined;
+};
 
 export const userService = {
   async getMyProfile(): Promise<UserResponseDto> {
     const { data } = await api.get<UserResponseDto>(API_ENDPOINTS.users.profile);
-    return data;
+    return normalizeUserProfile(data, resolveGoogleAvatarFallback(data));
   },
 
   async getPublicProfile(userId: number): Promise<PublicUserProfileDto> {
@@ -21,7 +32,7 @@ export const userService = {
 
   async updateProfile(payload: UpdateUserRequestDto): Promise<UserResponseDto> {
     const { data } = await api.put<UserResponseDto>(API_ENDPOINTS.users.profile, payload);
-    return data;
+    return normalizeUserProfile(data, resolveGoogleAvatarFallback(data));
   },
 
   async changePassword(payload: ChangePasswordRequestDto): Promise<void> {

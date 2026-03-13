@@ -16,6 +16,7 @@ export interface SearchResultsSectionProps {
   totalPages: number;
   visibleCount: number;
   paginationItems: SearchPaginationItem[];
+  favoriteIds: Set<number>;
   onViewModeChange: (mode: SearchViewMode) => void;
   onOpenMapPage: () => void;
   onMapPropertySelect: (propertyId: number) => void;

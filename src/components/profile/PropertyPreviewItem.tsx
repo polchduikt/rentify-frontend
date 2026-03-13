@@ -43,7 +43,7 @@ export const PropertyPreviewItem = ({ property, onDelete, isDeleting = false }: 
 
   const metaParts = [
     property.rooms != null ? `${property.rooms} кімн.` : null,
-    property.areaSqm != null ? `${Number(property.areaSqm)} РјВІ` : null,
+    property.areaSqm != null ? `${Number(property.areaSqm)} м²` : null,
     property.floor != null ? `${property.floor}${property.totalFloors != null ? ` / ${property.totalFloors}` : ''}` : null,
   ].filter(Boolean);
 

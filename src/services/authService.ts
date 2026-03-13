@@ -8,13 +8,16 @@ import type {
 } from '@/types/auth';
 import type { UserResponseDto } from '@/types/user';
 import api from './api';
+import { normalizeUserProfile } from './adapters/userAdapter';
 import {
   clearAuthToken,
   clearGoogleAvatarUrl,
   getAuthToken,
   getGoogleAvatarUrl,
+  isGoogleAvatarFallbackDisabled,
   setGoogleAvatarUrl,
 } from './storage';
+import { sanitizeAvatarValue } from '@/utils/avatar';
 
 let profileRequest: Promise<UserResponseDto> | null = null;
 let profileRequestToken: string | null = null;
@@ -22,17 +25,6 @@ let profileRequestToken: string | null = null;
 interface GoogleIdTokenPayload {
   picture?: string;
 }
-
-const sanitizeAvatarValue = (value: unknown): string => {
-  if (typeof value !== 'string') {
-    return '';
-  }
-  const trimmed = value.trim().replace(/^["']+|["']+$/g, '');
-  if (!trimmed || trimmed === 'null' || trimmed === 'undefined') {
-    return '';
-  }
-  return trimmed;
-};
 
 const decodeBase64Url = (value: string) => {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
@@ -56,25 +48,9 @@ const getGooglePictureFromIdToken = (idToken: string): string | undefined => {
   }
 };
 
-const extractAvatar = (user: UserResponseDto): string => {
-  const raw = user as unknown as Record<string, unknown>;
-  const candidates = [raw.avatarUrl, raw.avatar, raw.avatar_url, raw.imageUrl, raw.picture];
-  for (const candidate of candidates) {
-    const sanitized = sanitizeAvatarValue(candidate);
-    if (sanitized) {
-      return sanitized;
-    }
-  }
-  return '';
-};
-
-const normalizeUserProfile = (user: UserResponseDto, fallbackAvatar?: string): UserResponseDto => {
-  const avatarUrl = extractAvatar(user) || sanitizeAvatarValue(fallbackAvatar) || '';
-  return {
-    ...user,
-    avatarUrl,
-  };
-};
+interface FetchProfileOptions {
+  googlePictureFallback?: string;
+}
 
 export const authService = {
   async login(data: AuthenticationRequestDto): Promise<AuthenticationResponseDto> {
@@ -92,7 +68,7 @@ export const authService = {
     return response.data;
   },
 
-  async fetchProfile(token?: string): Promise<UserResponseDto> {
+  async fetchProfile(token?: string, options?: FetchProfileOptions): Promise<UserResponseDto> {
     const resolvedToken = token ?? getAuthToken();
     if (!resolvedToken) {
       return Promise.reject(new Error('Auth token is missing'));
@@ -107,7 +83,15 @@ export const authService = {
       .get<UserResponseDto>(API_ENDPOINTS.users.profile, {
         headers: { Authorization: `Bearer ${resolvedToken}` },
       })
-      .then((res) => normalizeUserProfile(res.data, getGoogleAvatarUrl() ?? undefined))
+      .then((res) => {
+        const userId = Number(res.data.id);
+        const hasValidUserId = Number.isFinite(userId) && userId > 0;
+        const isFallbackDisabled = isGoogleAvatarFallbackDisabled(hasValidUserId ? userId : undefined);
+        const fallbackAvatar = isFallbackDisabled
+          ? undefined
+          : options?.googlePictureFallback ?? getGoogleAvatarUrl() ?? undefined;
+        return normalizeUserProfile(res.data, fallbackAvatar);
+      })
       .finally(() => {
         if (profileRequestToken === resolvedToken) {
           profileRequest = null;
@@ -134,14 +118,14 @@ export const authService = {
 
   async loginWithGoogleProfile(data: GoogleOAuthRequestDto): Promise<AuthSession> {
     const googlePicture = getGooglePictureFromIdToken(data.idToken);
-    if (googlePicture) {
-      setGoogleAvatarUrl(googlePicture);
-    }
-
     const { token } = await authService.loginWithGoogle(data);
-    const user = normalizeUserProfile(await authService.fetchProfile(token), googlePicture);
+    const user = await authService.fetchProfile(token, { googlePictureFallback: googlePicture });
+    const userId = Number(user.id);
+    const isFallbackDisabled = isGoogleAvatarFallbackDisabled(
+      Number.isFinite(userId) && userId > 0 ? userId : undefined,
+    );
 
-    if (user.avatarUrl) {
+    if (!isFallbackDisabled && user.avatarUrl) {
       setGoogleAvatarUrl(user.avatarUrl);
     }
 

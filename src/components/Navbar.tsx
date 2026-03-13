@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, Heart, Home, Menu, Plus, User, X } from 'lucide-react';
+import { Bell, Heart, Home, Menu, Moon, Plus, Sun, User, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { APP_CONTENT } from '@/constants/appContent';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { resolveAvatarUrl } from '@/utils/avatar';
 
 const Navbar = () => {
   const { user, isAuthenticated } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
@@ -22,9 +24,10 @@ const Navbar = () => {
 
   const desktopIconButtonClass =
     'inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:border-slate-300 hover:bg-slate-100';
+  const themeButtonLabel = theme === 'dark' ? 'Світла тема' : 'Темна тема';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className="rentify-navbar sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-5">
           <Link to={ROUTES.home} className="flex items-center gap-2">
@@ -46,6 +49,10 @@ const Navbar = () => {
 
         {isAuthenticated ? (
           <div className="hidden items-center gap-2 md:flex">
+            <button type="button" onClick={toggleTheme} className={desktopIconButtonClass} aria-label={themeButtonLabel}>
+              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+
             <Link to={ROUTES.profile} className={desktopIconButtonClass} aria-label="Сповіщення">
               <Bell size={17} />
             </Link>
@@ -82,6 +89,9 @@ const Navbar = () => {
           </div>
         ) : (
           <div className="hidden items-center gap-2 md:flex">
+            <button type="button" onClick={toggleTheme} className={desktopIconButtonClass} aria-label={themeButtonLabel}>
+              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
             <Link
               to={ROUTES.login}
               className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
@@ -97,19 +107,38 @@ const Navbar = () => {
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => setOpen((prev) => !prev)}
-          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden"
-          aria-label="Перемкнути меню"
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+            aria-label={themeButtonLabel}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
+            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+            aria-label="Перемкнути меню"
+          >
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
       {open ? (
         <div className="border-t border-slate-200 bg-white px-4 py-4 md:hidden">
           <div className="space-y-1">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-100"
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              {themeButtonLabel}
+            </button>
             <Link
               to={ROUTES.search}
               onClick={() => setOpen(false)}

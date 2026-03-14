@@ -1,4 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   PropertyDetailsMainSections,
@@ -18,6 +19,11 @@ const PropertyDetailsPage = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isOwnerPhoneVisible, setIsOwnerPhoneVisible] = useState(false);
+
+  useEffect(() => {
+    setIsOwnerPhoneVisible(false);
+  }, [model.property?.id]);
 
   const handleContactHost = () => {
     if (!model.property) {
@@ -31,6 +37,17 @@ const PropertyDetailsPage = () => {
       propertyId: model.property.id,
       initialText: `Доброго дня! Цікавить оголошення "${model.property.title}".`,
     });
+  };
+
+  const handleShowOwnerPhone = () => {
+    if (!model.ownerPhone) {
+      return;
+    }
+    if (!isAuthenticated) {
+      navigate(ROUTES.login, { state: { from: location } });
+      return;
+    }
+    setIsOwnerPhoneVisible(true);
   };
 
   if (!model.isValidId) {
@@ -142,10 +159,13 @@ const PropertyDetailsPage = () => {
               ownerLoading={model.ownerLoading}
               ownerName={model.ownerName}
               ownerInitial={model.ownerInitial}
+              ownerPhone={model.ownerPhone}
+              isPhoneVisible={isOwnerPhoneVisible}
               onDateFromChange={model.setBookingDateFrom}
               onDateToChange={model.setBookingDateTo}
               onGuestsChange={model.setBookingGuests}
               onContactHost={handleContactHost}
+              onShowPhone={handleShowOwnerPhone}
               disableContactHost={model.isOwnProperty}
             />
           ) : (
@@ -155,7 +175,10 @@ const PropertyDetailsPage = () => {
               ownerLoading={model.ownerLoading}
               ownerName={model.ownerName}
               ownerInitial={model.ownerInitial}
+              ownerPhone={model.ownerPhone}
+              isPhoneVisible={isOwnerPhoneVisible}
               onContactHost={handleContactHost}
+              onShowPhone={handleShowOwnerPhone}
               disableContactHost={model.isOwnProperty}
             />
           )}

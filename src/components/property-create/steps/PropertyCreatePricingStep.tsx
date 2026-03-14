@@ -11,6 +11,7 @@ export const PropertyCreatePricingStep = ({ model }: PropertyCreatePricingStepPr
   } = model.form;
   const rentalType = watch('rentalType');
   const availabilityDraft = model.availabilityDraft;
+  const hasAnyAvailabilityBlocks = model.existingAvailabilityBlocks.length > 0 || model.availabilityBlocks.length > 0;
 
   return (
     <div className="space-y-8">
@@ -107,8 +108,36 @@ export const PropertyCreatePricingStep = ({ model }: PropertyCreatePricingStepPr
 
           {model.availabilityError ? <p className="mt-2 text-xs text-red-600">{model.availabilityError}</p> : null}
 
-          {model.availabilityBlocks.length > 0 ? (
+          {model.availabilityBlocksLoading ? (
+            <div className="mt-4 h-16 animate-pulse rounded-xl bg-slate-100" />
+          ) : null}
+
+          {hasAnyAvailabilityBlocks ? (
             <div className="mt-4 space-y-2">
+              {model.existingAvailabilityBlocks.map((block) => (
+                <div
+                  key={`existing-${block.id}`}
+                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm"
+                >
+                  <div>
+                    <span className="font-medium text-slate-800">
+                      {block.dateFrom} - {block.dateTo}
+                    </span>
+                    {block.reason ? <span className="ml-2 text-slate-500">{block.reason}</span> : null}
+                    <span className="ml-2 rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                      Збережено
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => model.removeExistingAvailabilityBlock(block.id)}
+                    className="rounded-lg p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+
               {model.availabilityBlocks.map((block, index) => (
                 <div
                   key={`${block.dateFrom}-${block.dateTo}-${index}`}
@@ -119,6 +148,9 @@ export const PropertyCreatePricingStep = ({ model }: PropertyCreatePricingStepPr
                       {block.dateFrom} - {block.dateTo}
                     </span>
                     {block.reason ? <span className="ml-2 text-slate-500">{block.reason}</span> : null}
+                    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                      Нове
+                    </span>
                   </div>
                   <button
                     type="button"

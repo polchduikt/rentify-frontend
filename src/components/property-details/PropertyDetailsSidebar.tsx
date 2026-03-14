@@ -10,7 +10,10 @@ export const PropertyDetailsSidebar = ({
   ownerLoading,
   ownerName,
   ownerInitial,
+  ownerPhone,
+  isPhoneVisible,
   onContactHost,
+  onShowPhone,
   disableContactHost = false,
 }: PropertyDetailsSidebarProps) => (
   <aside className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
@@ -51,10 +54,12 @@ export const PropertyDetailsSidebar = ({
         </button>
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          onClick={onShowPhone}
+          disabled={!ownerPhone}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
         >
           <Phone size={16} />
-          Показати телефон
+          {ownerPhone ? (isPhoneVisible ? ownerPhone : 'Показати телефон') : 'Телефон не вказано'}
         </button>
       </div>
     </section>

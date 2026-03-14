@@ -7,11 +7,13 @@ import {
   getReviewedBookingIds,
   groupAmenitiesByCategory,
   normalizePropertyPhotos,
+  resolveOwnerPhone,
   resolveOwnerPresentation,
   resolvePropertyAddressLine,
   resolvePropertyCity,
 } from '@/services/adapters/propertyDetailsAdapter';
 import {
+  useAvailabilityBlocksQuery,
   useCreateReviewMutation,
   useMyBookingsQuery,
   useMyFavoritesQuery,
@@ -64,6 +66,7 @@ export const usePropertyDetailsPage = () => {
   const isOwnProperty = Boolean(property?.hostId && user?.id && property.hostId === user.id);
   const recommendationRentalType = property?.rentalType;
   const todayIso = useMemo(() => toIsoDate(new Date()), []);
+  const unavailableFromIso = useMemo(() => addDays(new Date(), -31), []);
   const maxDateIso = useMemo(() => addDays(new Date(), MAX_BOOKING_WINDOW_DAYS), []);
   const bookingMaxGuests = Math.max(1, Number(property?.maxGuests || 1));
   const shortTermCurrency = property?.pricing?.currency || 'UAH';
@@ -80,11 +83,12 @@ export const usePropertyDetailsPage = () => {
   const unavailableRangesQuery = useUnavailableRangesQuery(
     property?.id ?? 0,
     {
-      dateFrom: todayIso,
+      dateFrom: unavailableFromIso,
       dateTo: maxDateIso,
     },
     Boolean(property?.id && isShortTerm)
   );
+  const availabilityBlocksQuery = useAvailabilityBlocksQuery(property?.id ?? 0, Boolean(property?.id && isShortTerm));
   const favoritesQuery = useMyFavoritesQuery(isAuthenticated);
   const myBookingsQuery = useMyBookingsQuery(
     { page: 0, size: 200, sort: 'dateTo,desc' },
@@ -106,7 +110,37 @@ export const usePropertyDetailsPage = () => {
   );
 
   const photos = useMemo(() => normalizePropertyPhotos(property, FALLBACK_IMAGE), [property]);
-  const bookingUnavailableRanges = unavailableRangesQuery.data ?? [];
+  const bookingUnavailableRanges = useMemo(() => {
+    const apiUnavailableRanges = unavailableRangesQuery.data ?? [];
+    const blockRanges = (availabilityBlocksQuery.data ?? []).map((block) => ({
+      dateFrom: block.dateFrom,
+      dateTo: block.dateTo,
+      source: 'BLOCK',
+      bookingStatus: null,
+      reason: block.reason ?? null,
+    }));
+
+    if (blockRanges.length === 0) {
+      return apiUnavailableRanges;
+    }
+
+    const byKey = new Map(apiUnavailableRanges.map((range) => [`${range.source}|${range.dateFrom}|${range.dateTo}`, range]));
+
+    for (const block of blockRanges) {
+      const key = `${block.source}|${block.dateFrom}|${block.dateTo}`;
+      const existing = byKey.get(key);
+      if (existing) {
+        byKey.set(key, {
+          ...existing,
+          reason: existing.reason ?? block.reason ?? null,
+        });
+        continue;
+      }
+      byKey.set(key, block);
+    }
+
+    return Array.from(byKey.values());
+  }, [availabilityBlocksQuery.data, unavailableRangesQuery.data]);
 
   useEffect(() => {
     if (!isShortTerm) {
@@ -116,10 +150,10 @@ export const usePropertyDetailsPage = () => {
       return;
     }
 
-    setBookingDateFrom(addDays(new Date(), 1));
-    setBookingDateTo(addDays(new Date(), 3));
+    setBookingDateFrom('');
+    setBookingDateTo('');
     setBookingGuestsState(1);
-  }, [property?.id, isShortTerm]);
+  }, [isShortTerm, property?.id]);
 
   const setBookingGuests = (value: number) => {
     if (!Number.isFinite(value)) {
@@ -295,6 +329,7 @@ export const usePropertyDetailsPage = () => {
 
   const owner = ownerQuery.data;
   const { ownerName, ownerInitial } = resolveOwnerPresentation(owner, FALLBACK_OWNER_LABEL);
+  const ownerPhone = resolveOwnerPhone(owner);
 
   const favoriteIds = useMemo(
     () => new Set(favoritesQuery.data?.map((fav) => fav.propertyId) ?? []),
@@ -336,6 +371,7 @@ export const usePropertyDetailsPage = () => {
     ownerLoading: ownerQuery.isLoading,
     ownerName,
     ownerInitial,
+    ownerPhone,
     bookingDateFrom,
     setBookingDateFrom,
     bookingDateTo,
@@ -346,7 +382,7 @@ export const usePropertyDetailsPage = () => {
     bookingTodayIso: todayIso,
     bookingMaxDateIso: maxDateIso,
     bookingUnavailableRanges,
-    bookingUnavailableLoading: unavailableRangesQuery.isLoading,
+    bookingUnavailableLoading: unavailableRangesQuery.isLoading || availabilityBlocksQuery.isLoading,
     shortTermNightlyPrice,
     shortTermCurrency,
     isFavorite,

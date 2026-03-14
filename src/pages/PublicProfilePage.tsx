@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { ArrowRight, CalendarClock, Home, MessageCircle, Phone, Share2, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { openChatWidget } from '@/components/chat';
 import { PUBLIC_PROFILE_FALLBACK_PROPERTY_IMAGE } from '@/constants/publicProfile';
 import { ROUTES } from '@/config/routes';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { usePublicProfilePage } from '@/hooks';
 import type { PropertyResponseDto } from '@/types/property';
@@ -40,7 +41,11 @@ const PublicProfilePropertyCard = ({ property }: { property: PropertyResponseDto
 const PublicProfilePage = () => {
   const model = usePublicProfilePage();
   const { theme } = useTheme();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isShareSuccess, setIsShareSuccess] = useState(false);
+  const [isPhoneVisible, setIsPhoneVisible] = useState(false);
 
   const handleOpenChat = () => {
     if (!model.firstPropertyForChat || model.isOwnProfile) {
@@ -49,7 +54,7 @@ const PublicProfilePage = () => {
 
     openChatWidget({
       propertyId: model.firstPropertyForChat.id,
-      initialText: `Доброго дня! Цікавлять ваші оголошення на Rentify.`,
+      initialText: 'Доброго дня! Цікавлять ваші оголошення на Rentify.',
     });
   };
 
@@ -61,6 +66,17 @@ const PublicProfilePage = () => {
     } catch {
       setIsShareSuccess(false);
     }
+  };
+
+  const handleShowPhone = () => {
+    if (!model.rawPhone) {
+      return;
+    }
+    if (!isAuthenticated) {
+      navigate(ROUTES.login, { state: { from: location } });
+      return;
+    }
+    setIsPhoneVisible(true);
   };
 
   if (model.isInitialLoading) {
@@ -147,10 +163,15 @@ const PublicProfilePage = () => {
           <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Контакти</p>
             <div className="mt-4 space-y-2">
-              <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-3 text-sm font-bold text-slate-900">
+              <button
+                type="button"
+                onClick={handleShowPhone}
+                disabled={!model.rawPhone}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-3 text-sm font-bold text-slate-900 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+              >
                 <Phone size={15} />
-                {model.maskedPhone || 'Телефон прихований'}
-              </div>
+                {model.rawPhone ? (isPhoneVisible ? model.rawPhone : 'Показати телефон') : 'Телефон не вказано'}
+              </button>
 
               <button
                 type="button"

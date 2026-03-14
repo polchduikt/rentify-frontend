@@ -203,5 +203,6 @@ export interface UnavailableDateRangeDto {
   dateFrom: LocalDateString;
   dateTo: LocalDateString;
   source: string;
-  bookingStatus: BookingStatus;
+  bookingStatus: BookingStatus | null;
+  reason?: string | null;
 }

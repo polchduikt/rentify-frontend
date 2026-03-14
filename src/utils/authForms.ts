@@ -4,7 +4,7 @@ const phonePattern = /^\+?[0-9]{10,15}$/;
 
 export const loginSchema = z.object({
   email: z.string().trim().email('Введіть коректну email адресу'),
-  password: z.string().min(8, 'Пароль має містити щонайменше 8 символів').max(100, 'Пароль занадто довгий'),
+  password: z.string().min(1, 'Введіть пароль'),
 });
 
 export const registerSchema = z.object({

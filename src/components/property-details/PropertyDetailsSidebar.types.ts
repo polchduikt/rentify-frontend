@@ -7,6 +7,9 @@ export interface PropertyDetailsSidebarProps {
   ownerLoading: boolean;
   ownerName: string;
   ownerInitial: string;
+  ownerPhone: string;
+  isPhoneVisible: boolean;
   onContactHost: () => void;
+  onShowPhone: () => void;
   disableContactHost?: boolean;
 }

@@ -14,14 +14,43 @@ const isRangeUnavailable = (dateFrom: string, dateTo: string, ranges: Unavailabl
     if (!range.dateFrom || !range.dateTo) {
       return false;
     }
-    if (range.source === 'BLOCK') {
+    if (String(range.source).toUpperCase() === 'BLOCK') {
       return dateFrom <= range.dateTo && dateTo >= range.dateFrom;
     }
     return dateFrom < range.dateTo && dateTo > range.dateFrom;
   });
 
-const isDateBlocked = (iso: string, ranges: UnavailableDateRangeDto[]) =>
-  ranges.some((range) => range.dateFrom && range.dateTo && iso >= range.dateFrom && iso <= range.dateTo);
+type UnavailableKind = 'BLOCK' | 'BOOKING';
+
+const getUnavailableKindByDate = (iso: string, ranges: UnavailableDateRangeDto[]): UnavailableKind | null => {
+  let hasBlock = false;
+  let hasBooking = false;
+
+  for (const range of ranges) {
+    if (!range.dateFrom || !range.dateTo || iso < range.dateFrom || iso > range.dateTo) {
+      continue;
+    }
+
+    const source = String(range.source || '').toUpperCase();
+    const hasBookingStatus = Boolean(range.bookingStatus);
+
+    if (source === 'BOOKING' || source.includes('BOOK') || hasBookingStatus) {
+      hasBooking = true;
+      break;
+    }
+    if (source === 'BLOCK' || source.includes('BLOCK')) {
+      hasBlock = true;
+    }
+  }
+
+  if (hasBooking) {
+    return 'BOOKING';
+  }
+  if (hasBlock) {
+    return 'BLOCK';
+  }
+  return null;
+};
 
 type CalendarCell = { iso: string; day: number } | null;
 
@@ -78,9 +107,9 @@ export const PropertyShortTermDateRangeCalendar = ({
   const canNext = secondMonth.getTime() < maxMonthStart.getTime();
 
   const handleDayClick = (iso: string) => {
-    const blocked = isDateBlocked(iso, unavailableRanges);
+    const unavailableKind = getUnavailableKindByDate(iso, unavailableRanges);
     const outOfRange = iso < todayIso || iso > maxDateIso;
-    if (blocked || outOfRange) {
+    if (unavailableKind || outOfRange) {
       return;
     }
 
@@ -123,37 +152,43 @@ export const PropertyShortTermDateRangeCalendar = ({
               return <span key={`${monthLabel}-empty-${index}`} className="block h-14 rounded-lg bg-transparent" />;
             }
 
-            const isBlocked = isDateBlocked(cell.iso, unavailableRanges);
+            const unavailableKind = getUnavailableKindByDate(cell.iso, unavailableRanges);
             const isOutsideRange = cell.iso < todayIso || cell.iso > maxDateIso;
             const isSelectedStart = Boolean(dateFrom && cell.iso === dateFrom);
             const isSelectedEnd = Boolean(dateTo && cell.iso === dateTo);
             const isInSelectedRange = Boolean(dateFrom && dateTo && cell.iso > dateFrom && cell.iso < dateTo);
+            const isUnavailable = Boolean(unavailableKind);
+            const isBlocked = unavailableKind === 'BLOCK';
+            const isBooked = unavailableKind === 'BOOKING';
 
             return (
               <button
                 key={cell.iso}
                 type="button"
                 onClick={() => handleDayClick(cell.iso)}
-                disabled={isBlocked || isOutsideRange}
+                disabled={isUnavailable || isOutsideRange}
                 className={`h-14 rounded-lg border px-1 text-left transition ${
                   isSelectedStart || isSelectedEnd
                     ? 'border-emerald-600 bg-emerald-600 text-white'
                     : isInSelectedRange
                       ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-                      : isBlocked
-                        ? 'cursor-not-allowed border-rose-200 bg-rose-50 text-rose-500'
+                      : isBooked
+                        ? 'cursor-not-allowed border-red-300 bg-red-50 text-red-600'
+                        : isBlocked
+                          ? 'cursor-not-allowed border-amber-200 bg-amber-50 text-amber-600'
                         : isOutsideRange
                           ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300'
                           : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-blue-300 hover:bg-blue-50'
                 }`}
               >
                 <div className="text-sm font-semibold">{cell.day}</div>
-                {!isBlocked && !isOutsideRange ? (
+                {!isUnavailable && !isOutsideRange ? (
                   <div className={`mt-1 text-[10px] ${isSelectedStart || isSelectedEnd ? 'text-white/90' : 'text-slate-500'}`}>
                     {currency} {Math.round(nightlyPrice)}
                   </div>
                 ) : null}
-                {isBlocked ? <div className="mt-1 text-[10px] font-semibold uppercase">зайнято</div> : null}
+                {isBlocked ? <div className="mt-1 text-[10px] font-semibold uppercase">ЗАБЛ.</div> : null}
+                {isBooked ? <div className="mt-1 text-[10px] font-semibold uppercase">ЗАБР.</div> : null}
               </button>
             );
           })}
@@ -196,8 +231,12 @@ export const PropertyShortTermDateRangeCalendar = ({
           доступно
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-3 w-3 rounded border border-rose-200 bg-rose-100" />
+          <span className="h-3 w-3 rounded border border-amber-300 bg-amber-100" />
           заблоковано
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <span className="h-3 w-3 rounded border border-red-300 bg-red-100" />
+          заброньовано
         </span>
         <span className="inline-flex items-center gap-2">
           <span className="h-3 w-3 rounded border border-emerald-600 bg-emerald-600" />

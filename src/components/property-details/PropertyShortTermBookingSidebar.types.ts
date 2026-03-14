@@ -18,9 +18,12 @@ export interface PropertyShortTermBookingSidebarProps {
   ownerLoading: boolean;
   ownerName: string;
   ownerInitial: string;
+  ownerPhone: string;
+  isPhoneVisible: boolean;
   onDateFromChange: (value: string) => void;
   onDateToChange: (value: string) => void;
   onGuestsChange: (value: number) => void;
   onContactHost: () => void;
+  onShowPhone: () => void;
   disableContactHost?: boolean;
 }

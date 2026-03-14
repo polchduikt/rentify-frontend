@@ -4,9 +4,11 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import {
+  useAvailabilityBlocksQuery,
   useAmenitiesGroupedQuery,
   useCreateAvailabilityBlockMutation,
   useCreatePropertyMutation,
+  useDeleteAvailabilityBlockMutation,
   useDeletePropertyPhotoMutation,
   useLocationSuggestQuery,
   usePropertyByIdQuery,
@@ -14,7 +16,7 @@ import {
   useUploadPropertyPhotoMutation,
 } from '@/hooks/api';
 import type { LocationSuggestionDto } from '@/types/location';
-import type { PropertyPhotoDto } from '@/types/property';
+import type { AvailabilityBlockDto, PropertyPhotoDto } from '@/types/property';
 import type { AvailabilityDraft, PropertyCreateFormValues } from '@/types/propertyCreate';
 import {
   sortPropertyPhotos,
@@ -58,6 +60,8 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
   const [locationRefIds, setLocationRefIds] = useState<PropertyLocationRefIds>({});
   const [availabilityDraft, setAvailabilityDraft] = useState<AvailabilityDraft>(createEmptyAvailabilityDraft);
   const [availabilityBlocks, setAvailabilityBlocks] = useState<AvailabilityDraft[]>([]);
+  const [existingAvailabilityBlocks, setExistingAvailabilityBlocks] = useState<AvailabilityBlockDto[]>([]);
+  const [removedExistingAvailabilityBlockIds, setRemovedExistingAvailabilityBlockIds] = useState<number[]>([]);
   const [availabilityError, setAvailabilityError] = useState('');
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [reverseGeocodingError, setReverseGeocodingError] = useState('');
@@ -65,6 +69,7 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
   const [submitSuccess, setSubmitSuccess] = useState('');
   const skipForwardGeocodeRef = useRef(false);
   const initializedEditPropertySnapshotRef = useRef<string | null>(null);
+  const initializedAvailabilitySnapshotRef = useRef<string | null>(null);
   const initialExistingPhotoIdsRef = useRef<number[]>([]);
 
   const form = useForm<PropertyCreateFormValues>({
@@ -86,18 +91,21 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
 
   const amenitiesGroupedQuery = useAmenitiesGroupedQuery();
   const editPropertyQuery = usePropertyByIdQuery(propertyId, isEditMode);
+  const availabilityBlocksQuery = useAvailabilityBlocksQuery(propertyId, isEditMode);
   const createPropertyMutation = useCreatePropertyMutation();
   const updatePropertyMutation = useUpdatePropertyMutation();
   const uploadPhotoMutation = useUploadPropertyPhotoMutation();
   const deletePhotoMutation = useDeletePropertyPhotoMutation();
   const createAvailabilityBlockMutation = useCreateAvailabilityBlockMutation();
+  const deleteAvailabilityBlockMutation = useDeleteAvailabilityBlockMutation();
   const existingPhotosCount = existingPhotos.length;
 
   const isSubmitting =
     (isEditMode ? updatePropertyMutation.isPending : createPropertyMutation.isPending) ||
     uploadPhotoMutation.isPending ||
     deletePhotoMutation.isPending ||
-    createAvailabilityBlockMutation.isPending;
+    createAvailabilityBlockMutation.isPending ||
+    deleteAvailabilityBlockMutation.isPending;
 
   const totalSteps = STEP_FIELDS.length;
 
@@ -208,6 +216,11 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     setAvailabilityBlocks((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
   };
 
+  const removeExistingAvailabilityBlock = (blockId: number) => {
+    setExistingAvailabilityBlocks((prev) => prev.filter((block) => block.id !== blockId));
+    setRemovedExistingAvailabilityBlockIds((prev) => (prev.includes(blockId) ? prev : [...prev, blockId]));
+  };
+
   useEffect(() => {
     if (!isEditMode) {
       return;
@@ -245,6 +258,9 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     setSelectedLocation(undefined);
     setExistingPhotos(sortedExistingPhotos);
     initialExistingPhotoIdsRef.current = sortedExistingPhotos.map((photo) => photo.id);
+    setExistingAvailabilityBlocks([]);
+    setRemovedExistingAvailabilityBlockIds([]);
+    initializedAvailabilitySnapshotRef.current = null;
     setAvailabilityBlocks([]);
     setAvailabilityDraft(createEmptyAvailabilityDraft());
     setAvailabilityError('');
@@ -254,6 +270,36 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     setSubmitSuccess('');
     initializedEditPropertySnapshotRef.current = snapshotKey;
   }, [editPropertyQuery.data, editPropertyQuery.isFetching, isEditMode, reset]);
+
+  useEffect(() => {
+    if (!isEditMode) {
+      return;
+    }
+
+    const blocks = availabilityBlocksQuery.data;
+    if (!blocks) {
+      return;
+    }
+
+    const sortedBlocks = [...blocks].sort((left, right) => {
+      if (left.dateFrom !== right.dateFrom) {
+        return left.dateFrom.localeCompare(right.dateFrom);
+      }
+      return left.dateTo.localeCompare(right.dateTo);
+    });
+
+    const snapshotKey = sortedBlocks
+      .map((block) => `${block.id}:${block.dateFrom}:${block.dateTo}:${block.reason ?? ''}`)
+      .join('|');
+
+    if (initializedAvailabilitySnapshotRef.current === snapshotKey) {
+      return;
+    }
+
+    setExistingAvailabilityBlocks(sortedBlocks);
+    setRemovedExistingAvailabilityBlockIds([]);
+    initializedAvailabilitySnapshotRef.current = snapshotKey;
+  }, [availabilityBlocksQuery.data, isEditMode]);
 
   const goNextStep = async () => {
     if (!canGoNext) {
@@ -338,6 +384,17 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
             file,
           });
         }
+      }
+
+      if (removedExistingAvailabilityBlockIds.length > 0) {
+        await Promise.all(
+          removedExistingAvailabilityBlockIds.map((blockId) =>
+            deleteAvailabilityBlockMutation.mutateAsync({
+              propertyId: savedProperty.id,
+              blockId,
+            }),
+          ),
+        );
       }
 
       if (availabilityBlocks.length > 0) {
@@ -538,12 +595,14 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     amenitySlugs,
     availabilityDraft,
     availabilityBlocks,
+    existingAvailabilityBlocks,
     availabilityError,
     submitError,
     submitSuccess,
     isReverseGeocoding,
     reverseGeocodingError,
     isSubmitting,
+    availabilityBlocksLoading: isEditMode && availabilityBlocksQuery.isLoading,
     amenitiesGrouped: amenitiesGroupedQuery.data ?? [],
     amenitiesLoading: amenitiesGroupedQuery.isLoading || amenitiesGroupedQuery.isFetching,
     suggestions: locationSuggestionsQuery.data ?? [],
@@ -565,6 +624,7 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     setAvailabilityDraft,
     addAvailabilityBlock,
     removeAvailabilityBlock,
+    removeExistingAvailabilityBlock,
     isEditMode,
     initialDataLoading: isEditMode && editPropertyQuery.isLoading && !editPropertyQuery.data,
     initialDataError,

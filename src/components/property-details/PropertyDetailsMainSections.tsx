@@ -126,7 +126,7 @@ export const PropertyDetailsMainSections = ({
       <div className="space-y-6">
         <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div className="group relative bg-slate-100">
-            <img src={activePhoto} alt={property.title} className="h-[440px] w-full object-cover"/>
+            <img src={activePhoto} alt={property.title} className="h-[480px] w-full object-cover"/>
             <button
               type="button"
               onClick={() => setIsPhotoViewerOpen(true)}

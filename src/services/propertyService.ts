@@ -19,6 +19,13 @@ export interface UnavailableRangesQuery {
   dateTo?: string;
 }
 
+type UnavailableRangeApiDto = Partial<UnavailableDateRangeDto> & {
+  date_from?: string;
+  date_to?: string;
+  booking_status?: UnavailableDateRangeDto['bookingStatus'];
+  reason?: string | null;
+};
+
 export const propertyService = {
   async getAllProperties(page?: PageQuery): Promise<SpringPage<PropertyResponseDto>> {
     const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.root, {
@@ -113,7 +120,7 @@ export const propertyService = {
     propertyId: number,
     query?: UnavailableRangesQuery
   ): Promise<UnavailableDateRangeDto[]> {
-    const { data } = await api.get<UnavailableDateRangeDto[]>(
+    const { data } = await api.get<UnavailableRangeApiDto[]>(
       API_ENDPOINTS.properties.unavailableRanges(propertyId),
       {
         params: cleanQueryParams({
@@ -122,7 +129,18 @@ export const propertyService = {
         }),
       }
     );
-    return data;
+
+    const rawRanges = Array.isArray(data) ? data : data ? [data] : [];
+
+    return rawRanges
+      .map((range) => ({
+        dateFrom: range.dateFrom ?? range.date_from ?? '',
+        dateTo: range.dateTo ?? range.date_to ?? '',
+        source: String(range.source ?? ''),
+        bookingStatus: range.bookingStatus ?? range.booking_status ?? null,
+        reason: range.reason ?? null,
+      }))
+      .filter((range) => Boolean(range.dateFrom && range.dateTo));
   },
 
   async changePropertyStatus(

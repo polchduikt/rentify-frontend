@@ -55,6 +55,17 @@ export const resolveOwnerPresentation = (
   };
 };
 
+export const resolveOwnerPhone = (owner?: PublicUserProfileDto | null): string => {
+  const raw = owner as unknown as Record<string, unknown> | null | undefined;
+  const candidates = [raw?.phone, raw?.phoneNumber, raw?.mobilePhone, raw?.contactPhone];
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim().length > 0) {
+      return candidate.trim();
+    }
+  }
+  return '';
+};
+
 export const getReviewedBookingIds = (
   reviews: Array<{ authorId?: number; bookingId?: number }>,
   userId?: number,

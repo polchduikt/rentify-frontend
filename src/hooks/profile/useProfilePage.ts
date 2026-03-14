@@ -29,7 +29,7 @@ import type { PasswordFormState, ProfileFormState } from '@/types/profile';
 import { getApiErrorMessage } from '@/utils/errors';
 import { buildLatestPaymentStatusByBookingId } from '@/utils/payments';
 
-const PROFILE_PROPERTIES_PAGE_SIZE = 6;
+const PROFILE_PROPERTIES_PAGE_SIZE = 300;
 const PROFILE_PROPERTIES_METRICS_PAGE_SIZE = 300;
 const PROFILE_TRANSACTIONS_PAGE_SIZE = 5;
 const PROFILE_BOOKINGS_PAGE_SIZE = 24;

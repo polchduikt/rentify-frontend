@@ -15,6 +15,7 @@ export interface PublicUserProfileDto {
   id: number;
   firstName: string;
   lastName: string;
+  phone?: string | null;
   avatarUrl: string;
   createdAt: ZonedDateTimeString;
 }

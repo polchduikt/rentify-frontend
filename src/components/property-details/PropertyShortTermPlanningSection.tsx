@@ -27,6 +27,14 @@ const formatDate = (value: string): string => {
   return date.toLocaleDateString('uk-UA', { day: '2-digit', month: 'long', year: 'numeric' });
 };
 
+const formatRangeLabel = (dateFrom: string, dateTo: string): string =>
+  dateFrom === dateTo ? formatDate(dateFrom) : `${formatDate(dateFrom)} — ${formatDate(dateTo)}`;
+
+const resolveBlockReason = (reason?: string | null): string => {
+  const normalized = reason?.trim();
+  return normalized ? normalized : '—';
+};
+
 export const PropertyShortTermPlanningSection = ({
   dateFrom,
   dateTo,
@@ -41,6 +49,27 @@ export const PropertyShortTermPlanningSection = ({
   onDateToChange,
 }: PropertyShortTermPlanningSectionProps) => {
   const nights = diffNights(dateFrom, dateTo);
+  const blockedRanges = unavailableRanges.filter((range) => String(range.source).toUpperCase() === 'BLOCK');
+  const blockedRangesByDate = new Map<string, UnavailableDateRangeDto>();
+
+  for (const range of blockedRanges) {
+    if (!range.dateFrom || !range.dateTo) {
+      continue;
+    }
+
+    const key = `${range.dateFrom}|${range.dateTo}`;
+    const existing = blockedRangesByDate.get(key);
+    if (!existing) {
+      blockedRangesByDate.set(key, range);
+      continue;
+    }
+
+    if (!existing.reason && range.reason) {
+      blockedRangesByDate.set(key, range);
+    }
+  }
+
+  const blockedRangesList = Array.from(blockedRangesByDate.values());
 
   return (
     <section className="space-y-4">
@@ -89,8 +118,26 @@ export const PropertyShortTermPlanningSection = ({
             </p>
           </div>
         </div>
-      </div>
 
+        <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Причина блокування</p>
+          {blockedRangesList.length === 0 ? (
+            <p className="mt-1 text-sm font-semibold text-amber-900">—</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {blockedRangesList.map((range) => (
+                <div
+                  key={`${range.dateFrom}-${range.dateTo}`}
+                  className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1 text-sm text-amber-900"
+                >
+                  <span className="font-semibold">{formatRangeLabel(range.dateFrom, range.dateTo)}</span>
+                  <span>{resolveBlockReason(range.reason)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   );
 };

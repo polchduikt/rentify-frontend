@@ -41,10 +41,13 @@ export const PropertyShortTermBookingSidebar = ({
   ownerLoading,
   ownerName,
   ownerInitial,
+  ownerPhone,
+  isPhoneVisible,
   onDateFromChange,
   onDateToChange,
   onGuestsChange,
   onContactHost,
+  onShowPhone,
   disableContactHost = false,
 }: PropertyShortTermBookingSidebarProps) => {
   const navigate = useNavigate();
@@ -76,7 +79,7 @@ export const PropertyShortTermBookingSidebar = ({
       return 'Для цього оголошення не вказана коректна ціна за ніч.';
     }
     if (isRangeUnavailable(dateFrom, dateTo, unavailableRanges)) {
-      return 'Обрані дати вже зайняті. Виберіть інший період.';
+      return 'Обрані дати заброньовані або заблоковані. Виберіть інший період.';
     }
     return null;
   }, [dateFrom, dateTo, guests, maxGuests, nightlyPrice, todayIso, unavailableRanges]);
@@ -273,10 +276,12 @@ export const PropertyShortTermBookingSidebar = ({
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            onClick={onShowPhone}
+            disabled={!ownerPhone}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
           >
             <Phone size={16} />
-            Показати телефон
+            {ownerPhone ? (isPhoneVisible ? ownerPhone : 'Показати телефон') : 'Телефон не вказано'}
           </button>
         </div>
       </section>

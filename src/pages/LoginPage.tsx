@@ -108,7 +108,7 @@ const LoginPage = () => {
             <AuthPasswordField
               id="password"
               autoComplete="current-password"
-              placeholder="Мінімум 8 символів"
+              placeholder="Введіть пароль"
               label="Пароль"
               showPassword={showPassword}
               onToggleShow={() => setShowPassword((prev) => !prev)}

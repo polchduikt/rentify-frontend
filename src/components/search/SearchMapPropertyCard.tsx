@@ -109,9 +109,6 @@ export const SearchMapPropertyCard = ({ property, onClose }: SearchMapPropertyCa
                 </p>
               ) : null}
 
-              <span className="mt-4 inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
-                Детальніше
-              </span>
             </div>
           </Link>
         </article>

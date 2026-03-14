@@ -39,8 +39,10 @@ const Navbar = () => {
 
           <Link
             to={ROUTES.search}
-            className={`hidden rounded-lg px-3 py-2 text-sm font-semibold transition md:inline-flex ${
-              isSearchActive ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100'
+            className={`hidden items-center rounded-xl border px-4 py-2.5 text-base font-semibold transition md:inline-flex ${
+              isSearchActive
+                ? 'border-blue-200 bg-blue-50 text-blue-700'
+                : 'border-slate-200 bg-white text-slate-800 hover:bg-slate-100'
             }`}
           >
             Орендувати

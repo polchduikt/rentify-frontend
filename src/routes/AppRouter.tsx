@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode, useEffect } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -89,8 +89,19 @@ const GuestRoute = () => {
   return <Outlet />;
 };
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname]);
+
+  return null;
+};
+
 const AppRouter = () => (
   <BrowserRouter>
+    <ScrollToTop />
     <Routes>
       <Route element={<MainLayout />}>
         <Route path={ROUTES.home} element={withSuspense(<HomePage />)} />

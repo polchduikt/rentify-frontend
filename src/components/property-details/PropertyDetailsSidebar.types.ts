@@ -7,8 +7,6 @@ export interface PropertyDetailsSidebarProps {
   ownerLoading: boolean;
   ownerName: string;
   ownerInitial: string;
-  pricePerMonth: number;
-  currency: string;
   onContactHost: () => void;
   disableContactHost?: boolean;
 }

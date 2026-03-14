@@ -21,5 +21,6 @@ export interface PropertyDetailsMainSectionsProps {
   onSlideNext: () => void;
   isFavorite?: boolean;
   favoriteIds?: Set<number>;
+  shortTermBookingSection?: ReactNode;
   shortTermReviewsSection?: ReactNode;
 }

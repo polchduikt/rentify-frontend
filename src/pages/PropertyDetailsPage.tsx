@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   PropertyDetailsMainSections,
   PropertyDetailsSidebar,
+  PropertyShortTermPlanningSection,
   PropertyShortTermBookingSidebar,
   PropertyShortTermReviewsSection,
 } from '@/components/property-details';
@@ -90,6 +91,23 @@ const PropertyDetailsPage = () => {
             onSlideNext={model.slideRecommendationsNext}
             isFavorite={model.isFavorite}
             favoriteIds={model.favoriteIds}
+            shortTermBookingSection={
+              model.isShortTerm ? (
+                <PropertyShortTermPlanningSection
+                  dateFrom={model.bookingDateFrom}
+                  dateTo={model.bookingDateTo}
+                  guests={model.bookingGuests}
+                  maxGuests={model.bookingMaxGuests}
+                  todayIso={model.bookingTodayIso}
+                  maxDateIso={model.bookingMaxDateIso}
+                  nightlyPrice={model.shortTermNightlyPrice}
+                  currency={model.shortTermCurrency}
+                  unavailableRanges={model.bookingUnavailableRanges}
+                  onDateFromChange={model.setBookingDateFrom}
+                  onDateToChange={model.setBookingDateTo}
+                />
+              ) : null
+            }
             shortTermReviewsSection={
               model.isShortTerm ? (
                 <PropertyShortTermReviewsSection
@@ -110,10 +128,23 @@ const PropertyDetailsPage = () => {
           {model.isShortTerm ? (
             <PropertyShortTermBookingSidebar
               property={model.property}
+              dateFrom={model.bookingDateFrom}
+              dateTo={model.bookingDateTo}
+              guests={model.bookingGuests}
+              maxGuests={model.bookingMaxGuests}
+              todayIso={model.bookingTodayIso}
+              maxDateIso={model.bookingMaxDateIso}
+              nightlyPrice={model.shortTermNightlyPrice}
+              currency={model.shortTermCurrency}
+              unavailableRanges={model.bookingUnavailableRanges}
+              unavailableLoading={model.bookingUnavailableLoading}
               owner={model.owner}
               ownerLoading={model.ownerLoading}
               ownerName={model.ownerName}
               ownerInitial={model.ownerInitial}
+              onDateFromChange={model.setBookingDateFrom}
+              onDateToChange={model.setBookingDateTo}
+              onGuestsChange={model.setBookingGuests}
               onContactHost={handleContactHost}
               disableContactHost={model.isOwnProperty}
             />
@@ -124,8 +155,6 @@ const PropertyDetailsPage = () => {
               ownerLoading={model.ownerLoading}
               ownerName={model.ownerName}
               ownerInitial={model.ownerInitial}
-              pricePerMonth={model.pricePerMonth}
-              currency={model.currency}
               onContactHost={handleContactHost}
               disableContactHost={model.isOwnProperty}
             />

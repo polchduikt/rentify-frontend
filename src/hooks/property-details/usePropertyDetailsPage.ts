@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FALLBACK_IMAGE, resolveLocationFallback } from '@/constants/propertyDetails';
+import { MAX_BOOKING_WINDOW_DAYS } from '@/constants/propertyDetailsPage';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   getReviewedBookingIds,
@@ -18,10 +19,11 @@ import {
   usePropertyReviewsQuery,
   usePublicProfileQuery,
   useSearchPropertiesQuery,
+  useUnavailableRangesQuery,
 } from '@/hooks/api';
 import type { ReviewRequestDto } from '@/types/review';
 import { parseCoordinate } from '@/utils/propertyDetails';
-import { toIsoDate } from '@/utils/bookingDates';
+import { addDays, toIsoDate } from '@/utils/bookingDates';
 import { getApiErrorMessage } from '@/utils/errors';
 import { geocodeAddress } from '@/utils/geocoding';
 
@@ -52,6 +54,9 @@ export const usePropertyDetailsPage = () => {
   const [recommendedStart, setRecommendedStart] = useState(0);
   const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [mapCoordsLoading, setMapCoordsLoading] = useState(false);
+  const [bookingDateFrom, setBookingDateFrom] = useState('');
+  const [bookingDateTo, setBookingDateTo] = useState('');
+  const [bookingGuestsState, setBookingGuestsState] = useState(1);
 
   const propertyQuery = usePropertyByIdQuery(numericId, isValidId);
   const property = propertyQuery.data ?? null;
@@ -59,8 +64,27 @@ export const usePropertyDetailsPage = () => {
   const isOwnProperty = Boolean(property?.hostId && user?.id && property.hostId === user.id);
   const recommendationRentalType = property?.rentalType;
   const todayIso = useMemo(() => toIsoDate(new Date()), []);
+  const maxDateIso = useMemo(() => addDays(new Date(), MAX_BOOKING_WINDOW_DAYS), []);
+  const bookingMaxGuests = Math.max(1, Number(property?.maxGuests || 1));
+  const shortTermCurrency = property?.pricing?.currency || 'UAH';
+  const shortTermNightlyPrice = useMemo(() => {
+    const directNightly = Number(property?.pricing?.pricePerNight || 0);
+    if (directNightly > 0) {
+      return directNightly;
+    }
+    const monthly = Number(property?.pricing?.pricePerMonth || 0);
+    return monthly > 0 ? monthly / 30 : 0;
+  }, [property?.pricing?.pricePerNight, property?.pricing?.pricePerMonth]);
 
   const ownerQuery = usePublicProfileQuery(property?.hostId ?? 0, Boolean(property?.hostId));
+  const unavailableRangesQuery = useUnavailableRangesQuery(
+    property?.id ?? 0,
+    {
+      dateFrom: todayIso,
+      dateTo: maxDateIso,
+    },
+    Boolean(property?.id && isShortTerm)
+  );
   const favoritesQuery = useMyFavoritesQuery(isAuthenticated);
   const myBookingsQuery = useMyBookingsQuery(
     { page: 0, size: 200, sort: 'dateTo,desc' },
@@ -82,6 +106,27 @@ export const usePropertyDetailsPage = () => {
   );
 
   const photos = useMemo(() => normalizePropertyPhotos(property, FALLBACK_IMAGE), [property]);
+  const bookingUnavailableRanges = unavailableRangesQuery.data ?? [];
+
+  useEffect(() => {
+    if (!isShortTerm) {
+      setBookingDateFrom('');
+      setBookingDateTo('');
+      setBookingGuestsState(1);
+      return;
+    }
+
+    setBookingDateFrom(addDays(new Date(), 1));
+    setBookingDateTo(addDays(new Date(), 3));
+    setBookingGuestsState(1);
+  }, [property?.id, isShortTerm]);
+
+  const setBookingGuests = (value: number) => {
+    if (!Number.isFinite(value)) {
+      return;
+    }
+    setBookingGuestsState(Math.min(bookingMaxGuests, Math.max(1, Math.trunc(value))));
+  };
   const groupedAmenities = useMemo(() => groupAmenitiesByCategory(property?.amenities), [property?.amenities]);
 
   const recommended = useMemo(() => {
@@ -248,9 +293,6 @@ export const usePropertyDetailsPage = () => {
     await createReviewMutation.mutateAsync(payload);
   };
 
-  const pricePerMonth = Number(property?.pricing?.pricePerMonth || property?.pricing?.pricePerNight || 0);
-  const currency = property?.pricing?.currency || 'UAH';
-
   const owner = ownerQuery.data;
   const { ownerName, ownerInitial } = resolveOwnerPresentation(owner, FALLBACK_OWNER_LABEL);
 
@@ -294,8 +336,19 @@ export const usePropertyDetailsPage = () => {
     ownerLoading: ownerQuery.isLoading,
     ownerName,
     ownerInitial,
-    pricePerMonth,
-    currency,
+    bookingDateFrom,
+    setBookingDateFrom,
+    bookingDateTo,
+    setBookingDateTo,
+    bookingGuests: bookingGuestsState,
+    setBookingGuests,
+    bookingMaxGuests,
+    bookingTodayIso: todayIso,
+    bookingMaxDateIso: maxDateIso,
+    bookingUnavailableRanges,
+    bookingUnavailableLoading: unavailableRangesQuery.isLoading,
+    shortTermNightlyPrice,
+    shortTermCurrency,
     isFavorite,
     favoriteIds,
     isOwnProperty,

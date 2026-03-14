@@ -1,12 +1,28 @@
-import { ChevronLeft, ChevronRight, Heart, MapPin, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import {
+  BadgeCheck,
+  BedDouble,
+  Building2,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Layers,
+  Maximize2,
+  MapPin,
+  Ruler,
+  Sparkles,
+  Star,
+  X,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 import { MARKET_TYPE_LABELS, PROPERTY_TYPE_LABELS } from '@/constants/propertyDetails';
 import { PROPERTY_CREATE_AMENITY_CATEGORY_LABELS } from '@/constants/propertyCreateUi';
 import { ROUTES } from '@/config/routes';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
-import { formatPropertyCreatedAt, yesNo } from '@/utils/propertyDetails';
+import { formatPropertyCreatedAt, formatPropertyPrice, yesNo } from '@/utils/propertyDetails';
 import { MapInvalidateSize } from './MapInvalidateSize';
 import { RecommendedPropertyCard } from './RecommendedPropertyCard';
 import type { PropertyDetailsMainSectionsProps } from './PropertyDetailsMainSections.types';
@@ -32,13 +48,64 @@ export const PropertyDetailsMainSections = ({
   onSlideNext,
   isFavorite = false,
   favoriteIds = new Set(),
+  shortTermBookingSection = null,
   shortTermReviewsSection = null,
 }: PropertyDetailsMainSectionsProps) => {
   const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
+  const [isPhotoViewerOpen, setIsPhotoViewerOpen] = useState(false);
   const addToFavoritesMutation = useAddToFavoritesMutation();
   const removeFromFavoritesMutation = useRemoveFromFavoritesMutation();
 
   const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;
+  const isLongTerm = property.rentalType === 'LONG_TERM';
+  const hasPhotoNavigation = photos.length > 1;
+
+  const handlePhotoNavigate = (direction: 'prev' | 'next') => {
+    if (!hasPhotoNavigation) {
+      return;
+    }
+
+    const nextIndex =
+      direction === 'next'
+        ? (activePhotoIndex + 1) % photos.length
+        : (activePhotoIndex - 1 + photos.length) % photos.length;
+
+    onPhotoSelect(nextIndex);
+  };
+
+  useEffect(() => {
+    if (!isPhotoViewerOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsPhotoViewerOpen(false);
+        return;
+      }
+      if (event.key === 'ArrowLeft') {
+        if (photos.length > 1) {
+          onPhotoSelect((activePhotoIndex - 1 + photos.length) % photos.length);
+        }
+        return;
+      }
+      if (event.key === 'ArrowRight') {
+        if (photos.length > 1) {
+          onPhotoSelect((activePhotoIndex + 1) % photos.length);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isPhotoViewerOpen, activePhotoIndex, photos.length, onPhotoSelect]);
 
   const handleFavoriteClick = async () => {
     if (isLoading) return;
@@ -58,8 +125,62 @@ export const PropertyDetailsMainSections = ({
   return (
       <div className="space-y-6">
         <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <img src={activePhoto} alt={property.title} className="h-[440px] w-full object-cover"/>
-          {photos.length > 1 ? (
+          <div className="group relative bg-slate-100">
+            <img src={activePhoto} alt={property.title} className="h-[440px] w-full object-cover"/>
+            <button
+              type="button"
+              onClick={() => setIsPhotoViewerOpen(true)}
+              className="absolute inset-0 z-10 cursor-zoom-in"
+              aria-label="Відкрити фото на весь екран"
+            />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" />
+
+            {hasPhotoNavigation ? (
+              <>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handlePhotoNavigate('prev');
+                  }}
+                  className="absolute left-3 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 opacity-100 shadow-sm transition hover:bg-white md:opacity-0 md:group-hover:opacity-100"
+                  aria-label="Попереднє фото"
+                >
+                  <ChevronLeft size={20}/>
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handlePhotoNavigate('next');
+                  }}
+                  className="absolute right-3 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 opacity-100 shadow-sm transition hover:bg-white md:opacity-0 md:group-hover:opacity-100"
+                  aria-label="Наступне фото"
+                >
+                  <ChevronRight size={20}/>
+                </button>
+              </>
+            ) : null}
+
+            <div className="absolute bottom-3 left-3 z-20 rounded-full bg-slate-900/70 px-2.5 py-1 text-xs font-semibold text-white">
+              Фото {activePhotoIndex + 1} / {photos.length}
+            </div>
+
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsPhotoViewerOpen(true);
+              }}
+              className="absolute right-3 top-3 z-20 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-white"
+              aria-label="Відкрити повнорозмірне фото"
+            >
+              <Maximize2 size={14}/>
+              Повний розмір
+            </button>
+          </div>
+
+          {hasPhotoNavigation ? (
               <div className="grid grid-cols-4 gap-2 border-t border-slate-200 p-3 sm:grid-cols-6 lg:grid-cols-7">
                 {photos.map((photo, index) => (
                     <button
@@ -76,6 +197,115 @@ export const PropertyDetailsMainSections = ({
               </div>
           ) : null}
         </section>
+
+        {isPhotoViewerOpen && typeof document !== 'undefined'
+          ? createPortal(
+              <div
+                className="fixed inset-0 z-[3000] h-[100dvh] w-screen overflow-hidden bg-slate-950/95 p-3 sm:p-6"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Перегляд фотографій"
+                onClick={() => setIsPhotoViewerOpen(false)}
+              >
+                <div className="relative flex h-full w-full flex-col" onClick={(event) => event.stopPropagation()}>
+                  <div className="mb-3 flex items-center justify-between gap-3 text-white">
+                    <p className="line-clamp-1 text-sm font-semibold">{property.title}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                        {activePhotoIndex + 1} / {photos.length}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsPhotoViewerOpen(false)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-900 transition hover:bg-slate-200"
+                        aria-label="Закрити перегляд фото"
+                      >
+                        <X size={18}/>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid min-h-0 flex-1 gap-4 md:grid-cols-[minmax(0,1fr)_88px]">
+                    <div className="relative flex min-h-0 items-center justify-center rounded-2xl bg-black/35 px-2 sm:px-8">
+                      <img src={activePhoto} alt={property.title} className="max-h-full max-w-full rounded-xl object-contain"/>
+
+                      {hasPhotoNavigation ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handlePhotoNavigate('prev');
+                            }}
+                            className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg transition hover:bg-slate-100"
+                            aria-label="Попереднє фото"
+                          >
+                            <ChevronLeft size={22}/>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handlePhotoNavigate('next');
+                            }}
+                            className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg transition hover:bg-slate-100"
+                            aria-label="Наступне фото"
+                          >
+                            <ChevronRight size={22}/>
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
+
+                    {hasPhotoNavigation ? (
+                      <div className="hidden min-h-0 md:block">
+                        <div className="h-full overflow-y-auto pr-1">
+                          <div className="flex flex-col gap-2">
+                            {photos.map((photo, index) => (
+                              <button
+                                key={`fullscreen-thumb-${photo}-${index}`}
+                                type="button"
+                                onClick={() => onPhotoSelect(index)}
+                                className={`overflow-hidden rounded-xl border-2 transition ${
+                                  index === activePhotoIndex
+                                    ? 'border-blue-400'
+                                    : 'border-transparent opacity-75 hover:opacity-100'
+                                }`}
+                                aria-label={`Відкрити фото ${index + 1}`}
+                              >
+                                <img src={photo} alt="" className="h-16 w-full object-cover"/>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {hasPhotoNavigation ? (
+                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1 md:hidden">
+                      {photos.map((photo, index) => (
+                        <button
+                          key={`mobile-fullscreen-thumb-${photo}-${index}`}
+                          type="button"
+                          onClick={() => onPhotoSelect(index)}
+                          className={`overflow-hidden rounded-lg border-2 transition ${
+                            index === activePhotoIndex ? 'border-blue-400' : 'border-transparent opacity-80'
+                          }`}
+                          aria-label={`Відкрити фото ${index + 1}`}
+                        >
+                          <img src={photo} alt="" className="h-14 w-20 object-cover"/>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </div>,
+              document.body,
+            )
+          : null}
+
+        {shortTermBookingSection}
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-bold text-slate-900">Інформація про оголошення</h2>
@@ -118,7 +348,67 @@ export const PropertyDetailsMainSections = ({
             {addressLine}
           </p>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {isLongTerm ? (
+            <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(0,0.95fr)]">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Ціна оренди</p>
+                <p className="mt-2 text-4xl font-black text-slate-900">
+                  {formatPropertyPrice(property.pricing?.pricePerMonth || 0, property.pricing?.currency || 'UAH')}
+                </p>
+                <p className="mt-1 text-sm text-slate-500">на місяць</p>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <Building2 size={16} className="text-slate-400" />
+                    {PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <Layers size={16} className="text-slate-400" />
+                    {property.floor || '-'} поверх {property.totalFloors ? `з ${property.totalFloors}` : ''}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <Ruler size={16} className="text-slate-400" />
+                    {property.areaSqm ? `${property.areaSqm} м²` : 'Площа не вказана'}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <BedDouble size={16} className="text-slate-400" />
+                    {property.rooms || '-'} кімнат
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2">
+                    <CalendarDays size={16} className="text-slate-400" />
+                    Опубліковано {formatPropertyCreatedAt(property.createdAt)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-slate-100 p-5">
+                <div className="flex items-center justify-between text-sm text-slate-700">
+                  <span className="inline-flex items-center gap-1">
+                    <Star size={14} className="text-amber-500" />
+                    Рейтинг
+                  </span>
+                  <strong>{Number(property.averageRating || 0).toFixed(1)}</strong>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
+                  <span>Відгуків</span>
+                  <strong>{property.reviewCount || 0}</strong>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
+                  <span>Переглядів</span>
+                  <strong>{property.viewCount || 0}</strong>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
+                  <span className="inline-flex items-center gap-1">
+                    <BadgeCheck size={14} className="text-emerald-600" />
+                    Перевірене
+                  </span>
+                  <strong>{property.isVerifiedProperty ? 'Так' : 'Ні'}</strong>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          <div className={`mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 ${isLongTerm ? 'hidden' : ''}`}>
             <div className="rounded-2xl bg-slate-100 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Кімнат</p>
               <p className="mt-1 text-xl font-bold text-slate-900">{property.rooms || '-'}</p>
@@ -152,22 +442,24 @@ export const PropertyDetailsMainSections = ({
           {groupedAmenities.length === 0 ? (
               <p className="mt-3 text-slate-600">Зручності не вказані.</p>
           ) : (
-              <div className="mt-4 space-y-4">
+              <div className="mt-4 grid gap-x-8 gap-y-5 md:grid-cols-2">
                 {groupedAmenities.map((group) => (
-                    <div key={group.category}>
-                      <p className="mb-2 text-sm font-bold text-slate-700">
-                        {PROPERTY_CREATE_AMENITY_CATEGORY_LABELS[group.category as keyof typeof PROPERTY_CREATE_AMENITY_CATEGORY_LABELS] ||
-                            group.category}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {group.amenities.map((amenity) => (
-                            <span key={amenity.id}
-                                  className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm text-slate-700">
-                      {amenity.name}
-                    </span>
-                        ))}
-                      </div>
+                  <div key={group.category}>
+                    <p className="mb-2 text-sm font-bold text-slate-700">
+                      {PROPERTY_CREATE_AMENITY_CATEGORY_LABELS[group.category as keyof typeof PROPERTY_CREATE_AMENITY_CATEGORY_LABELS] ||
+                        group.category}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {group.amenities.map((amenity) => (
+                        <span
+                          key={amenity.id}
+                          className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm text-slate-700"
+                        >
+                          {amenity.name}
+                        </span>
+                      ))}
                     </div>
+                  </div>
                 ))}
               </div>
           )}

@@ -1,17 +1,16 @@
-import { BadgeCheck, BedDouble, CalendarDays, Clock3, Layers, MapPin, MessageCircle, Ruler, Star, Users } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { CalendarDays, MessageCircle, Phone } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { PROPERTY_TYPE_LABELS } from '@/constants/propertyDetails';
-import { MAX_BOOKING_WINDOW_DAYS } from '@/constants/propertyDetailsPage';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCreateBookingMutation, useUnavailableRangesQuery } from '@/hooks/api';
+import { useCreateBookingMutation } from '@/hooks/api';
 import type { UnavailableDateRangeDto } from '@/types/property';
-import { addDays, diffNights, toIsoDate } from '@/utils/bookingDates';
+import { diffNights } from '@/utils/bookingDates';
 import { getApiErrorMessage } from '@/utils/errors';
 import { formatPropertyCreatedAt, formatPropertyPrice } from '@/utils/propertyDetails';
-import { formatLocalTime } from '@/utils/time';
 import type { PropertyShortTermBookingSidebarProps } from './PropertyShortTermBookingSidebar.types';
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const isRangeUnavailable = (dateFrom: string, dateTo: string, ranges: UnavailableDateRangeDto[]): boolean =>
   ranges.some((range) => {
@@ -26,22 +25,25 @@ const isRangeUnavailable = (dateFrom: string, dateTo: string, ranges: Unavailabl
     return dateFrom < range.dateTo && dateTo > range.dateFrom;
   });
 
-const formatDateLabel = (value: string): string => {
-  const date = new Date(`${value}T00:00:00`);
-  if (!Number.isFinite(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleDateString('uk-UA', { day: '2-digit', month: 'short' });
-};
-
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-
 export const PropertyShortTermBookingSidebar = ({
   property,
+  dateFrom,
+  dateTo,
+  guests,
+  maxGuests,
+  todayIso,
+  maxDateIso,
+  nightlyPrice,
+  currency,
+  unavailableRanges,
+  unavailableLoading,
   owner,
   ownerLoading,
   ownerName,
   ownerInitial,
+  onDateFromChange,
+  onDateToChange,
+  onGuestsChange,
   onContactHost,
   disableContactHost = false,
 }: PropertyShortTermBookingSidebarProps) => {
@@ -49,47 +51,13 @@ export const PropertyShortTermBookingSidebar = ({
   const location = useLocation();
   const { isAuthenticated } = useAuth();
 
-  const todayIso = useMemo(() => toIsoDate(new Date()), []);
-  const maxDateIso = useMemo(() => addDays(new Date(), MAX_BOOKING_WINDOW_DAYS), []);
-
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [guests, setGuests] = useState(1);
   const [formError, setFormError] = useState<string | null>(null);
   const [createdBookingId, setCreatedBookingId] = useState<number | null>(null);
 
-  useEffect(() => {
-    setDateFrom(addDays(new Date(), 1));
-    setDateTo(addDays(new Date(), 3));
-    setGuests(1);
-    setFormError(null);
-    setCreatedBookingId(null);
-  }, [property.id]);
-
-  const unavailableRangesQuery = useUnavailableRangesQuery(
-    property.id,
-    {
-      dateFrom: todayIso,
-      dateTo: maxDateIso,
-    },
-    Number.isFinite(property.id) && property.id > 0,
-  );
   const createBookingMutation = useCreateBookingMutation();
-
-  const unavailableRanges = unavailableRangesQuery.data ?? [];
-  const maxGuests = Math.max(1, Number(property.maxGuests || 1));
-  const nightlyPrice = useMemo(() => {
-    const directNightly = Number(property.pricing?.pricePerNight || 0);
-    if (directNightly > 0) {
-      return directNightly;
-    }
-    const monthly = Number(property.pricing?.pricePerMonth || 0);
-    return monthly > 0 ? monthly / 30 : 0;
-  }, [property.pricing?.pricePerNight, property.pricing?.pricePerMonth]);
 
   const nights = useMemo(() => diffNights(dateFrom, dateTo), [dateFrom, dateTo]);
   const estimatedTotal = useMemo(() => Math.round(nightlyPrice * nights), [nightlyPrice, nights]);
-  const currency = property.pricing?.currency || 'UAH';
 
   const validationError = useMemo(() => {
     if (!dateFrom || !dateTo) {
@@ -115,16 +83,14 @@ export const PropertyShortTermBookingSidebar = ({
 
   const isBookingDisabled =
     createBookingMutation.isPending ||
-    unavailableRangesQuery.isLoading ||
+    unavailableLoading ||
     !dateFrom ||
     !dateTo ||
     Boolean(validationError) ||
     createdBookingId != null;
 
-  const unavailablePreview = unavailableRanges.slice(0, 4);
-
   const handleGuestsChange = (nextValue: number) => {
-    setGuests(clamp(nextValue, 1, maxGuests));
+    onGuestsChange(clamp(nextValue, 1, maxGuests));
     setFormError(null);
     setCreatedBookingId(null);
   };
@@ -171,7 +137,7 @@ export const PropertyShortTermBookingSidebar = ({
               max={maxDateIso}
               value={dateFrom}
               onChange={(event) => {
-                setDateFrom(event.target.value);
+                onDateFromChange(event.target.value);
                 setFormError(null);
                 setCreatedBookingId(null);
               }}
@@ -186,7 +152,7 @@ export const PropertyShortTermBookingSidebar = ({
               max={maxDateIso}
               value={dateTo}
               onChange={(event) => {
-                setDateTo(event.target.value);
+                onDateToChange(event.target.value);
                 setFormError(null);
                 setCreatedBookingId(null);
               }}
@@ -271,31 +237,6 @@ export const PropertyShortTermBookingSidebar = ({
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Недоступні дати</p>
-        {unavailableRangesQuery.isLoading ? (
-          <div className="mt-3 h-16 animate-pulse rounded-xl bg-slate-200" />
-        ) : unavailablePreview.length === 0 ? (
-          <p className="mt-3 text-sm text-emerald-700">Наразі весь період відкритий для бронювання.</p>
-        ) : (
-          <div className="mt-3 space-y-2">
-            {unavailablePreview.map((range, index) => (
-              <div key={`${range.dateFrom}-${range.dateTo}-${index}`} className="flex items-center justify-between rounded-xl bg-slate-100 px-3 py-2 text-sm">
-                <span className="text-slate-700">
-                  {formatDateLabel(range.dateFrom)} - {formatDateLabel(range.dateTo)}
-                </span>
-                <span className={range.source === 'BLOCK' ? 'text-rose-700' : 'text-amber-700'}>
-                  {range.source === 'BLOCK' ? 'Блок' : 'Бронь'}
-                </span>
-              </div>
-            ))}
-            {unavailableRanges.length > unavailablePreview.length ? (
-              <p className="text-xs text-slate-500">+ ще {unavailableRanges.length - unavailablePreview.length} періодів</p>
-            ) : null}
-          </div>
-        )}
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Власник</p>
         {ownerLoading ? (
           <div className="mt-3 h-16 animate-pulse rounded-xl bg-slate-200" />
@@ -320,7 +261,7 @@ export const PropertyShortTermBookingSidebar = ({
           </div>
         )}
 
-        <div className="mt-5 space-y-2">
+        <div className="mt-4 space-y-2">
           <button
             type="button"
             onClick={onContactHost}
@@ -330,38 +271,13 @@ export const PropertyShortTermBookingSidebar = ({
             <MessageCircle size={16} />
             {disableContactHost ? 'Це ваше оголошення' : 'Написати власнику'}
           </button>
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <MapPin size={15} className="text-slate-400" />
-            {property.address?.location?.city || 'Місто не вказано'}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <Users size={15} className="text-slate-400" />
-            до {maxGuests} гостей
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <Clock3 size={15} className="text-slate-400" />
-            Заїзд: {formatLocalTime(property.checkInTime)}, Виїзд: {formatLocalTime(property.checkOutTime)}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <BedDouble size={15} className="text-slate-400" />
-            {property.rooms || '-'} кімнат
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <Ruler size={15} className="text-slate-400" />
-            {property.areaSqm ? `${property.areaSqm} м²` : 'Площа не вказана'}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <Layers size={15} className="text-slate-400" />
-            {property.floor || '-'} поверх {property.totalFloors ? `з ${property.totalFloors}` : ''}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <Star size={15} className="text-amber-500" />
-            Рейтинг: {Number(property.averageRating || 0).toFixed(1)}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <BadgeCheck size={15} className="text-emerald-600" />
-            {PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType}
-          </div>
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            <Phone size={16} />
+            Показати телефон
+          </button>
         </div>
       </section>
     </aside>

@@ -1,10 +1,8 @@
-import { BadgeCheck, BedDouble, Building2, CalendarDays, Layers, MessageCircle, Phone, Ruler, Star } from 'lucide-react';
+import { MessageCircle, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PROPERTY_TYPE_LABELS } from '@/constants/propertyDetails';
 import { ROUTES } from '@/config/routes';
-import { formatPropertyCreatedAt, formatPropertyPrice } from '@/utils/propertyDetails';
+import { formatPropertyCreatedAt } from '@/utils/propertyDetails';
 import type { PropertyDetailsSidebarProps } from './PropertyDetailsSidebar.types';
-
 
 export const PropertyDetailsSidebar = ({
   property,
@@ -12,8 +10,6 @@ export const PropertyDetailsSidebar = ({
   ownerLoading,
   ownerName,
   ownerInitial,
-  pricePerMonth,
-  currency,
   onContactHost,
   disableContactHost = false,
 }: PropertyDetailsSidebarProps) => (
@@ -60,60 +56,6 @@ export const PropertyDetailsSidebar = ({
           <Phone size={16} />
           Показати телефон
         </button>
-      </div>
-    </section>
-
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Ціна оренди</p>
-      <p className="mt-2 text-4xl font-black text-slate-900">{formatPropertyPrice(pricePerMonth, currency)}</p>
-      <p className="mt-1 text-sm text-slate-500">на місяць</p>
-
-      <div className="mt-5 space-y-2">
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <Building2 size={16} className="text-slate-400" />
-          {PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType}
-        </div>
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <Layers size={16} className="text-slate-400" />
-          {property.floor || '-'} поверх {property.totalFloors ? `з ${property.totalFloors}` : ''}
-        </div>
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <Ruler size={16} className="text-slate-400" />
-          {property.areaSqm ? `${property.areaSqm} м²` : 'Площа не вказана'}
-        </div>
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <BedDouble size={16} className="text-slate-400" />
-          {property.rooms || '-'} кімнат
-        </div>
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <CalendarDays size={16} className="text-slate-400" />
-          Опубліковано {formatPropertyCreatedAt(property.createdAt)}
-        </div>
-      </div>
-
-      <div className="mt-6 rounded-2xl bg-slate-100 p-4">
-        <div className="flex items-center justify-between text-sm text-slate-700">
-          <span className="inline-flex items-center gap-1">
-            <Star size={14} className="text-amber-500" />
-            Рейтинг
-          </span>
-          <strong>{Number(property.averageRating || 0).toFixed(1)}</strong>
-        </div>
-        <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
-          <span>Р’ідгуків</span>
-          <strong>{property.reviewCount || 0}</strong>
-        </div>
-        <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
-          <span>Переглядів</span>
-          <strong>{property.viewCount || 0}</strong>
-        </div>
-        <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
-          <span className="inline-flex items-center gap-1">
-            <BadgeCheck size={14} className="text-emerald-600" />
-            Перевірене
-          </span>
-          <strong>{property.isVerifiedProperty ? 'Так' : 'Ні'}</strong>
-        </div>
       </div>
     </section>
   </aside>

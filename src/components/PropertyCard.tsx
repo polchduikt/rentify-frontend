@@ -7,6 +7,25 @@ import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hoo
 import { isTopPromotionActive } from '@/utils/promotions';
 import type { PropertyCardProps } from './PropertyCard.types';
 
+const formatPublishedLabel = (createdAt?: string): string => {
+  if (!createdAt) return 'Опубліковано нещодавно';
+
+  const ms = Date.now() - new Date(createdAt).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return 'Опубліковано нещодавно';
+
+  const minutes = Math.floor(ms / (1000 * 60));
+  if (minutes < 60) return `Опубліковано ${Math.max(1, minutes)} хв тому`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Опубліковано ${hours} год тому`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `Опубліковано ${days} дн тому`;
+
+  const months = Math.floor(days / 30);
+  return `Опубліковано ${months} міс тому`;
+};
+
 
 const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
   const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
@@ -106,14 +125,12 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
             {property.floor != null && (
               <span className="inline-flex items-center gap-1.5">
                 <Layers size={14} className="text-slate-400" />
-                {property.floor} / {property.totalFloors || '?'}
+                {property.totalFloors != null ? `${property.floor} поверх з ${property.totalFloors}` : `${property.floor} поверх`}
               </span>
             )}
           </div>
 
-          <span className="mt-5 inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">
-            Детальніше
-          </span>
+          <p className="mt-5 text-sm text-slate-500">{formatPublishedLabel(property.createdAt)}</p>
         </div>
       </Link>
     </article>

@@ -1,5 +1,5 @@
 import type { PageQuery } from '@/types/api';
-import type { AmenityCategory } from '@/types/enums';
+import type { AmenityCategory, PropertyStatus } from '@/types/enums';
 import type { PropertySearchCriteriaDto } from '@/types/property';
 import type { LocationSuggestQuery } from '@/services/locationService';
 import type { UnavailableRangesQuery } from '@/services/propertyService';
@@ -41,7 +41,7 @@ export const queryKeys = {
   },
   properties: {
     all: (page?: PageQuery) => ['properties', 'all', page ?? null] as const,
-    mine: (page?: PageQuery) => ['properties', 'mine', page ?? null] as const,
+    mine: (page?: PageQuery, statuses?: PropertyStatus[]) => ['properties', 'mine', page ?? null, statuses ?? null] as const,
     byId: (id: number) => ['properties', 'byId', id] as const,
     search: (criteria?: PropertySearchCriteriaDto, page?: PageQuery) =>
       ['properties', 'search', criteria ?? null, page ?? null] as const,

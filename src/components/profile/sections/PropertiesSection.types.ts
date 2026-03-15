@@ -5,4 +5,9 @@ export interface PropertiesSectionProps {
   properties: PropertyResponseDto[];
   propertiesLoading: boolean;
   propertiesError: string | null;
+  totalCount?: number;
+  currentPage?: number;
+  totalPages?: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
 }

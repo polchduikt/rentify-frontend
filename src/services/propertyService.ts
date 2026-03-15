@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '@/config/apiEndpoints';
 import type { PageQuery, SpringPage } from '@/types/api';
+import type { PropertyStatus } from '@/types/enums';
 import type {
   AvailabilityBlockDto,
   AvailabilityBlockRequestDto,
@@ -37,6 +38,19 @@ export const propertyService = {
   async getMyProperties(page?: PageQuery): Promise<SpringPage<PropertyResponseDto>> {
     const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.mine, {
       params: withPageQuery(page),
+    });
+    return data;
+  },
+
+  async getMyPropertiesFiltered(
+    page?: PageQuery,
+    statuses?: PropertyStatus[]
+  ): Promise<SpringPage<PropertyResponseDto>> {
+    const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.mine, {
+      params: {
+        ...withPageQuery(page),
+        ...(statuses && statuses.length > 0 ? { statuses: statuses.join(',') } : {}),
+      },
     });
     return data;
   },

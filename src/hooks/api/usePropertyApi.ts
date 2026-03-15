@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { propertyService, type UnavailableRangesQuery } from '@/services/propertyService';
 import type { PageQuery } from '@/types/api';
+import type { PropertyStatus } from '@/types/enums';
 import type {
   AvailabilityBlockRequestDto,
   PropertyCreateRequestDto,
@@ -16,10 +17,10 @@ export const useAllPropertiesQuery = (page?: PageQuery, enabled = true) =>
     enabled,
   });
 
-export const useMyPropertiesQuery = (page?: PageQuery) =>
+export const useMyPropertiesQuery = (page?: PageQuery, statuses?: PropertyStatus[]) =>
   useQuery({
-    queryKey: queryKeys.properties.mine(page),
-    queryFn: () => propertyService.getMyProperties(page),
+    queryKey: queryKeys.properties.mine(page, statuses),
+    queryFn: () => propertyService.getMyPropertiesFiltered(page, statuses),
   });
 
 export const usePropertyByIdQuery = (id: number, enabled = true) =>

@@ -96,6 +96,15 @@ const ProfilePage = () => {
     setIsTopUpModalOpen(false);
   };
 
+  const isPublishedPropertiesSection = navigation.activeSection === 'properties-published';
+  const propertiesForSection = isPublishedPropertiesSection ? model.publishedProperties : navigation.propertiesForActiveTab;
+  const propertiesLoadingForSection = isPublishedPropertiesSection
+    ? model.publishedPropertiesLoading
+    : model.propertiesLoading;
+  const propertiesErrorForSection = isPublishedPropertiesSection ? model.publishedPropertiesError : model.propertiesError;
+  const publishedTotalCount = Math.max(model.publishedPropertiesTotalElements, model.activePropertiesInPreview);
+  const publishedTotalPages = Math.max(model.publishedPropertiesTotalPages, Math.ceil(publishedTotalCount / 10));
+
   return (
     <div
       className={`profile-page-shell pb-14 ${
@@ -232,9 +241,22 @@ const ProfilePage = () => {
             {navigation.isPropertiesSection ? (
               <PropertiesSection
                 title={navigation.propertiesTabTitle}
-                properties={navigation.propertiesForActiveTab}
-                propertiesLoading={model.propertiesLoading}
-                propertiesError={model.propertiesError}
+                properties={propertiesForSection}
+                propertiesLoading={propertiesLoadingForSection}
+                propertiesError={propertiesErrorForSection}
+                totalCount={
+                  isPublishedPropertiesSection
+                    ? publishedTotalCount
+                    : navigation.propertiesForActiveTab.length
+                }
+                currentPage={isPublishedPropertiesSection ? model.publishedPropertiesPage + 1 : undefined}
+                totalPages={isPublishedPropertiesSection ? publishedTotalPages : undefined}
+                pageSize={isPublishedPropertiesSection ? 10 : undefined}
+                onPageChange={
+                  isPublishedPropertiesSection
+                    ? (page) => model.setPublishedPropertiesPage(Math.max(0, page - 1))
+                    : undefined
+                }
               />
             ) : null}
           </div>

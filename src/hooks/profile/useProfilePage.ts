@@ -31,6 +31,7 @@ import { buildLatestPaymentStatusByBookingId } from '@/utils/payments';
 
 const PROFILE_PROPERTIES_PAGE_SIZE = 300;
 const PROFILE_PROPERTIES_METRICS_PAGE_SIZE = 300;
+const PROFILE_PUBLISHED_PROPERTIES_PAGE_SIZE = 10;
 const PROFILE_TRANSACTIONS_PAGE_SIZE = 5;
 const PROFILE_BOOKINGS_PAGE_SIZE = 24;
 const TENANT_PAYMENT_TRANSACTION_ID_OFFSET = 1_000_000_000;
@@ -38,6 +39,7 @@ const HOST_PAYMENT_TRANSACTION_ID_OFFSET = 2_000_000_000;
 
 export const useProfilePage = () => {
   const { user: authUser, refreshProfile } = useAuth();
+  const [publishedPropertiesPage, setPublishedPropertiesPage] = useState(0);
   const [profileForm, setProfileForm] = useState<ProfileFormState>(() => toProfileForm(authUser ?? undefined));
   const [passwordForm, setPasswordForm] = useState<PasswordFormState>({
     currentPassword: '',
@@ -56,6 +58,14 @@ export const useProfilePage = () => {
     size: PROFILE_PROPERTIES_METRICS_PAGE_SIZE,
     sort: 'createdAt,desc',
   });
+  const publishedPropertiesQuery = useMyPropertiesQuery(
+    {
+      page: publishedPropertiesPage,
+      size: PROFILE_PUBLISHED_PROPERTIES_PAGE_SIZE,
+      sort: 'createdAt,desc',
+    },
+    ['ACTIVE'],
+  );
   const favoritesQuery = useMyFavoritesQuery();
   const walletQuery = useWalletBalanceQuery();
   const topUpOptionsQuery = useWalletTopUpOptionsQuery();
@@ -82,6 +92,16 @@ export const useProfilePage = () => {
     setProfileForm(toProfileForm(profile ?? undefined));
   }, [profile?.id, profile?.firstName, profile?.lastName, profile?.phone]);
 
+  useEffect(() => {
+    const publishedPageData = publishedPropertiesQuery.data;
+    if (!publishedPageData || publishedPropertiesPage === 0) {
+      return;
+    }
+    if (publishedPageData.totalElements > 0 && publishedPageData.content.length === 0) {
+      setPublishedPropertiesPage((prev) => Math.max(0, prev - 1));
+    }
+  }, [publishedPropertiesPage, publishedPropertiesQuery.data]);
+
   const isProfileDirty = useMemo(() => {
     if (!profile) {
       return false;
@@ -98,6 +118,7 @@ export const useProfilePage = () => {
 
   const properties = propertiesQuery.data?.content ?? [];
   const propertiesForMetrics = propertiesMetricsQuery.data?.content ?? properties;
+  const publishedProperties = publishedPropertiesQuery.data?.content ?? [];
   const favorites = favoritesQuery.data ?? [];
   const myBookings = myBookingsQuery.data?.content ?? [];
   const incomingBookings = incomingBookingsQuery.data?.content ?? [];
@@ -198,6 +219,13 @@ export const useProfilePage = () => {
     isInitialLoading,
     criticalError,
     properties,
+    publishedProperties,
+    publishedPropertiesPage,
+    publishedPropertiesTotalPages: Math.max(1, publishedPropertiesQuery.data?.totalPages ?? 1),
+    publishedPropertiesTotalElements: publishedPropertiesQuery.data?.totalElements ?? publishedProperties.length,
+    publishedPropertiesError: publishedPropertiesQuery.error
+      ? getApiErrorMessage(publishedPropertiesQuery.error, 'Не вдалося завантажити опубліковані оголошення.')
+      : null,
     propertiesForPromotions: propertiesForMetrics,
     favorites,
     myBookings,
@@ -219,6 +247,7 @@ export const useProfilePage = () => {
     subscriptionPlan: walletQuery.data?.subscriptionPlan ?? profile?.subscriptionPlan ?? 'FREE',
     subscriptionActiveUntil: walletQuery.data?.subscriptionActiveUntil ?? profile?.subscriptionActiveUntil,
     propertiesLoading: propertiesQuery.isLoading,
+    publishedPropertiesLoading: publishedPropertiesQuery.isLoading,
     favoritesLoading: favoritesQuery.isLoading,
     bookingsLoading: myBookingsQuery.isLoading || incomingBookingsQuery.isLoading,
     myBookingsLoading: myBookingsQuery.isLoading,
@@ -267,6 +296,7 @@ export const useProfilePage = () => {
     deleteAccount: actions.deleteAccount,
     uploadAvatar: actions.uploadAvatar,
     deleteAvatar: actions.deleteAvatar,
+    setPublishedPropertiesPage,
     topUpWallet: actions.topUpWallet,
     cancelBooking: actions.cancelBooking,
     confirmIncomingBooking: actions.confirmIncomingBooking,

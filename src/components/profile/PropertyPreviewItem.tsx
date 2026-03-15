@@ -1,12 +1,11 @@
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Archive, Eye, Pencil, Send, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FALLBACK_IMAGE } from '@/constants/propertyDetails';
 import { PROPERTY_STATUS_LABELS } from '@/constants/profileUi';
 import { ROUTES } from '@/config/routes';
-import { isTopPromotionActive } from '@/utils/promotions';
 import { formatDate, formatMoney } from '@/utils/profileFormatters';
+import { isTopPromotionActive } from '@/utils/promotions';
 import type { PropertyPreviewItemProps } from './PropertyPreviewItem.types';
-
 
 const formatPromotionUntilDate = (value?: string): string | null => {
   if (!value) {
@@ -23,7 +22,15 @@ const formatPromotionUntilDate = (value?: string): string | null => {
   });
 };
 
-export const PropertyPreviewItem = ({ property, onDelete, isDeleting = false }: PropertyPreviewItemProps) => {
+export const PropertyPreviewItem = ({
+  property,
+  onDelete,
+  onArchive,
+  onPublish,
+  isDeleting = false,
+  isArchiving = false,
+  isPublishing = false,
+}: PropertyPreviewItemProps) => {
   const image = property.photos?.[0]?.url || FALLBACK_IMAGE;
   const isRecommended = isTopPromotionActive(property);
   const promotionUntilDate = formatPromotionUntilDate(property.topPromotedUntil);
@@ -40,6 +47,9 @@ export const PropertyPreviewItem = ({ property, onDelete, isDeleting = false }: 
     ) || 0;
   const priceSuffix = isShortTerm ? '/ доба' : '/ міс';
   const currency = property.pricing?.currency || 'UAH';
+  const isStatusActive = property.status === 'ACTIVE';
+  const canArchive = isStatusActive && Boolean(onArchive);
+  const canPublish = (property.status === 'INACTIVE' || property.status === 'DRAFT') && Boolean(onPublish);
 
   const metaParts = [
     property.rooms != null ? `${property.rooms} кімн.` : null,
@@ -48,7 +58,7 @@ export const PropertyPreviewItem = ({ property, onDelete, isDeleting = false }: 
   ].filter(Boolean);
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-lg">
+    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-lg md:h-[360px]">
       <div className="grid h-full grid-cols-1 md:grid-cols-[360px_minmax(0,1fr)] md:items-stretch">
         <div className="relative h-56 md:h-auto">
           <Link
@@ -71,7 +81,7 @@ export const PropertyPreviewItem = ({ property, onDelete, isDeleting = false }: 
 
         <div className="flex min-w-0 flex-col p-5 md:p-6">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-            <h3 className="min-w-0 text-lg font-bold leading-snug text-slate-900 break-words [overflow-wrap:anywhere]">
+            <h3 className="min-w-0 line-clamp-2 text-lg font-bold leading-snug text-slate-900 break-words [overflow-wrap:anywhere]">
               {property.title}
             </h3>
             <p className="whitespace-nowrap text-sm font-semibold text-slate-900 md:text-base">
@@ -94,30 +104,52 @@ export const PropertyPreviewItem = ({ property, onDelete, isDeleting = false }: 
             {isRecommended && promotionUntilDate ? <p className="font-semibold text-blue-700">Просування до {promotionUntilDate}</p> : null}
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4">
+          <div className="mt-5 flex flex-nowrap items-center gap-1.5 border-t border-slate-200 pt-4">
             <Link
               to={ROUTES.propertyDetails(property.id)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-slate-700 transition hover:bg-slate-50"
             >
-              <Eye size={15} />
+              <Eye size={14} />
               Переглянути
             </Link>
             <Link
               to={ROUTES.editProperty(property.id)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-blue-300 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+              className="inline-flex items-center gap-1 rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-blue-700 transition hover:bg-blue-100"
             >
-              <Pencil size={15} />
+              <Pencil size={14} />
               Редагувати
             </Link>
             <button
               type="button"
               onClick={() => onDelete?.(property)}
               disabled={isDeleting}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-1 rounded-lg border border-rose-300 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Trash2 size={15} />
+              <Trash2 size={14} />
               {isDeleting ? 'Видалення...' : 'Видалити'}
             </button>
+            {canArchive ? (
+              <button
+                type="button"
+                onClick={() => onArchive?.(property)}
+                disabled={isArchiving}
+                className="inline-flex items-center gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Archive size={14} />
+                {isArchiving ? 'Архівування...' : 'В архів'}
+              </button>
+            ) : null}
+            {canPublish ? (
+              <button
+                type="button"
+                onClick={() => onPublish?.(property)}
+                disabled={isPublishing}
+                className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Send size={14} />
+                {isPublishing ? 'Публікація...' : 'Опублікувати'}
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

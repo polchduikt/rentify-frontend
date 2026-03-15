@@ -31,6 +31,7 @@ import {
 } from '@/utils/search/searchPageUtils';
 
 const MAP_PINS_PAGE_SIZE = 300;
+const SCROLL_TOP = 0;
 
 const createEmptyFormState = () => ({
   ...EMPTY_FORM_FILTERS,
@@ -57,16 +58,17 @@ export const useSearchPage = () => {
   const [draftSortMode, setDraftSortMode] = useState<SearchSortMode>(() => parseSortMode(params.get('sortMode')));
   const [urlSortMode, setUrlSortMode] = useState<SearchSortMode>(() => parseSortMode(params.get('sortMode')));
   const [viewMode, setViewMode] = useState<SearchViewMode>(() => parseViewMode(params.get('view')));
-  const [visiblePages, setVisiblePages] = useState(() => parsePositiveInt(params.get('page')));
+  const [currentPageState, setCurrentPageState] = useState(() => parsePositiveInt(params.get('page')));
+  const [loadedPagesFromCurrent, setLoadedPagesFromCurrent] = useState(1);
   const [mapBounds, setMapBounds] = useState<SearchMapBounds | null>(null);
   const [selectedMapPropertyId, setSelectedMapPropertyId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    const next = buildSearchParams(urlFilters, urlSortMode, viewMode, visiblePages);
+    const next = buildSearchParams(urlFilters, urlSortMode, viewMode, currentPageState);
     if (params.toString() !== next.toString()) {
       setParams(next, { replace: true });
     }
-  }, [params, setParams, urlFilters, urlSortMode, viewMode, visiblePages]);
+  }, [currentPageState, params, setParams, urlFilters, urlSortMode, viewMode]);
 
   const criteria = useMemo(() => toCriteria(draftFilters), [draftFilters]);
   const mapCriteria = useMemo(
@@ -97,20 +99,41 @@ export const useSearchPage = () => {
 
   const filtered = useMemo(() => {
     const source = propertiesQuery.data?.content ?? [];
-    const withClientRules = applyClientOnlyFilters(source, draftFilters);
+    const activeOnly = source.filter((property) => String(property.status).toUpperCase() === 'ACTIVE');
+    const withClientRules = applyClientOnlyFilters(activeOnly, draftFilters);
     return sortProperties(withClientRules, draftSortMode);
   }, [propertiesQuery.data?.content, draftFilters, draftSortMode]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(visiblePages, totalPages);
-  const visibleCount = Math.min(filtered.length, currentPage * PAGE_SIZE);
-  const visibleItems = filtered.slice(0, visibleCount);
+  const currentPage = Math.min(currentPageState, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const maxVisibleFromCurrent = Math.max(0, filtered.length - startIndex);
+  const currentPageMaxSegments = Math.max(1, Math.ceil(maxVisibleFromCurrent / PAGE_SIZE));
+  const currentVisibleCount = Math.min(maxVisibleFromCurrent, loadedPagesFromCurrent * PAGE_SIZE);
+  const visibleItems = filtered.slice(startIndex, startIndex + currentVisibleCount);
+  const visibleCount = startIndex + visibleItems.length;
+  const remainingCount = Math.max(0, filtered.length - visibleCount);
+  const hasMoreFromCurrentPage = remainingCount > 0;
   const paginationItems = buildPagination(currentPage, totalPages);
+
+  useEffect(() => {
+    if (propertiesQuery.isLoading || propertiesQuery.isFetching) {
+      return;
+    }
+    if (currentPageState <= totalPages) {
+      return;
+    }
+    setCurrentPageState(totalPages);
+    setLoadedPagesFromCurrent(1);
+  }, [currentPageState, propertiesQuery.isFetching, propertiesQuery.isLoading, totalPages]);
 
   const fallbackMapPins = useMemo(() => buildFallbackMapPins(filtered), [filtered]);
   const mapPins = useMemo(() => {
     const serverPins = mapPinsQuery.data?.content ?? [];
-    return enrichMapPinsWithRooms(serverPins.length > 0 ? serverPins : fallbackMapPins, filtered);
+    const allowedIds = new Set(filtered.map((property) => property.id));
+    return enrichMapPinsWithRooms(serverPins.length > 0 ? serverPins : fallbackMapPins, filtered).filter((pin) =>
+      allowedIds.has(pin.id),
+    );
   }, [fallbackMapPins, filtered, mapPinsQuery.data?.content]);
 
   const selectedPropertyFromFiltered = useMemo(
@@ -136,14 +159,20 @@ export const useSearchPage = () => {
   const handleFiltersCommit = () => {
     setUrlFilters(draftFilters);
     setUrlSortMode(draftSortMode);
-    setVisiblePages(1);
+    setCurrentPageState(1);
+    setLoadedPagesFromCurrent(1);
   };
 
   const handleRentalTypeChange = (value: string) => {
-    setDraftFilters((prev) => ({
-      ...prev,
+    const nextFilters = {
+      ...draftFilters,
       rentalType: parseRentalType(value || null),
-    }));
+    };
+    setDraftFilters(nextFilters);
+    setUrlFilters(nextFilters);
+    setUrlSortMode(draftSortMode);
+    setCurrentPageState(1);
+    setLoadedPagesFromCurrent(1);
   };
 
   const handleRoomsSelect = (value: string) => {
@@ -173,25 +202,49 @@ export const useSearchPage = () => {
     setUrlFilters(empty);
     setDraftSortMode('NEWEST');
     setUrlSortMode('NEWEST');
-    setVisiblePages(1);
+    setCurrentPageState(1);
+    setLoadedPagesFromCurrent(1);
     setMapBounds(null);
     setSelectedMapPropertyId(undefined);
   };
 
   const showMore = () => {
-    setVisiblePages((prev) => Math.min(totalPages, prev + 1));
+    setLoadedPagesFromCurrent((prev) => Math.min(currentPageMaxSegments, prev + 1));
+  };
+
+  const scrollToTop = () => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.scrollTo({ top: SCROLL_TOP, behavior: 'smooth' });
   };
 
   const goPrevPage = () => {
-    setVisiblePages((prev) => Math.max(1, prev - 1));
+    if (currentPage <= 1) {
+      return;
+    }
+    setCurrentPageState(currentPage - 1);
+    setLoadedPagesFromCurrent(1);
+    scrollToTop();
   };
 
   const goNextPage = () => {
-    setVisiblePages((prev) => Math.min(totalPages, prev + 1));
+    if (currentPage >= totalPages) {
+      return;
+    }
+    setCurrentPageState(currentPage + 1);
+    setLoadedPagesFromCurrent(1);
+    scrollToTop();
   };
 
   const goToPage = (page: number) => {
-    setVisiblePages(page);
+    const clamped = Math.max(1, Math.min(totalPages, page));
+    if (clamped === currentPage) {
+      return;
+    }
+    setCurrentPageState(clamped);
+    setLoadedPagesFromCurrent(1);
+    scrollToTop();
   };
 
   const extraCount = countExtraFilters(draftFilters.extra);
@@ -227,6 +280,8 @@ export const useSearchPage = () => {
     currentPage,
     totalPages,
     visibleCount,
+    remainingCount,
+    hasMoreFromCurrentPage,
     paginationItems,
     favoriteIds,
     extraCount,

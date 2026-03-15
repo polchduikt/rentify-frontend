@@ -1,4 +1,4 @@
-import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
+import { Check, Search, SlidersHorizontal } from 'lucide-react';
 import { LOCATION_TYPE_LABELS } from '@/constants/searchFilters';
 import { useSearchFiltersPanelState } from '@/hooks/search/useSearchFiltersPanelState';
 import type { SearchFiltersPanelProps } from './SearchFiltersPanel.types';
@@ -10,6 +10,12 @@ const rangeLabel = (label: string, from: string, to: string, unit: string): stri
   if (from) return `${label}: від ${from} ${unit}`;
   if (to) return `${label}: до ${to} ${unit}`;
   return label;
+};
+
+const rentalTypeButtonLabel = (rentalType?: string): string => {
+  if (rentalType === 'SHORT_TERM') return 'Тип оренди: Подобово';
+  if (rentalType === 'LONG_TERM') return 'Тип оренди: Довгостроково';
+  return 'Тип оренди';
 };
 
 export const SearchFiltersPanel = ({
@@ -58,6 +64,7 @@ export const SearchFiltersPanel = ({
     expandedRows,
     toggleRow,
     applyMainPanel,
+    rentalTypeRef,
     priceRef,
     roomsRef,
     areaRef,
@@ -125,18 +132,40 @@ export const SearchFiltersPanel = ({
         </form>
 
         <div className={`mt-3 flex flex-wrap items-center gap-2 ${isMapMode ? 'relative' : ''}`}>
-          <label className="relative">
-            <select
-              value={rentalType ?? ''}
-              onChange={(event) => onRentalTypeChange(event.target.value)}
-              className="h-11 appearance-none rounded-full bg-white pl-4 pr-10 font-semibold"
-            >
-              <option value="">Тип оренди</option>
-              <option value="SHORT_TERM">Подобово</option>
-              <option value="LONG_TERM">Довгостроково</option>
-            </select>
-            <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" />
-          </label>
+          <div ref={rentalTypeRef} className="relative">
+            <DropdownTrigger
+              label={rentalTypeButtonLabel(rentalType)}
+              active={mainPanel === 'rental'}
+              onClick={() => setMainPanel((prev) => (prev === 'rental' ? null : 'rental'))}
+            />
+            {mainPanel === 'rental' ? (
+              <div className="absolute left-0 top-[calc(100%+10px)] z-40 w-[240px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+                {[
+                  { value: '', label: 'Усі' },
+                  { value: 'SHORT_TERM', label: 'Подобово' },
+                  { value: 'LONG_TERM', label: 'Довгостроково' },
+                ].map((option) => {
+                  const isActive = (rentalType ?? '') === option.value;
+                  return (
+                    <button
+                      key={option.value || 'all'}
+                      type="button"
+                      onClick={() => {
+                        onRentalTypeChange(option.value);
+                        setMainPanel(null);
+                      }}
+                      className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition ${
+                        isActive ? 'bg-gray-100 text-blue-700' : 'text-gray-800 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>{option.label}</span>
+                      {isActive ? <Check size={16} className="text-blue-700" /> : null}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
 
           <div ref={priceRef} className="relative">
             <DropdownTrigger

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { PROPERTY_CARD_FALLBACK_IMAGE } from '@/constants/propertyImages';
 import { ROUTES } from '@/config/routes';
 import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
+import { formatMoney } from '@/utils/profileFormatters';
 import { isTopPromotionActive } from '@/utils/promotions';
 import type { PropertyCardProps } from './PropertyCard.types';
 
@@ -26,7 +27,6 @@ const formatPublishedLabel = (createdAt?: string): string => {
   return `Опубліковано ${months} міс тому`;
 };
 
-
 const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
   const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
   const addToFavoritesMutation = useAddToFavoritesMutation();
@@ -40,6 +40,7 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
   const isRecommended = isTopPromotionActive(property);
   const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
+  const locationLine = [city, street].filter(Boolean).join(', ');
 
   const basePrice =
     property.rentalType === 'SHORT_TERM'
@@ -50,9 +51,9 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
 
   const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;
 
-  const handleFavoriteClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleFavoriteClick = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
 
     if (isLoading) return;
 
@@ -84,29 +85,23 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
           ) : null}
           <button
             onClick={handleFavoriteClick}
-            className="absolute top-3 right-3 inline-flex items-center justify-center rounded-lg bg-white/80 p-2 transition hover:bg-white"
+            className="absolute right-3 top-3 inline-flex items-center justify-center rounded-lg bg-white/80 p-2 transition hover:bg-white"
             aria-label={isLocalFavorite ? 'Видалити з улюблених' : 'Додати в улюблене'}
           >
-            <Heart
-              size={20}
-              fill={isLocalFavorite ? '#ef4444' : 'none'}
-              color={isLocalFavorite ? '#ef4444' : '#64748b'}
-            />
+            <Heart size={20} fill={isLocalFavorite ? '#ef4444' : 'none'} color={isLocalFavorite ? '#ef4444' : '#64748b'} />
           </button>
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col p-5">
           <div className="mb-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-slate-900">
-              {Number(basePrice || 0).toLocaleString('uk-UA')} {currency}
-            </span>
+            <span className="text-2xl font-bold text-slate-900">{formatMoney(basePrice || 0, currency)}</span>
             <span className="text-sm font-medium text-slate-500">{priceSuffix}</span>
           </div>
 
           <h3 className="text-lg font-bold text-slate-900 break-words [overflow-wrap:anywhere]">{property.title}</h3>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
             <MapPin size={14} />
-            <span className="break-words [overflow-wrap:anywhere]">{street || city}</span>
+            <span className="break-words [overflow-wrap:anywhere]">{locationLine}</span>
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">

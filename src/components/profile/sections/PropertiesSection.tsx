@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import type { PropertyResponseDto } from '@/types/property';
 import type { PropertiesSectionProps } from './PropertiesSection.types';
-import { useDeletePropertyMutation } from '@/hooks/api';
+import { useChangePropertyStatusMutation, useDeletePropertyMutation } from '@/hooks/api';
 import { getApiErrorMessage } from '@/utils/errors';
 import { PropertyPreviewItem } from '../PropertyPreviewItem';
 
 export const PropertiesSection = ({ title, properties, propertiesLoading, propertiesError }: PropertiesSectionProps) => {
   const [propertyToDelete, setPropertyToDelete] = useState<PropertyResponseDto | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [statusAction, setStatusAction] = useState<{ id: number; type: 'archive' | 'publish' } | null>(null);
   const deletePropertyMutation = useDeletePropertyMutation();
+  const changePropertyStatusMutation = useChangePropertyStatusMutation();
 
   const handleDeleteConfirm = async () => {
     if (!propertyToDelete) {
@@ -24,6 +27,36 @@ export const PropertiesSection = ({ title, properties, propertiesLoading, proper
     }
   };
 
+  const handleArchive = async (property: PropertyResponseDto) => {
+    setStatusError(null);
+    setStatusAction({ id: property.id, type: 'archive' });
+    try {
+      await changePropertyStatusMutation.mutateAsync({
+        propertyId: property.id,
+        payload: { status: 'INACTIVE' },
+      });
+    } catch (error) {
+      setStatusError(getApiErrorMessage(error, 'Не вдалося перенести оголошення в архів.'));
+    } finally {
+      setStatusAction(null);
+    }
+  };
+
+  const handlePublish = async (property: PropertyResponseDto) => {
+    setStatusError(null);
+    setStatusAction({ id: property.id, type: 'publish' });
+    try {
+      await changePropertyStatusMutation.mutateAsync({
+        propertyId: property.id,
+        payload: { status: 'ACTIVE' },
+      });
+    } catch (error) {
+      setStatusError(getApiErrorMessage(error, 'Не вдалося опублікувати оголошення.'));
+    } finally {
+      setStatusAction(null);
+    }
+  };
+
   return (
     <>
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -33,6 +66,7 @@ export const PropertiesSection = ({ title, properties, propertiesLoading, proper
         </div>
 
         {deleteError ? <p className="mb-4 text-sm text-rose-700">{deleteError}</p> : null}
+        {statusError ? <p className="mb-4 text-sm text-rose-700">{statusError}</p> : null}
 
         {propertiesError ? (
           <p className="text-sm text-rose-700">{propertiesError}</p>
@@ -50,6 +84,18 @@ export const PropertiesSection = ({ title, properties, propertiesLoading, proper
                 property={property}
                 onDelete={(item) => setPropertyToDelete(item)}
                 isDeleting={deletePropertyMutation.isPending && propertyToDelete?.id === property.id}
+                onArchive={(item) => void handleArchive(item)}
+                onPublish={(item) => void handlePublish(item)}
+                isArchiving={
+                  changePropertyStatusMutation.isPending &&
+                  statusAction?.id === property.id &&
+                  statusAction.type === 'archive'
+                }
+                isPublishing={
+                  changePropertyStatusMutation.isPending &&
+                  statusAction?.id === property.id &&
+                  statusAction.type === 'publish'
+                }
               />
             ))}
           </div>

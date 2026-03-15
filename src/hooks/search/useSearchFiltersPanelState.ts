@@ -7,6 +7,7 @@ export const useSearchFiltersPanelState = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
+  const rentalTypeRef = useRef<HTMLDivElement | null>(null);
   const priceRef = useRef<HTMLDivElement | null>(null);
   const roomsRef = useRef<HTMLDivElement | null>(null);
   const areaRef = useRef<HTMLDivElement | null>(null);
@@ -17,7 +18,8 @@ export const useSearchFiltersPanelState = () => {
       const target = event.target as Node;
 
       if (mainPanel) {
-        const panelRef = mainPanel === 'price' ? priceRef : mainPanel === 'rooms' ? roomsRef : areaRef;
+        const panelRef =
+          mainPanel === 'rental' ? rentalTypeRef : mainPanel === 'price' ? priceRef : mainPanel === 'rooms' ? roomsRef : areaRef;
         if (panelRef.current && !panelRef.current.contains(target)) {
           setMainPanel(null);
         }
@@ -51,6 +53,7 @@ export const useSearchFiltersPanelState = () => {
     expandedRows,
     toggleRow,
     applyMainPanel,
+    rentalTypeRef,
     priceRef,
     roomsRef,
     areaRef,

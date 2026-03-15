@@ -8,4 +8,6 @@ export interface CreatePropertyStepActionsProps {
   onPrev: () => void;
   onNext: () => void;
   onPublish: () => void;
+  onSaveDraft?: () => void;
+  onCancel?: () => void;
 }

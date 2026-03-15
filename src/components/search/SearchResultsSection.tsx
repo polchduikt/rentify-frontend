@@ -117,7 +117,7 @@ export const SearchResultsSection = ({
                 <button
                   type="button"
                   onClick={onShowMore}
-                  className="inline-flex h-12 items-center gap-2 rounded-2xl border border-[#1a2f5f]/40 bg-white px-7 font-semibold text-gray-800 hover:bg-gray-50"
+                  className="inline-flex h-12 items-center gap-2 rounded-2xl bg-[#13284f] px-7 font-semibold text-white shadow-[0_12px_26px_-18px_rgba(19,40,79,0.9)] transition hover:bg-[#102142]"
                 >
                   <RotateCw size={16} />
                   Показати ще {Math.min(20, filtered.length - visibleCount)}
@@ -125,18 +125,18 @@ export const SearchResultsSection = ({
               </div>
             )}
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
+            <div className="rounded-3xl border border-[#d8e1f1] bg-gradient-to-br from-white via-[#f7f9fd] to-[#eef3fb] p-4 shadow-[0_18px_35px_-30px_rgba(19,40,79,0.75)] sm:p-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm font-medium text-[#405071]">
                   Показано {visibleCount} з {filtered.length}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#d8e2f3] bg-white/90 p-1.5 shadow-sm backdrop-blur">
                   <button
                     type="button"
                     onClick={onPrevPage}
                     disabled={currentPage === 1}
-                    className="inline-flex h-10 items-center rounded-xl border border-gray-300 bg-white px-3 text-gray-700 disabled:border-gray-200 disabled:text-gray-300"
+                    className="inline-flex h-10 items-center rounded-xl border border-[#cad7ee] bg-white px-3 text-[#1f3763] transition hover:border-[#9fb4d8] hover:bg-[#f3f7ff] disabled:border-[#e4e9f4] disabled:bg-[#f7f9fd] disabled:text-[#a6b1c5]"
                     aria-label="Попередня сторінка"
                   >
                     <ChevronLeft size={16} />
@@ -148,10 +148,10 @@ export const SearchResultsSection = ({
                         key={item}
                         type="button"
                         onClick={() => onPageChange(item)}
-                        className={`h-10 min-w-10 rounded-xl border px-3 text-sm font-semibold ${
+                        className={`h-10 min-w-10 rounded-xl border px-3 text-sm font-semibold transition ${
                           item === currentPage
-                            ? 'border-gray-900 bg-gray-900 text-white'
-                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'border-[#13284f] bg-gradient-to-br from-[#13284f] to-[#1f3f79] text-white shadow-[0_12px_24px_-18px_rgba(19,40,79,0.95)]'
+                            : 'border-[#cad7ee] bg-white text-[#1f3763] hover:border-[#9fb4d8] hover:bg-[#f3f7ff]'
                         }`}
                       >
                         {item}
@@ -159,7 +159,7 @@ export const SearchResultsSection = ({
                     ) : (
                       <span
                         key={item}
-                        className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-3 text-gray-400"
+                        className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-[#e2e8f4] bg-[#f8faff] px-3 text-[#9ba9c2]"
                       >
                         ...
                       </span>
@@ -170,7 +170,7 @@ export const SearchResultsSection = ({
                     type="button"
                     onClick={onNextPage}
                     disabled={currentPage === totalPages}
-                    className="inline-flex h-10 items-center rounded-xl border border-gray-300 bg-white px-3 text-gray-700 disabled:border-gray-200 disabled:text-gray-300"
+                    className="inline-flex h-10 items-center rounded-xl border border-[#cad7ee] bg-white px-3 text-[#1f3763] transition hover:border-[#9fb4d8] hover:bg-[#f3f7ff] disabled:border-[#e4e9f4] disabled:bg-[#f7f9fd] disabled:text-[#a6b1c5]"
                     aria-label="Наступна сторінка"
                   >
                     <ChevronRight size={16} />

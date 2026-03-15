@@ -53,7 +53,7 @@ export const usePublicProfilePage = () => {
     [allHostProperties],
   );
 
-  const displayedProperties = publishedProperties.length > 0 ? publishedProperties : allHostProperties;
+  const displayedProperties = publishedProperties;
   const displayedCount = displayedProperties.length;
   const averageRating =
     displayedCount > 0

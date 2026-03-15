@@ -53,12 +53,15 @@ export const PropertyDetailsMainSections = ({
 }: PropertyDetailsMainSectionsProps) => {
   const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
   const [isPhotoViewerOpen, setIsPhotoViewerOpen] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const addToFavoritesMutation = useAddToFavoritesMutation();
   const removeFromFavoritesMutation = useRemoveFromFavoritesMutation();
 
   const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;
   const isLongTerm = property.rentalType === 'LONG_TERM';
   const hasPhotoNavigation = photos.length > 1;
+  const descriptionText = property.description?.trim() || '';
+  const isDescriptionLong = descriptionText.length > 420;
 
   const handlePhotoNavigate = (direction: 'prev' | 'next') => {
     if (!hasPhotoNavigation) {
@@ -106,6 +109,10 @@ export const PropertyDetailsMainSections = ({
       document.body.style.overflow = previousOverflow;
     };
   }, [isPhotoViewerOpen, activePhotoIndex, photos.length, onPhotoSelect]);
+
+  useEffect(() => {
+    setIsDescriptionExpanded(false);
+  }, [property.id]);
 
   const handleFavoriteClick = async () => {
     if (isLoading) return;
@@ -432,9 +439,29 @@ export const PropertyDetailsMainSections = ({
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-bold text-slate-900">Опис</h2>
-          <p className="mt-3 whitespace-pre-line break-words [overflow-wrap:anywhere] text-[15px] leading-relaxed text-slate-700">
-            {property.description || 'Опис відсутній.'}
-          </p>
+          <div className="relative mt-3">
+            <p
+              className={`whitespace-pre-line break-words [overflow-wrap:anywhere] text-[15px] leading-relaxed text-slate-700 ${
+                isDescriptionLong && !isDescriptionExpanded ? 'max-h-[220px] overflow-hidden' : ''
+              }`}
+            >
+              {property.description || 'Опис відсутній.'}
+            </p>
+
+            {isDescriptionLong && !isDescriptionExpanded ? (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white via-white/95 to-transparent" />
+            ) : null}
+          </div>
+
+          {isDescriptionLong ? (
+            <button
+              type="button"
+              onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+              className="mt-3 inline-flex items-center rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+            >
+              {isDescriptionExpanded ? 'Сховати' : 'Розкрити повністю'}
+            </button>
+          ) : null}
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

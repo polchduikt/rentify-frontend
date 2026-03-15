@@ -79,11 +79,11 @@ const EditPropertyPage = () => {
             isSubmitting={model.isSubmitting}
             isLastStep={isLastStep}
             isStepComplete={model.stepCompletion[model.step]}
-            submitLabel="Зберегти зміни"
-            submittingLabel="Збереження..."
             onPrev={model.goPrevStep}
             onNext={model.goNextStep}
             onPublish={model.publishProperty}
+            onSaveDraft={() => void model.saveDraftProperty()}
+            onCancel={model.cancelEditing}
           />
         </section>
       </div>

@@ -4,7 +4,7 @@ export type SearchViewMode = 'single' | 'double' | 'map';
 
 export type SearchSortMode = 'NEWEST' | 'PRICE_ASC' | 'PRICE_DESC';
 
-export type SearchMainPanel = 'price' | 'rooms' | 'area' | null;
+export type SearchMainPanel = 'rental' | 'price' | 'rooms' | 'area' | null;
 
 export type SearchPaginationItem = number | 'dots-left' | 'dots-right';
 

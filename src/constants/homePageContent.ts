@@ -1,8 +1,12 @@
 import type { RentalType } from '@/types/enums';
 import cityKharkivPhoto from '@/assets/images/home/city-kharkiv.jpg';
+import cityIvanofrankifskPhoto from '@/assets/images/home/city-ivanofrankifsk.jpg';
+import cityJitomerPhoto from '@/assets/images/home/city-jitomer.jpg';
 import cityKyivPhoto from '@/assets/images/home/city-kyiv.jpg';
 import cityLvivPhoto from '@/assets/images/home/city-lviv.jpg';
 import cityOdesaPhoto from '@/assets/images/home/city-odesa.jpg';
+import cityRivnePhoto from '@/assets/images/home/city-rivne.jpg';
+import cityVinnicaPhoto from '@/assets/images/home/city-vinnica.jpg';
 import heroCityPhoto from '@/assets/images/home/hero-city.jpg';
 import hostPropertyPhoto from '@/assets/images/home/host-property.jpg';
 import mapEntryPhoto from '@/assets/images/home/map-entry.jpg';
@@ -25,10 +29,54 @@ export const HOME_HERO_RENTAL_OPTIONS: ReadonlyArray<{ value: RentalType; label:
 ] as const;
 
 export const HOME_POPULAR_CITIES = [
-  { name: 'Київ', query: 'Київ', image: cityKyivPhoto },
-  { name: 'Львів', query: 'Львів', image: cityLvivPhoto },
-  { name: 'Одеса', query: 'Одеса', image: cityOdesaPhoto },
-  { name: 'Харків', query: 'Харків', image: cityKharkivPhoto },
+  {
+    name: 'Київ',
+    query: 'Київ',
+    image: cityKyivPhoto,
+    countQueries: ['Київ', 'Kyiv', 'Kiev'],
+  },
+  {
+    name: 'Львів',
+    query: 'Львів',
+    image: cityLvivPhoto,
+    countQueries: ['Львів', 'Lviv'],
+  },
+  {
+    name: 'Одеса',
+    query: 'Одеса',
+    image: cityOdesaPhoto,
+    countQueries: ['Одеса', 'Odesa', 'Odessa'],
+  },
+  {
+    name: 'Харків',
+    query: 'Харків',
+    image: cityKharkivPhoto,
+    countQueries: ['Харків', 'Kharkiv', 'Kharkov'],
+  },
+  {
+    name: 'Вінниця',
+    query: 'Вінниця',
+    image: cityVinnicaPhoto,
+    countQueries: ['Вінниця', 'Vinnytsia', 'Vinnitsa'],
+  },
+  {
+    name: 'Житомир',
+    query: 'Житомир',
+    image: cityJitomerPhoto,
+    countQueries: ['Житомир', 'Zhytomyr', 'Zhitomir'],
+  },
+  {
+    name: 'Рівне',
+    query: 'Рівне',
+    image: cityRivnePhoto,
+    countQueries: ['Рівне', 'Rivne', 'Rovno'],
+  },
+  {
+    name: 'Івано-Франківськ',
+    query: 'Івано-Франківськ',
+    image: cityIvanofrankifskPhoto,
+    countQueries: ['Івано-Франківськ', 'Івано Франківськ', 'Ivano-Frankivsk', 'Ivano Frankivsk', 'Frankivsk'],
+  },
 ] as const;
 
 export const HOME_WORKFLOW_STEPS = [
@@ -38,7 +86,7 @@ export const HOME_WORKFLOW_STEPS = [
   },
   {
     title: 'Бронюй',
-    description: 'Порівнюйте умови, ціни і зручності. Бронювання займає кілька хвилин.',
+    description: 'Порівнюйте умови, ціни та зручності. Бронювання займає кілька хвилин.',
   },
   {
     title: 'Заселяйся',
@@ -61,10 +109,10 @@ export const HOME_FAQ_ITEMS = [
   {
     question: 'Чи можу я шукати лише короткострокову оренду?',
     answer:
-      'Так. У пошуку доступний фільтр формату оренди, а в hero є швидкий перемикач Подобово або Помісячно перед переходом у каталог.',
+      'Так. У пошуку є фільтр формату оренди, а в hero доступний швидкий перемикач Подобово або Помісячно перед переходом у каталог.',
   },
   {
-    question: 'Як зв’язатися з власником?',
+    question: 'Як звʼязатися з власником?',
     answer:
       'Після відкриття оголошення можна надіслати запит або написати в чаті. Історія комунікації зберігається у вашому профілі.',
   },
@@ -74,8 +122,8 @@ export const HOME_FAQ_ITEMS = [
       'Умови залежать від конкретного оголошення. Перед бронюванням завжди видно підсумкову вартість, додаткові платежі та правила.',
   },
   {
-    question: 'Як власнику швидко додати новий об’єкт?',
+    question: 'Як власнику швидко додати новий обʼєкт?',
     answer:
-      'Створіть оголошення у кілька кроків: адреса, опис, зручності, ціна та фото. Після публікації об’єкт одразу доступний у пошуку.',
+      'Створіть оголошення у кілька кроків: адреса, опис, зручності, ціна та фото. Після публікації обʼєкт одразу доступний у пошуку.',
   },
 ] as const;

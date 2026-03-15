@@ -6,6 +6,7 @@ import { ROUTES } from '@/config/routes';
 import {
   useAvailabilityBlocksQuery,
   useAmenitiesGroupedQuery,
+  useChangePropertyStatusMutation,
   useCreateAvailabilityBlockMutation,
   useCreatePropertyMutation,
   useDeleteAvailabilityBlockMutation,
@@ -92,6 +93,7 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
   const amenitiesGroupedQuery = useAmenitiesGroupedQuery();
   const editPropertyQuery = usePropertyByIdQuery(propertyId, isEditMode);
   const availabilityBlocksQuery = useAvailabilityBlocksQuery(propertyId, isEditMode);
+  const changePropertyStatusMutation = useChangePropertyStatusMutation();
   const createPropertyMutation = useCreatePropertyMutation();
   const updatePropertyMutation = useUpdatePropertyMutation();
   const uploadPhotoMutation = useUploadPropertyPhotoMutation();
@@ -102,6 +104,7 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
 
   const isSubmitting =
     (isEditMode ? updatePropertyMutation.isPending : createPropertyMutation.isPending) ||
+    changePropertyStatusMutation.isPending ||
     uploadPhotoMutation.isPending ||
     deletePhotoMutation.isPending ||
     createAvailabilityBlockMutation.isPending ||
@@ -412,18 +415,162 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
         );
       }
 
+      await changePropertyStatusMutation.mutateAsync({
+        propertyId: savedProperty.id,
+        payload: { status: 'ACTIVE' },
+      });
+
       setSubmitSuccess(
         isEditMode
           ? `Оголошення #${savedProperty.id} оновлено успішно.`
           : `Оголошення #${savedProperty.id} створено успішно.`,
       );
-      navigate(isEditMode ? ROUTES.profile : ROUTES.search, { replace: false });
+      navigate(`${ROUTES.profile}?section=properties-published`, { replace: false });
     } catch (error) {
       setSubmitError(
         getApiErrorMessage(error, isEditMode ? 'Не вдалося оновити оголошення' : 'Не вдалося створити оголошення'),
       );
     }
   });
+
+  const normalizeDraftValues = (values: PropertyCreateFormValues): PropertyCreateFormValues => {
+    const rentalType = values.rentalType === 'SHORT_TERM' ? 'SHORT_TERM' : 'LONG_TERM';
+    const shortTermCheckIn = values.checkInTime.trim() || '10:00';
+    const shortTermCheckOut = values.checkOutTime.trim() || '12:00';
+    const hasValidShortTermTimeRange = shortTermCheckIn < shortTermCheckOut;
+
+    return {
+      ...values,
+      rentalType,
+      propertyType: values.propertyType.trim() || 'APARTMENT',
+      title: values.title.trim() || 'Чернетка оголошення',
+      description:
+        values.description.trim() ||
+        'Чернетка оголошення. Поверніться до редагування та перевірте дані перед публікацією.',
+      cityQuery: values.cityQuery.trim() || 'Київ',
+      country: values.country.trim() || 'Ukraine',
+      city: values.city.trim() || 'Київ',
+      street: values.street.trim() || 'Вулиця',
+      lat: values.lat.trim() || '49.000000',
+      lng: values.lng.trim() || '31.000000',
+      rooms: values.rooms.trim() || '1',
+      floor: values.floor.trim() || '1',
+      totalFloors: values.totalFloors.trim() || '1',
+      areaSqm: values.areaSqm.trim() || '30',
+      maxGuests: rentalType === 'SHORT_TERM' ? values.maxGuests.trim() || '1' : values.maxGuests,
+      checkInTime: rentalType === 'SHORT_TERM' ? (hasValidShortTermTimeRange ? shortTermCheckIn : '10:00') : values.checkInTime,
+      checkOutTime: rentalType === 'SHORT_TERM' ? (hasValidShortTermTimeRange ? shortTermCheckOut : '12:00') : values.checkOutTime,
+      pricePerNight: rentalType === 'SHORT_TERM' ? values.pricePerNight.trim() || '1' : values.pricePerNight,
+      pricePerMonth: rentalType === 'LONG_TERM' ? values.pricePerMonth.trim() || '1' : values.pricePerMonth,
+      currency: values.currency.trim() || 'UAH',
+    };
+  };
+
+  const saveDraftProperty = async () => {
+    setSubmitError('');
+    setSubmitSuccess('');
+
+    try {
+      const values = normalizeDraftValues(form.getValues());
+      const payload = buildCreatePropertyPayload(values, selectedLocation, amenitySlugs, locationRefIds);
+      const savedProperty = isEditMode
+        ? await updatePropertyMutation.mutateAsync({ id: propertyId, payload })
+        : await createPropertyMutation.mutateAsync(payload);
+
+      const currentExistingPhotoIds = existingPhotos.map((photo) => photo.id);
+      const existingPhotosChanged =
+        isEditMode && !areIdsEqual(initialExistingPhotoIdsRef.current, currentExistingPhotoIds);
+
+      if (existingPhotosChanged) {
+        const existingFiles = await Promise.all(
+          existingPhotos.map((photo, index) => toFileFromUrl(photo.url, `property-${savedProperty.id}-existing-${index + 1}`)),
+        );
+
+        for (const photoId of initialExistingPhotoIdsRef.current) {
+          try {
+            await deletePhotoMutation.mutateAsync({
+              propertyId: savedProperty.id,
+              photoId,
+            });
+          } catch (error) {
+            if (!isNotFoundError(error)) {
+              throw error;
+            }
+          }
+        }
+
+        const orderedFiles = [...existingFiles, ...photos];
+        for (const file of orderedFiles) {
+          await uploadPhotoMutation.mutateAsync({
+            propertyId: savedProperty.id,
+            file,
+          });
+        }
+      } else if (photos.length > 0) {
+        for (const file of photos) {
+          await uploadPhotoMutation.mutateAsync({
+            propertyId: savedProperty.id,
+            file,
+          });
+        }
+      }
+
+      if (removedExistingAvailabilityBlockIds.length > 0) {
+        await Promise.all(
+          removedExistingAvailabilityBlockIds.map((blockId) =>
+            deleteAvailabilityBlockMutation.mutateAsync({
+              propertyId: savedProperty.id,
+              blockId,
+            }),
+          ),
+        );
+      }
+
+      if (availabilityBlocks.length > 0) {
+        await Promise.all(
+          availabilityBlocks.map((block) =>
+            createAvailabilityBlockMutation.mutateAsync({
+              propertyId: savedProperty.id,
+              payload: {
+                dateFrom: block.dateFrom,
+                dateTo: block.dateTo,
+                reason: block.reason || undefined,
+              },
+            }),
+          ),
+        );
+      }
+
+      await changePropertyStatusMutation.mutateAsync({
+        propertyId: savedProperty.id,
+        payload: { status: 'DRAFT' },
+      });
+
+      setSubmitSuccess(`Оголошення #${savedProperty.id} збережено у чернетках.`);
+      navigate(`${ROUTES.profile}?section=properties-drafts`, { replace: false });
+    } catch (error) {
+      setSubmitError(
+        getApiErrorMessage(error, isEditMode ? 'Не вдалося зберегти чернетку оголошення' : 'Не вдалося створити чернетку оголошення'),
+      );
+    }
+  };
+
+  const cancelEditing = () => {
+    if (!isEditMode) {
+      navigate(`${ROUTES.profile}?section=properties-drafts`);
+      return;
+    }
+
+    const propertyStatus = String(editPropertyQuery.data?.status ?? '').toUpperCase();
+    const section =
+      propertyStatus === 'DRAFT'
+        ? 'properties-drafts'
+        : propertyStatus === 'INACTIVE' || propertyStatus === 'BLOCKED'
+          ? 'properties-archived'
+          : 'properties-published';
+
+    navigate(`${ROUTES.profile}?section=${section}`);
+  };
 
   const latValue = form.watch('lat');
   const lngValue = form.watch('lng');
@@ -615,6 +762,8 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     goNextStep,
     goPrevStep,
     publishProperty,
+    saveDraftProperty,
+    cancelEditing,
     toggleAmenity,
     removeExistingPhoto,
     moveExistingPhoto,

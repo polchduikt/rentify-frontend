@@ -53,6 +53,8 @@ const CreatePropertyPage = () => {
             onPrev={model.goPrevStep}
             onNext={model.goNextStep}
             onPublish={model.publishProperty}
+            onSaveDraft={() => void model.saveDraftProperty()}
+            onCancel={model.cancelEditing}
           />
         </section>
       </div>

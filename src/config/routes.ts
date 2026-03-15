@@ -17,6 +17,7 @@ export const ROUTES = {
   register: '/register',
   about: '/about',
   contacts: '/contacts',
+  support: '/support',
   privacy: '/privacy',
   terms: '/terms',
 } as const;

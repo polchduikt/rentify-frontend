@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, Heart, Home, Menu, Moon, Plus, Sun, User, X } from 'lucide-react';
+import { Bell, Heart, Menu, Moon, Plus, Sun, User, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { APP_CONTENT } from '@/constants/appContent';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { resolveAvatarUrl } from '@/utils/avatar';
+
+const INFO_NAV_LINKS = [
+  { label: 'Про нас', to: ROUTES.about },
+  { label: 'Контакти', to: ROUTES.contacts },
+  { label: 'Підтримка', to: ROUTES.support },
+] as const;
+const BRAND_LOGO_PATH = '/rentify-logo.svg';
 
 const Navbar = () => {
   const { user, isAuthenticated } = useAuth();
@@ -31,9 +38,7 @@ const Navbar = () => {
       <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-5">
           <Link to={ROUTES.home} className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
-              <Home size={18} />
-            </span>
+            <img src={BRAND_LOGO_PATH} alt="Логотип Rentify" className="h-9 w-9 rounded-lg object-cover" loading="lazy" />
             <span className="text-[28px] font-black leading-none text-slate-900">{APP_CONTENT.companyName}</span>
           </Link>
 
@@ -47,6 +52,23 @@ const Navbar = () => {
           >
             Орендувати
           </Link>
+
+          <nav className="hidden items-center gap-1 lg:flex">
+            {INFO_NAV_LINKS.map((link) => {
+              const isActive = location.pathname === link.to;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    isActive ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
         {isAuthenticated ? (
@@ -94,10 +116,7 @@ const Navbar = () => {
             <button type="button" onClick={toggleTheme} className={desktopIconButtonClass} aria-label={themeButtonLabel}>
               {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <Link
-              to={ROUTES.login}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-            >
+            <Link to={ROUTES.login} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
               Вхід
             </Link>
             <Link
@@ -141,6 +160,7 @@ const Navbar = () => {
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               {themeButtonLabel}
             </button>
+
             <Link
               to={ROUTES.search}
               onClick={() => setOpen(false)}
@@ -150,6 +170,22 @@ const Navbar = () => {
             >
               Орендувати
             </Link>
+
+            {INFO_NAV_LINKS.map((link) => {
+              const isActive = location.pathname === link.to;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
+                    isActive ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
           {isAuthenticated ? (

@@ -14,6 +14,6 @@ export const FOOTER_LINKS: Record<string, Array<{ label: string; to: string }>> 
   Компанія: [
     { label: 'Про нас', to: ROUTES.about },
     { label: 'Контакти', to: ROUTES.contacts },
-    { label: 'Підтримка', to: ROUTES.contacts },
+    { label: 'Підтримка', to: ROUTES.support },
   ],
 };

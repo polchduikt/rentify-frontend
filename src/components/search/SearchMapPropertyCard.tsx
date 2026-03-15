@@ -1,117 +1,175 @@
-import { Layers, MapPin, ZoomIn } from 'lucide-react';
+import { BadgeCheck, BedDouble, Layers, MapPin, Ruler, Users, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEARCH_PROPERTY_FALLBACK_IMAGE } from '@/constants/propertyImages';
 import { ROUTES } from '@/config/routes';
 import { isTopPromotionActive } from '@/utils/promotions';
-import { resolveCompactRooms, resolveMapAddressLine, resolveMapPropertyMeta, resolveMapPropertyPrice } from '@/utils/searchMap';
+import { resolveMapAddressLine, resolveMapPropertyPrice } from '@/utils/searchMap';
 import type { SearchMapPropertyCardProps } from './SearchMapPropertyCard.types';
 
-export const SearchMapPropertyCard = ({ property, onClose }: SearchMapPropertyCardProps) => {
-  const { value: selectedPrice, suffix: selectedPriceSuffix, currency: selectedCurrency } = resolveMapPropertyPrice(property);
-  const selectedRoomsCompact = resolveCompactRooms(property);
-  const isRecommended = isTopPromotionActive(property);
+const MARKET_TYPE_LABELS: Record<string, string> = {
+  SECONDARY: 'Вторинний ринок',
+  NEW_BUILD: 'Новобудова',
+};
 
+const RENTAL_TYPE_LABELS: Record<string, string> = {
+  SHORT_TERM: 'Подобово',
+  LONG_TERM: 'Довгостроково',
+};
+
+const formatPublishedDate = (value?: string): string => {
+  if (!value) {
+    return 'Опубліковано нещодавно';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Опубліковано нещодавно';
+  }
+
+  return `Опубліковано ${date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+};
+
+const sidePanelClassName =
+  'absolute bottom-4 left-4 z-[640] hidden h-[min(66vh,680px)] w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_24px_50px_rgba(15,23,42,0.28)] lg:block xl:w-[390px]';
+
+export const SearchMapPropertyCard = ({ property, onClose }: SearchMapPropertyCardProps) => {
   if (!property) {
     return (
-      <aside className="absolute bottom-4 left-4 top-4 z-[640] hidden w-[390px] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_28px_60px_rgba(15,23,42,0.28)] lg:block">
+      <aside className={sidePanelClassName}>
         <div className="flex h-full items-center justify-center p-6 text-center text-slate-500">Завантаження оголошення...</div>
       </aside>
     );
   }
 
+  const { value: selectedPrice, suffix: selectedPriceSuffix, currency: selectedCurrency } = resolveMapPropertyPrice(property);
+  const heroPhoto = property.photos?.[0]?.url || SEARCH_PROPERTY_FALLBACK_IMAGE;
+  const galleryPhotos = property.photos?.slice(1, 5) ?? [];
+  const cityLabel = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
+  const isRecommended = isTopPromotionActive(property);
+  const rentalTypeLabel = RENTAL_TYPE_LABELS[property.rentalType] || property.rentalType;
+  const marketTypeLabel = MARKET_TYPE_LABELS[property.marketType] || property.marketType;
+
   return (
-    <aside className="absolute bottom-4 left-4 top-4 z-[640] hidden w-[390px] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_28px_60px_rgba(15,23,42,0.28)] lg:block">
-      <div className="h-full overflow-auto p-3">
-        <article className="relative rounded-[24px] bg-white p-2 shadow-sm">
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-5 top-5 z-30 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-slate-700 shadow-sm hover:bg-white"
-            aria-label="Закрити картку"
-          >
-            x
-          </button>
-
-          <Link
-            to={ROUTES.propertyDetails(property.id)}
-            aria-label={`Переглянути оголошення: ${property.title}`}
-            className="block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-          >
-            <div className="relative overflow-hidden rounded-[20px]">
-              <img
-                src={property.photos?.[0]?.url || SEARCH_PROPERTY_FALLBACK_IMAGE}
-                alt={property.title}
-                className="h-[240px] w-full object-cover"
-              />
-              {isRecommended ? (
-                <span className="absolute left-4 top-4 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white">
-                  Рекомендовано
-                </span>
-              ) : null}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent p-4">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[30px] font-black leading-none text-white">
-                      {selectedPrice > 0 ? selectedPrice.toLocaleString('uk-UA') : '0'} {selectedCurrency}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-white/85">{selectedPriceSuffix}</p>
-                  </div>
-                  {selectedRoomsCompact ? (
-                    <span className="inline-flex rounded-full bg-white/90 px-3 py-1 text-sm font-bold text-slate-900">
-                      {selectedRoomsCompact}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-
-            <div className="min-w-0 px-1 pb-2 pt-4">
-              <p className="text-xl font-extrabold leading-tight text-slate-900 break-words [overflow-wrap:anywhere]">
-                {resolveMapAddressLine(property)}
+    <aside className={sidePanelClassName}>
+      <div className="flex h-full flex-col">
+        <header className="border-b border-slate-200 px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="truncate text-lg leading-tight font-bold text-slate-900">{resolveMapAddressLine(property)}</h3>
+              <p className="mt-1 flex items-center gap-1 text-sm text-slate-600">
+                <MapPin size={14} />
+                {cityLabel}
               </p>
-              <p className="mt-1 text-sm font-medium text-slate-500">{property.address?.location?.city || 'Місто не вказано'}</p>
-              <p className="mt-3 text-sm text-slate-700">{resolveMapPropertyMeta(property)}</p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+              aria-label="Закрити картку"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </header>
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-                  <MapPin size={12} className="mr-1" />
-                  {property.propertyType}
-                </span>
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
-                  <ZoomIn size={12} className="mr-1" />
-                  {property.rentalType === 'SHORT_TERM' ? 'Подобово' : 'Довгостроково'}
-                </span>
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
-                  <Layers size={12} className="mr-1" />
-                  {property.marketType}
-                </span>
+        <div className="flex-1 overflow-hidden p-3">
+          <article className="space-y-3">
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200">
+              <img src={heroPhoto} alt={property.title} className="h-[182px] w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/15 to-transparent" />
+
+              <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                {isRecommended ? (
+                  <span className="rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white">Рекомендовано</span>
+                ) : null}
+                {property.isVerifiedProperty ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                    <BadgeCheck size={12} />
+                    Перевірене
+                  </span>
+                ) : null}
               </div>
 
-              {property.photos && property.photos.length > 1 ? (
-                <div className="mt-4 flex gap-2 overflow-auto pb-1">
-                  {property.photos.slice(1, 6).map((photo) => (
-                    <img key={photo.id} src={photo.url} alt="" className="h-16 w-20 shrink-0 rounded-xl object-cover" />
-                  ))}
-                </div>
-              ) : null}
-
-              {property.description ? (
-                <p
-                  className="mt-4 rounded-xl bg-slate-50 p-3 text-sm leading-relaxed text-slate-600 break-words [overflow-wrap:anywhere]"
-                  style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {property.description}
+              <div className="absolute bottom-3 left-3 right-3">
+                <p className="text-[34px] leading-none font-black text-white">
+                  {selectedPrice > 0 ? selectedPrice.toLocaleString('uk-UA') : '0'} {selectedCurrency}
                 </p>
-              ) : null}
-
+                <p className="mt-1 text-xs font-semibold text-white/90">{selectedPriceSuffix}</p>
+              </div>
             </div>
-          </Link>
-        </article>
+
+            {galleryPhotos.length > 0 ? (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {galleryPhotos.map((photo) => (
+                  <img key={photo.id} src={photo.url} alt="" className="h-14 w-20 shrink-0 rounded-xl border border-slate-200 object-cover" />
+                ))}
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700">
+                <span className="flex items-center gap-1">
+                  <BedDouble size={13} />
+                  {property.rooms || 0} кім.
+                </span>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700">
+                <span className="flex items-center gap-1">
+                  <Ruler size={13} />
+                  {property.areaSqm ? `${Number(property.areaSqm)} м²` : 'Площа не вказана'}
+                </span>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700">
+                <span className="flex items-center gap-1">
+                  <Layers size={13} />
+                  {property.floor && property.totalFloors ? `${property.floor}/${property.totalFloors} поверх` : 'Поверх не вказано'}
+                </span>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700">
+                <span className="flex items-center gap-1">
+                  <Users size={13} />
+                  {property.maxGuests || 0} гостей
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                {rentalTypeLabel}
+              </span>
+              <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                {marketTypeLabel}
+              </span>
+              {property.rules?.petsAllowed ? (
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                  Можна з тваринами
+                </span>
+              ) : null}
+            </div>
+
+            {property.description ? <p className="line-clamp-2 text-xs leading-relaxed text-slate-600">{property.description}</p> : null}
+
+            <p className="text-[11px] text-slate-500">{formatPublishedDate(property.createdAt)}</p>
+          </article>
+        </div>
+
+        <footer className="border-t border-slate-200 p-3">
+          <div className="flex items-center gap-2">
+            <Link
+              to={ROUTES.propertyDetails(property.id)}
+              className="inline-flex h-10 flex-1 items-center justify-center rounded-xl bg-blue-600 px-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+            >
+              Відкрити повний перегляд
+            </Link>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              Закрити
+            </button>
+          </div>
+        </footer>
       </div>
     </aside>
   );

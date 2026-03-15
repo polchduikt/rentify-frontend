@@ -1,11 +1,13 @@
 import { lazy, Suspense, type ReactNode, useEffect } from 'react';
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Outlet, Route, Routes, matchPath, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
 import MainLayout from '@/layouts/MainLayout';
 
 const BookingPaymentPage = lazy(() => import('@/pages/BookingPaymentPage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const ContactsPage = lazy(() => import('@/pages/ContactsPage'));
 const CreatePropertyPage = lazy(() => import('@/pages/CreatePropertyPage'));
 const EditPropertyPage = lazy(() => import('@/pages/EditPropertyPage'));
 const FavoritesPage = lazy(() => import('@/pages/FavoritesPage'));
@@ -18,6 +20,7 @@ const PropertyDetailsPage = lazy(() => import('@/pages/PropertyDetailsPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const SearchMapPage = lazy(() => import('@/pages/SearchMapPage'));
+const SupportPage = lazy(() => import('@/pages/SupportPage'));
 
 const FullPageLoader = () => (
   <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-700">Завантаження...</div>
@@ -99,8 +102,83 @@ const ScrollToTop = () => {
   return null;
 };
 
+const resolvePageTitle = (pathname: string): string => {
+  if (pathname === ROUTES.home) {
+    return 'Rentify - Оренда житла в Україні';
+  }
+
+  if (pathname === ROUTES.search) {
+    return 'Пошук оголошень - Rentify';
+  }
+
+  if (pathname === ROUTES.searchMap) {
+    return 'Пошук на мапі - Rentify';
+  }
+
+  if (pathname === ROUTES.about) {
+    return 'Про нас - Rentify';
+  }
+
+  if (pathname === ROUTES.contacts) {
+    return 'Контакти - Rentify';
+  }
+
+  if (pathname === ROUTES.support) {
+    return 'Підтримка - Rentify';
+  }
+
+  if (pathname === ROUTES.profile) {
+    return 'Профіль - Rentify';
+  }
+
+  if (pathname === ROUTES.favorites) {
+    return 'Обране - Rentify';
+  }
+
+  if (pathname === ROUTES.login) {
+    return 'Вхід - Rentify';
+  }
+
+  if (pathname === ROUTES.register) {
+    return 'Реєстрація - Rentify';
+  }
+
+  if (pathname === ROUTES.createProperty) {
+    return 'Створення оголошення - Rentify';
+  }
+
+  if (matchPath(ROUTES.propertyDetailsPattern, pathname)) {
+    return 'Оголошення - Rentify';
+  }
+
+  if (matchPath(ROUTES.editPropertyPattern, pathname)) {
+    return 'Редагування оголошення - Rentify';
+  }
+
+  if (matchPath(ROUTES.publicProfilePattern, pathname)) {
+    return 'Профіль користувача - Rentify';
+  }
+
+  if (matchPath(ROUTES.bookingPaymentPattern, pathname)) {
+    return 'Оплата бронювання - Rentify';
+  }
+
+  return 'Rentify';
+};
+
+const DocumentTitle = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    document.title = resolvePageTitle(pathname);
+  }, [pathname]);
+
+  return null;
+};
+
 const AppRouter = () => (
   <BrowserRouter>
+    <DocumentTitle />
     <ScrollToTop />
     <Routes>
       <Route element={<MainLayout />}>
@@ -108,15 +186,10 @@ const AppRouter = () => (
         <Route path={ROUTES.search} element={withSuspense(<SearchPage />)} />
         <Route path={ROUTES.propertyDetailsPattern} element={withSuspense(<PropertyDetailsPage />)} />
         <Route path={ROUTES.publicProfilePattern} element={withSuspense(<PublicProfilePage />)} />
+        <Route path={ROUTES.about} element={withSuspense(<AboutPage />)} />
+        <Route path={ROUTES.contacts} element={withSuspense(<ContactsPage />)} />
+        <Route path={ROUTES.support} element={withSuspense(<SupportPage />)} />
 
-        <Route
-          path={ROUTES.about}
-          element={withSuspense(<PlaceholderPage title="Про Rentify" description="Інформація про компанію та бачення продукту." />)}
-        />
-        <Route
-          path={ROUTES.contacts}
-          element={withSuspense(<PlaceholderPage title="Контакти" description="Канали підтримки та способи зв'язку." />)}
-        />
         <Route
           path={ROUTES.privacy}
           element={withSuspense(<PlaceholderPage title="Політика конфіденційності" description="Умови обробки та захисту даних." />)}

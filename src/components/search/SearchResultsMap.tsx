@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import L from 'leaflet';
 import { MapContainer, Marker, useMap } from 'react-leaflet';
 import { UkraineBaseTileLayers } from '@/components/map/UkraineBaseTileLayers';
 import { UkraineRegionLabelsLayer } from '@/components/map/UkraineRegionLabelsLayer';
@@ -12,6 +13,7 @@ import { toPinPosition } from '@/utils/searchMap';
 import { UKRAINE_VIEW_BOUNDS } from '@/utils/ukraineMask';
 import type { SearchResultsMapProps, SearchResultsMapSelectionSyncProps } from './SearchResultsMap.types';
 
+const UKRAINE_MAP_RENDERER = L.svg({ padding: 1 });
 
 
 const SearchResultsMapSelectionSync = ({ pins, selectedPropertyId }: SearchResultsMapSelectionSyncProps) => {
@@ -73,6 +75,8 @@ export const SearchResultsMap = ({
           maxZoom={UKRAINE_MAX_ZOOM}
           maxBounds={UKRAINE_VIEW_BOUNDS}
           maxBoundsViscosity={1}
+          inertia={false}
+          renderer={UKRAINE_MAP_RENDERER}
           scrollWheelZoom
           className="h-[68vh] min-h-[500px] w-full"
           style={{ minHeight: 500 }}

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import L from 'leaflet';
 import { List } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { MapContainer, Marker, ZoomControl } from 'react-leaflet';
@@ -15,6 +16,8 @@ import { useSearchPage } from '@/hooks';
 import { usePricePinIcons } from '@/hooks/map/usePricePinIcons';
 import { toPinPosition } from '@/utils/searchMap';
 import { UKRAINE_VIEW_BOUNDS } from '@/utils/ukraineMask';
+
+const UKRAINE_MAP_RENDERER = L.svg({ padding: 1 });
 
 const SearchMapPage = () => {
   const model = useSearchPage();
@@ -46,6 +49,8 @@ const SearchMapPage = () => {
         maxZoom={UKRAINE_MAX_ZOOM}
         maxBounds={UKRAINE_VIEW_BOUNDS}
         maxBoundsViscosity={1}
+        inertia={false}
+        renderer={UKRAINE_MAP_RENDERER}
         zoomControl={false}
         scrollWheelZoom
         className="h-full w-full"
@@ -139,10 +144,6 @@ const SearchMapPage = () => {
         <div className="pointer-events-none absolute left-1/2 top-16 z-[650] -translate-x-1/2 rounded-full bg-amber-50 px-4 py-2 text-sm text-amber-700 shadow-lg">
           {model.mapPinsError}
         </div>
-      )}
-
-      {isSidebarVisible && (
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-[170px] z-[635] bg-slate-700/18 sm:top-[154px] lg:top-[126px]" />
       )}
 
       {isSidebarVisible && (

@@ -1,4 +1,4 @@
-import { Facebook, Home, Instagram, Mail, MapPin, Phone, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { APP_CONTENT } from '@/constants/appContent';
 import { FOOTER_LINKS } from '@/constants/footerLinks';
@@ -10,9 +10,7 @@ const Footer = () => (
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
         <div className="space-y-4 lg:col-span-2">
           <Link to={ROUTES.home} className="inline-flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-              <Home size={16} />
-            </span>
+            <img src="/rentify-logo.svg" alt="Логотип Rentify" className="h-8 w-8 rounded-lg object-cover" loading="lazy" />
             <span className="text-xl font-bold text-white">{APP_CONTENT.companyName}</span>
           </Link>
 

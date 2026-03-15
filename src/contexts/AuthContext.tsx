@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { USE_HTTP_ONLY_AUTH_COOKIE } from '@/config/env';
 import type {
   AuthenticationRequestDto,
   GoogleOAuthRequestDto,
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const bootstrap = async () => {
       const storedToken = getAuthToken();
-      if (!storedToken) {
+      if (!storedToken && !USE_HTTP_ONLY_AUTH_COOKIE) {
         if (isMounted) {
           setIsLoading(false);
         }
@@ -56,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        const profile = await authService.fetchProfile(storedToken);
+        const profile = await authService.fetchProfile(storedToken ?? undefined);
         if (isMounted) {
           setUser(profile);
           setProfileCache(profile);
@@ -97,11 +98,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [queryClient]);
 
-  const applySession = (nextToken: string, nextUser: UserResponseDto) => {
+  const applySession = (nextToken: string | null, nextUser: UserResponseDto) => {
     authService.clearProfileCache();
     queryClient.clear();
     setAuthToken(nextToken);
-    setToken(nextToken);
+    setToken(nextToken ?? null);
     setUser(nextUser);
     setProfileCache(nextUser);
   };
@@ -123,7 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshProfile = async () => {
     const storedToken = getAuthToken();
-    if (!storedToken) {
+    if (!storedToken && !USE_HTTP_ONLY_AUTH_COOKIE) {
       authService.clearProfileCache();
       queryClient.clear();
       setToken(null);
@@ -131,8 +132,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const profile = await authService.fetchProfile(storedToken);
-    setToken(storedToken);
+    const profile = await authService.fetchProfile(storedToken ?? undefined);
+    setToken(storedToken ?? null);
     setUser(profile);
     setProfileCache(profile);
   };

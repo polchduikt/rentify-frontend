@@ -1,27 +1,64 @@
-import { STORAGE_KEYS } from '../config/env';
+import { STORAGE_KEYS, USE_HTTP_ONLY_AUTH_COOKIE } from '../config/env';
 
 export type ThemeMode = 'light' | 'dark';
 
-export const getAuthToken = (): string | null =>
-    localStorage.getItem(STORAGE_KEYS.authToken);
+const getStorageItem = (key: string): string | null => {
+    try {
+        return localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+};
 
-export const setAuthToken = (token: string): void => {
-    localStorage.setItem(STORAGE_KEYS.authToken, token);
+const setStorageItem = (key: string, value: string): void => {
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        // Ignore storage write errors to keep app operational in restricted browser modes.
+    }
+};
+
+const removeStorageItem = (key: string): void => {
+    try {
+        localStorage.removeItem(key);
+    } catch {
+        // Ignore storage remove errors to keep app operational in restricted browser modes.
+    }
+};
+
+export const getAuthToken = (): string | null => {
+    if (USE_HTTP_ONLY_AUTH_COOKIE) {
+        return null;
+    }
+    return getStorageItem(STORAGE_KEYS.authToken);
+};
+
+export const setAuthToken = (token: string | null): void => {
+    if (USE_HTTP_ONLY_AUTH_COOKIE) {
+        return;
+    }
+
+    if (!token) {
+        removeStorageItem(STORAGE_KEYS.authToken);
+        return;
+    }
+
+    setStorageItem(STORAGE_KEYS.authToken, token);
 };
 
 export const clearAuthToken = (): void => {
-    localStorage.removeItem(STORAGE_KEYS.authToken);
+    removeStorageItem(STORAGE_KEYS.authToken);
 };
 
 export const getGoogleAvatarUrl = (): string | null =>
-    localStorage.getItem(STORAGE_KEYS.googleAvatarUrl);
+    getStorageItem(STORAGE_KEYS.googleAvatarUrl);
 
 export const setGoogleAvatarUrl = (avatarUrl: string): void => {
-    localStorage.setItem(STORAGE_KEYS.googleAvatarUrl, avatarUrl);
+    setStorageItem(STORAGE_KEYS.googleAvatarUrl, avatarUrl);
 };
 
 export const clearGoogleAvatarUrl = (): void => {
-    localStorage.removeItem(STORAGE_KEYS.googleAvatarUrl);
+    removeStorageItem(STORAGE_KEYS.googleAvatarUrl);
 };
 
 const normalizeUserId = (userId?: number | null): number | null => {
@@ -32,7 +69,7 @@ const normalizeUserId = (userId?: number | null): number | null => {
 };
 
 export const isGoogleAvatarFallbackDisabled = (userId?: number | null): boolean => {
-    const value = localStorage.getItem(STORAGE_KEYS.googleAvatarDisabled);
+    const value = getStorageItem(STORAGE_KEYS.googleAvatarDisabled);
     if (!value) {
         return false;
     }
@@ -48,17 +85,17 @@ export const isGoogleAvatarFallbackDisabled = (userId?: number | null): boolean 
 export const setGoogleAvatarFallbackDisabled = (disabled: boolean, userId?: number | null): void => {
     if (disabled) {
         const normalizedUserId = normalizeUserId(userId);
-        localStorage.setItem(
+        setStorageItem(
             STORAGE_KEYS.googleAvatarDisabled,
             normalizedUserId != null ? String(normalizedUserId) : '1',
         );
     } else {
-        localStorage.removeItem(STORAGE_KEYS.googleAvatarDisabled);
+        removeStorageItem(STORAGE_KEYS.googleAvatarDisabled);
     }
 };
 
 export const getThemeMode = (): ThemeMode | null => {
-    const value = localStorage.getItem(STORAGE_KEYS.themeMode);
+    const value = getStorageItem(STORAGE_KEYS.themeMode);
     if (value === 'light' || value === 'dark') {
         return value;
     }
@@ -66,5 +103,5 @@ export const getThemeMode = (): ThemeMode | null => {
 };
 
 export const setThemeMode = (mode: ThemeMode): void => {
-    localStorage.setItem(STORAGE_KEYS.themeMode, mode);
+    setStorageItem(STORAGE_KEYS.themeMode, mode);
 };

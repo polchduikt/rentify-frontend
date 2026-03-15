@@ -6,7 +6,7 @@ export interface AuthenticationRequestDto {
 }
 
 export interface AuthenticationResponseDto {
-  token: string;
+  token?: string | null;
 }
 
 export interface GoogleOAuthRequestDto {
@@ -22,6 +22,6 @@ export interface RegisterRequestDto {
 }
 
 export interface AuthSession {
-  token: string;
+  token: string | null;
   user: UserResponseDto;
 }

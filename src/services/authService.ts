@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from '@/config/apiEndpoints';
+import { USE_HTTP_ONLY_AUTH_COOKIE } from '@/config/env';
 import type {
   AuthSession,
   AuthenticationRequestDto,
@@ -20,7 +21,7 @@ import {
 import { sanitizeAvatarValue } from '@/utils/avatar';
 
 let profileRequest: Promise<UserResponseDto> | null = null;
-let profileRequestToken: string | null = null;
+let profileRequestKey: string | null = null;
 
 interface GoogleIdTokenPayload {
   picture?: string;
@@ -52,6 +53,11 @@ interface FetchProfileOptions {
   googlePictureFallback?: string;
 }
 
+const normalizeTokenValue = (token: string | null | undefined): string | null => {
+  const normalized = token?.trim();
+  return normalized ? normalized : null;
+};
+
 export const authService = {
   async login(data: AuthenticationRequestDto): Promise<AuthenticationResponseDto> {
     const response = await api.post<AuthenticationResponseDto>(API_ENDPOINTS.auth.login, data);
@@ -69,20 +75,26 @@ export const authService = {
   },
 
   async fetchProfile(token?: string, options?: FetchProfileOptions): Promise<UserResponseDto> {
-    const resolvedToken = token ?? getAuthToken();
-    if (!resolvedToken) {
+    const resolvedToken = normalizeTokenValue(token ?? getAuthToken());
+    const nextProfileKey = USE_HTTP_ONLY_AUTH_COOKIE ? '__cookie-session__' : resolvedToken;
+    if (!nextProfileKey) {
       return Promise.reject(new Error('Auth token is missing'));
     }
 
-    if (profileRequest && profileRequestToken === resolvedToken) {
+    if (profileRequest && profileRequestKey === nextProfileKey) {
       return profileRequest;
     }
 
-    profileRequestToken = resolvedToken;
+    profileRequestKey = nextProfileKey;
     profileRequest = api
-      .get<UserResponseDto>(API_ENDPOINTS.users.profile, {
-        headers: { Authorization: `Bearer ${resolvedToken}` },
-      })
+      .get<UserResponseDto>(
+        API_ENDPOINTS.users.profile,
+        USE_HTTP_ONLY_AUTH_COOKIE || !resolvedToken
+          ? undefined
+          : {
+              headers: { Authorization: `Bearer ${resolvedToken}` },
+            },
+      )
       .then((res) => {
         const userId = Number(res.data.id);
         const hasValidUserId = Number.isFinite(userId) && userId > 0;
@@ -93,9 +105,9 @@ export const authService = {
         return normalizeUserProfile(res.data, fallbackAvatar);
       })
       .finally(() => {
-        if (profileRequestToken === resolvedToken) {
+        if (profileRequestKey === nextProfileKey) {
           profileRequest = null;
-          profileRequestToken = null;
+          profileRequestKey = null;
         }
       });
 
@@ -105,21 +117,26 @@ export const authService = {
   async loginWithProfile(data: AuthenticationRequestDto): Promise<AuthSession> {
     clearGoogleAvatarUrl();
     const { token } = await authService.login(data);
-    const user = await authService.fetchProfile(token);
-    return { token, user };
+    const normalizedToken = normalizeTokenValue(token);
+    const user = await authService.fetchProfile(normalizedToken ?? undefined);
+    return { token: normalizedToken, user };
   },
 
   async registerWithProfile(data: RegisterRequestDto): Promise<AuthSession> {
     clearGoogleAvatarUrl();
     const { token } = await authService.register(data);
-    const user = await authService.fetchProfile(token);
-    return { token, user };
+    const normalizedToken = normalizeTokenValue(token);
+    const user = await authService.fetchProfile(normalizedToken ?? undefined);
+    return { token: normalizedToken, user };
   },
 
   async loginWithGoogleProfile(data: GoogleOAuthRequestDto): Promise<AuthSession> {
     const googlePicture = getGooglePictureFromIdToken(data.idToken);
     const { token } = await authService.loginWithGoogle(data);
-    const user = await authService.fetchProfile(token, { googlePictureFallback: googlePicture });
+    const normalizedToken = normalizeTokenValue(token);
+    const user = await authService.fetchProfile(normalizedToken ?? undefined, {
+      googlePictureFallback: googlePicture,
+    });
     const userId = Number(user.id);
     const isFallbackDisabled = isGoogleAvatarFallbackDisabled(
       Number.isFinite(userId) && userId > 0 ? userId : undefined,
@@ -129,17 +146,17 @@ export const authService = {
       setGoogleAvatarUrl(user.avatarUrl);
     }
 
-    return { token, user };
+    return { token: normalizedToken, user };
   },
 
   clearProfileCache(): void {
     profileRequest = null;
-    profileRequestToken = null;
+    profileRequestKey = null;
   },
 
   logout(): void {
     profileRequest = null;
-    profileRequestToken = null;
+    profileRequestKey = null;
     clearAuthToken();
     clearGoogleAvatarUrl();
   },

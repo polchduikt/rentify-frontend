@@ -26,7 +26,7 @@ export const PropertyCreateAmenitiesStep = ({ model }: PropertyCreateAmenitiesSt
           {model.amenitiesLoading ? (
             <div className="text-sm text-slate-500">Завантаження зручностей...</div>
           ) : (
-            model.amenitiesGrouped.map((group) => (
+            model.amenitiesGrouped.filter((group) => group.category !== 'VERIFICATION').map((group) => (
               <div key={group.category}>
                 <p className="mb-2 text-sm font-semibold text-slate-700">
                   {PROPERTY_CREATE_AMENITY_CATEGORY_LABELS[group.category] ?? group.category}

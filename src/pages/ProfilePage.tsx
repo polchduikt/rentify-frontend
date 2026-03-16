@@ -145,7 +145,7 @@ const ProfilePage = () => {
           onAvatarError={() => setAvatarLoadFailed(true)}
           initials={model.initials}
           fullName={model.fullName}
-          email={model.profile.email}
+          email={model.profile.email ?? ''}
           createdAt={model.profile.createdAt}
           walletBalance={model.walletBalance}
           walletCurrency={model.walletCurrency}

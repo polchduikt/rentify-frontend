@@ -1,9 +1,9 @@
 import type { FormEvent } from 'react';
 import type { ProfileFormState, SectionNotice } from '@/types/profile';
-import type { UserResponseDto } from '@/types/user';
+import type { UserResponseDto, UserSessionDto } from '@/types/user';
 
 export interface AccountSectionProps {
-  profile: UserResponseDto;
+  profile: UserResponseDto | UserSessionDto;
   fullName: string;
   initials: string;
   avatarSrc: string;

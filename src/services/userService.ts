@@ -7,7 +7,7 @@ import type {
   UserResponseDto,
   UserSessionDto,
 } from '@/types/user';
-import { normalizeUserProfile } from './adapters/userAdapter';
+import { normalizeUserProfile, toUserSession } from './adapters/userAdapter';
 import api from './api';
 import { getGoogleAvatarUrl, isGoogleAvatarFallbackDisabled } from './storage';
 
@@ -22,8 +22,9 @@ const resolveGoogleAvatarFallback = (userId: number | null | undefined): string 
 
 export const userService = {
   async getMySession(): Promise<UserSessionDto> {
-    const { data } = await api.get<UserSessionDto>(API_ENDPOINTS.users.session);
-    return normalizeUserProfile(data, resolveGoogleAvatarFallback(data.id));
+    const { data } = await api.get<UserResponseDto>(API_ENDPOINTS.users.profile);
+    const normalized = normalizeUserProfile(data, resolveGoogleAvatarFallback(data.id));
+    return toUserSession(normalized);
   },
 
   async getMyProfile(): Promise<UserResponseDto> {
@@ -38,7 +39,7 @@ export const userService = {
 
   async updateProfile(payload: UpdateUserRequestDto): Promise<UserResponseDto> {
     const { data } = await api.put<UserResponseDto>(API_ENDPOINTS.users.profile, payload);
-    return normalizeUserProfile(data, resolveGoogleAvatarFallback(data));
+    return normalizeUserProfile(data, resolveGoogleAvatarFallback(data.id));
   },
 
   async changePassword(payload: ChangePasswordRequestDto): Promise<void> {

@@ -3,10 +3,10 @@ export const API_ENDPOINTS = {
     login: '/auth/login',
     register: '/auth/register',
     google: '/auth/google',
+    logout: '/auth/logout',
   },
   users: {
     profile: '/users/profile',
-    session: '/users/session',
     publicProfile: (userId: number) => `/users/${userId}/public`,
     changePassword: '/users/profile/password',
     avatar: '/users/profile/avatar',

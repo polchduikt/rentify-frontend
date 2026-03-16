@@ -7,9 +7,9 @@ import type {
   GoogleOAuthRequestDto,
   RegisterRequestDto,
 } from '@/types/auth';
-import type { UserSessionDto } from '@/types/user';
+import type { UserResponseDto, UserSessionDto } from '@/types/user';
 import api from './api';
-import { normalizeUserProfile } from './adapters/userAdapter';
+import { normalizeUserProfile, toUserSession } from './adapters/userAdapter';
 import {
   clearAuthToken,
   clearGoogleAvatarUrl,
@@ -87,8 +87,8 @@ export const authService = {
 
     sessionRequestKey = nextSessionKey;
     sessionRequest = api
-      .get<UserSessionDto>(
-        API_ENDPOINTS.users.session,
+      .get<UserResponseDto>(
+        API_ENDPOINTS.users.profile,
         USE_HTTP_ONLY_AUTH_COOKIE || !resolvedToken
           ? undefined
           : {
@@ -96,13 +96,15 @@ export const authService = {
             },
       )
       .then((res) => {
-        const userId = Number(res.data.id);
+        const normalized = normalizeUserProfile(res.data);
+        const userId = Number(normalized.id);
         const hasValidUserId = Number.isFinite(userId) && userId > 0;
         const isFallbackDisabled = isGoogleAvatarFallbackDisabled(hasValidUserId ? userId : undefined);
         const fallbackAvatar = isFallbackDisabled
           ? undefined
           : options?.googlePictureFallback ?? getGoogleAvatarUrl() ?? undefined;
-        return normalizeUserProfile(res.data, fallbackAvatar);
+        const withAvatar = normalizeUserProfile(normalized, fallbackAvatar);
+        return toUserSession(withAvatar);
       })
       .finally(() => {
         if (sessionRequestKey === nextSessionKey) {
@@ -154,10 +156,14 @@ export const authService = {
     sessionRequestKey = null;
   },
 
-  logout(): void {
+  async logout(): Promise<void> {
     sessionRequest = null;
     sessionRequestKey = null;
-    clearAuthToken();
-    clearGoogleAvatarUrl();
+    try {
+      await api.post(API_ENDPOINTS.auth.logout);
+    } finally {
+      clearAuthToken();
+      clearGoogleAvatarUrl();
+    }
   },
 };

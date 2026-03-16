@@ -30,9 +30,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
   const [token, setToken] = useState<string | null>(() => getAuthToken());
+  const [user, setUser] = useState<UserSessionDto | null>(null);
 
   const sessionQuery = useMySessionQuery(true);
-  const user = sessionQuery.data ?? null;
   const isLoading = useMemo(() => {
     if (!USE_HTTP_ONLY_AUTH_COOKIE && !token) {
       return false;
@@ -48,10 +48,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   useEffect(() => {
+    if (sessionQuery.data && !user) {
+      setUser(sessionQuery.data);
+    }
+  }, [sessionQuery.data, user]);
+
+  useEffect(() => {
     const onSessionExpired = () => {
       authService.clearSessionCache();
       queryClient.clear();
       setToken(null);
+      setUser(null);
     };
 
     window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, onSessionExpired);
@@ -66,6 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     queryClient.clear();
     setAuthToken(nextToken);
     setToken(nextToken ?? null);
+    setUser(nextUser);
     setSessionCache(nextUser);
   };
 
@@ -95,13 +103,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const session = await authService.fetchSession(storedToken ?? undefined);
     setToken(storedToken ?? null);
+    setUser(session);
     setSessionCache(session);
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    await authService.logout();
     queryClient.clear();
     setToken(null);
+    setUser(null);
   };
 
   return (

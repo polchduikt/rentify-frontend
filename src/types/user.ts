@@ -48,6 +48,14 @@ export interface UserSessionDto {
   lastName: string;
   avatarUrl: string;
   roles: string[];
+  email?: string;
+  phone?: string;
+  isActive?: boolean;
+  balance?: Decimal;
+  subscriptionPlan?: SubscriptionPlan;
+  subscriptionActiveUntil?: ZonedDateTimeString;
+  createdAt?: ZonedDateTimeString;
+  updatedAt?: ZonedDateTimeString;
 }
 
 export type User = UserResponseDto;

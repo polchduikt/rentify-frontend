@@ -7,7 +7,7 @@ import type {
   GoogleOAuthRequestDto,
   RegisterRequestDto,
 } from '@/types/auth';
-import type { UserResponseDto } from '@/types/user';
+import type { UserSessionDto } from '@/types/user';
 import api from './api';
 import { normalizeUserProfile } from './adapters/userAdapter';
 import {
@@ -20,8 +20,8 @@ import {
 } from './storage';
 import { sanitizeAvatarValue } from '@/utils/avatar';
 
-let profileRequest: Promise<UserResponseDto> | null = null;
-let profileRequestKey: string | null = null;
+let sessionRequest: Promise<UserSessionDto> | null = null;
+let sessionRequestKey: string | null = null;
 
 interface GoogleIdTokenPayload {
   picture?: string;
@@ -49,7 +49,7 @@ const getGooglePictureFromIdToken = (idToken: string): string | undefined => {
   }
 };
 
-interface FetchProfileOptions {
+interface FetchSessionOptions {
   googlePictureFallback?: string;
 }
 
@@ -74,21 +74,21 @@ export const authService = {
     return response.data;
   },
 
-  async fetchProfile(token?: string, options?: FetchProfileOptions): Promise<UserResponseDto> {
+  async fetchSession(token?: string, options?: FetchSessionOptions): Promise<UserSessionDto> {
     const resolvedToken = normalizeTokenValue(token ?? getAuthToken());
-    const nextProfileKey = USE_HTTP_ONLY_AUTH_COOKIE ? '__cookie-session__' : resolvedToken;
-    if (!nextProfileKey) {
+    const nextSessionKey = USE_HTTP_ONLY_AUTH_COOKIE ? '__cookie-session__' : resolvedToken;
+    if (!nextSessionKey) {
       return Promise.reject(new Error('Auth token is missing'));
     }
 
-    if (profileRequest && profileRequestKey === nextProfileKey) {
-      return profileRequest;
+    if (sessionRequest && sessionRequestKey === nextSessionKey) {
+      return sessionRequest;
     }
 
-    profileRequestKey = nextProfileKey;
-    profileRequest = api
-      .get<UserResponseDto>(
-        API_ENDPOINTS.users.profile,
+    sessionRequestKey = nextSessionKey;
+    sessionRequest = api
+      .get<UserSessionDto>(
+        API_ENDPOINTS.users.session,
         USE_HTTP_ONLY_AUTH_COOKIE || !resolvedToken
           ? undefined
           : {
@@ -105,20 +105,20 @@ export const authService = {
         return normalizeUserProfile(res.data, fallbackAvatar);
       })
       .finally(() => {
-        if (profileRequestKey === nextProfileKey) {
-          profileRequest = null;
-          profileRequestKey = null;
+        if (sessionRequestKey === nextSessionKey) {
+          sessionRequest = null;
+          sessionRequestKey = null;
         }
       });
 
-    return profileRequest;
+    return sessionRequest;
   },
 
   async loginWithProfile(data: AuthenticationRequestDto): Promise<AuthSession> {
     clearGoogleAvatarUrl();
     const { token } = await authService.login(data);
     const normalizedToken = normalizeTokenValue(token);
-    const user = await authService.fetchProfile(normalizedToken ?? undefined);
+    const user = await authService.fetchSession(normalizedToken ?? undefined);
     return { token: normalizedToken, user };
   },
 
@@ -126,7 +126,7 @@ export const authService = {
     clearGoogleAvatarUrl();
     const { token } = await authService.register(data);
     const normalizedToken = normalizeTokenValue(token);
-    const user = await authService.fetchProfile(normalizedToken ?? undefined);
+    const user = await authService.fetchSession(normalizedToken ?? undefined);
     return { token: normalizedToken, user };
   },
 
@@ -134,7 +134,7 @@ export const authService = {
     const googlePicture = getGooglePictureFromIdToken(data.idToken);
     const { token } = await authService.loginWithGoogle(data);
     const normalizedToken = normalizeTokenValue(token);
-    const user = await authService.fetchProfile(normalizedToken ?? undefined, {
+    const user = await authService.fetchSession(normalizedToken ?? undefined, {
       googlePictureFallback: googlePicture,
     });
     const userId = Number(user.id);
@@ -149,14 +149,14 @@ export const authService = {
     return { token: normalizedToken, user };
   },
 
-  clearProfileCache(): void {
-    profileRequest = null;
-    profileRequestKey = null;
+  clearSessionCache(): void {
+    sessionRequest = null;
+    sessionRequestKey = null;
   },
 
   logout(): void {
-    profileRequest = null;
-    profileRequestKey = null;
+    sessionRequest = null;
+    sessionRequestKey = null;
     clearAuthToken();
     clearGoogleAvatarUrl();
   },

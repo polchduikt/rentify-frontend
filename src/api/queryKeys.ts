@@ -6,7 +6,7 @@ import type { UnavailableRangesQuery } from '@/services/propertyService';
 
 export const queryKeys = {
   auth: {
-    profile: () => ['auth', 'profile'] as const,
+    session: () => ['auth', 'session'] as const,
   },
   users: {
     profile: () => ['users', 'profile'] as const,

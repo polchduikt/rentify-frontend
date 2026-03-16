@@ -22,7 +22,8 @@ const Navbar = () => {
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
 
   const isSearchActive = location.pathname.startsWith(ROUTES.search);
-  const initials = user?.firstName?.charAt(0)?.toUpperCase() ?? user?.email?.charAt(0)?.toUpperCase() ?? 'U';
+  const initials =
+    `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`.toUpperCase() || 'U';
   const avatarSrc = useMemo(() => resolveAvatarUrl(user?.avatarUrl), [user?.avatarUrl]);
 
   useEffect(() => {

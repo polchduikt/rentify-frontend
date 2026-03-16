@@ -42,4 +42,12 @@ export interface UserResponseDto {
   updatedAt: ZonedDateTimeString;
 }
 
+export interface UserSessionDto {
+  id: number;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  roles: string[];
+}
+
 export type User = UserResponseDto;

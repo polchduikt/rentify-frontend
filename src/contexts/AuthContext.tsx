@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { USE_HTTP_ONLY_AUTH_COOKIE } from '@/config/env';
 import type {
@@ -7,13 +7,14 @@ import type {
   RegisterRequestDto,
 } from '@/types/auth';
 import { queryKeys } from '@/api/queryKeys';
-import type { UserResponseDto } from '@/types/user';
+import type { UserSessionDto } from '@/types/user';
 import { authService } from '@/services/authService';
 import { AUTH_SESSION_EXPIRED_EVENT } from '@/services/api';
 import { getAuthToken, setAuthToken } from '@/services/storage';
+import { useMySessionQuery } from '@/hooks/api/useUserApi';
 
 interface AuthContextType {
-  user: UserResponseDto | null;
+  user: UserSessionDto | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -28,67 +29,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
-  const [user, setUser] = useState<UserResponseDto | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(() => getAuthToken());
 
-  const setProfileCache = useCallback(
-    (profile: UserResponseDto) => {
-      queryClient.setQueryData(queryKeys.auth.profile(), profile);
-      queryClient.setQueryData(queryKeys.users.profile(), profile);
+  const sessionQuery = useMySessionQuery(true);
+  const user = sessionQuery.data ?? null;
+  const isLoading = useMemo(() => {
+    if (!USE_HTTP_ONLY_AUTH_COOKIE && !token) {
+      return false;
+    }
+    return sessionQuery.isLoading;
+  }, [sessionQuery.isLoading, token]);
+
+  const setSessionCache = useCallback(
+    (session: UserSessionDto) => {
+      queryClient.setQueryData(queryKeys.auth.session(), session);
     },
     [queryClient],
   );
 
   useEffect(() => {
-    let isMounted = true;
-
-    const bootstrap = async () => {
-      const storedToken = getAuthToken();
-      if (!storedToken && !USE_HTTP_ONLY_AUTH_COOKIE) {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      if (isMounted) {
-        setToken(storedToken);
-      }
-
-      try {
-        const profile = await authService.fetchProfile(storedToken ?? undefined);
-        if (isMounted) {
-          setUser(profile);
-          setProfileCache(profile);
-        }
-      } catch {
-        authService.logout();
-        queryClient.clear();
-        if (isMounted) {
-          setToken(null);
-          setUser(null);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void bootstrap();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [queryClient, setProfileCache]);
-
-  useEffect(() => {
     const onSessionExpired = () => {
-      authService.clearProfileCache();
+      authService.clearSessionCache();
       queryClient.clear();
       setToken(null);
-      setUser(null);
     };
 
     window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, onSessionExpired);
@@ -98,13 +61,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [queryClient]);
 
-  const applySession = (nextToken: string | null, nextUser: UserResponseDto) => {
-    authService.clearProfileCache();
+  const applySession = (nextToken: string | null, nextUser: UserSessionDto) => {
+    authService.clearSessionCache();
     queryClient.clear();
     setAuthToken(nextToken);
     setToken(nextToken ?? null);
-    setUser(nextUser);
-    setProfileCache(nextUser);
+    setSessionCache(nextUser);
   };
 
   const login = async (data: AuthenticationRequestDto) => {
@@ -125,24 +87,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const refreshProfile = async () => {
     const storedToken = getAuthToken();
     if (!storedToken && !USE_HTTP_ONLY_AUTH_COOKIE) {
-      authService.clearProfileCache();
+      authService.clearSessionCache();
       queryClient.clear();
       setToken(null);
-      setUser(null);
       return;
     }
 
-    const profile = await authService.fetchProfile(storedToken ?? undefined);
+    const session = await authService.fetchSession(storedToken ?? undefined);
     setToken(storedToken ?? null);
-    setUser(profile);
-    setProfileCache(profile);
+    setSessionCache(session);
   };
 
   const logout = () => {
     authService.logout();
     queryClient.clear();
     setToken(null);
-    setUser(null);
   };
 
   return (

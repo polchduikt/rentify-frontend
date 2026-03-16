@@ -46,7 +46,7 @@ export const usePurchaseSubscriptionMutation = () => {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.users.profile() });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.session() });
     },
   });
 };

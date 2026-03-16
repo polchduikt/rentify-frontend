@@ -5,24 +5,30 @@ import type {
   PublicUserProfileDto,
   UpdateUserRequestDto,
   UserResponseDto,
+  UserSessionDto,
 } from '@/types/user';
 import { normalizeUserProfile } from './adapters/userAdapter';
 import api from './api';
 import { getGoogleAvatarUrl, isGoogleAvatarFallbackDisabled } from './storage';
 
-const resolveGoogleAvatarFallback = (user: UserResponseDto): string | undefined => {
-  const userId = Number(user.id);
-  const hasValidUserId = Number.isFinite(userId) && userId > 0;
-  if (isGoogleAvatarFallbackDisabled(hasValidUserId ? userId : undefined)) {
+const resolveGoogleAvatarFallback = (userId: number | null | undefined): string | undefined => {
+  const normalizedUserId = Number(userId ?? 0);
+  const hasValidUserId = Number.isFinite(normalizedUserId) && normalizedUserId > 0;
+  if (isGoogleAvatarFallbackDisabled(hasValidUserId ? normalizedUserId : undefined)) {
     return undefined;
   }
   return getGoogleAvatarUrl() ?? undefined;
 };
 
 export const userService = {
+  async getMySession(): Promise<UserSessionDto> {
+    const { data } = await api.get<UserSessionDto>(API_ENDPOINTS.users.session);
+    return normalizeUserProfile(data, resolveGoogleAvatarFallback(data.id));
+  },
+
   async getMyProfile(): Promise<UserResponseDto> {
     const { data } = await api.get<UserResponseDto>(API_ENDPOINTS.users.profile);
-    return normalizeUserProfile(data, resolveGoogleAvatarFallback(data));
+    return normalizeUserProfile(data, resolveGoogleAvatarFallback(data.id));
   },
 
   async getPublicProfile(userId: number): Promise<PublicUserProfileDto> {

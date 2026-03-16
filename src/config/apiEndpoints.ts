@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
   },
   users: {
     profile: '/users/profile',
+    session: '/users/session',
     publicProfile: (userId: number) => `/users/${userId}/public`,
     changePassword: '/users/profile/password',
     avatar: '/users/profile/avatar',

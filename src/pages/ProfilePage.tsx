@@ -1,18 +1,7 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  AccountSection,
-  BookingsSection,
-  EmptySection,
-  FavoritesSection,
-  PromotionsSection,
-  ProfileHero,
-  ProfileSidebarNav,
-  TopUpModal,
-  PropertiesSection,
-  SecuritySection,
-  TransactionsSection,
-} from '@/components/profile';
+import { ProfileHero } from '@/components/profile/ProfileHero';
+import { ProfileSidebarNav } from '@/components/profile/ProfileSidebarNav';
 import { openChatWidget } from '@/components/chat';
 import { PROFILE_PAGE_SECTION_SET } from '@/constants/profilePage';
 import { ROUTES } from '@/config/routes';
@@ -22,6 +11,42 @@ import { useProfilePage } from '@/hooks';
 import { useProfileNavigation } from '@/hooks/profile';
 import type { NavigationSection } from '@/types/profile';
 import { resolveAvatarUrl } from '@/utils/avatar';
+
+const AccountSection = lazy(() =>
+  import('@/components/profile/sections/AccountSection').then((module) => ({ default: module.AccountSection }))
+);
+const BookingsSection = lazy(() =>
+  import('@/components/profile/sections/BookingsSection').then((module) => ({ default: module.BookingsSection }))
+);
+const EmptySection = lazy(() =>
+  import('@/components/profile/sections/EmptySection').then((module) => ({ default: module.EmptySection }))
+);
+const FavoritesSection = lazy(() =>
+  import('@/components/profile/sections/FavoritesSection').then((module) => ({ default: module.FavoritesSection }))
+);
+const PromotionsSection = lazy(() =>
+  import('@/components/profile/sections/PromotionsSection').then((module) => ({ default: module.PromotionsSection }))
+);
+const PropertiesSection = lazy(() =>
+  import('@/components/profile/sections/PropertiesSection').then((module) => ({ default: module.PropertiesSection }))
+);
+const SecuritySection = lazy(() =>
+  import('@/components/profile/sections/SecuritySection').then((module) => ({ default: module.SecuritySection }))
+);
+const TransactionsSection = lazy(() =>
+  import('@/components/profile/sections/TransactionsSection').then((module) => ({ default: module.TransactionsSection }))
+);
+const TopUpModal = lazy(() =>
+  import('@/components/profile/TopUpModal').then((module) => ({ default: module.TopUpModal }))
+);
+
+const SECTION_FALLBACK = (
+  <div className="space-y-4">
+    <div className="h-10 w-48 animate-pulse rounded-2xl bg-white/70" />
+    <div className="h-40 animate-pulse rounded-3xl bg-white/70" />
+    <div className="h-56 animate-pulse rounded-3xl bg-white/70" />
+  </div>
+);
 
 const ProfilePage = () => {
   const model = useProfilePage();
@@ -149,129 +174,133 @@ const ProfilePage = () => {
             onLogout={handleLogout}
           />
 
-          <div className="space-y-6">
-            {navigation.activeSection == null ? <EmptySection /> : null}
+          <Suspense fallback={SECTION_FALLBACK}>
+            <div className="space-y-6">
+              {navigation.activeSection == null ? <EmptySection /> : null}
 
-            {navigation.activeSection === 'account' ? (
-              <AccountSection
-                profile={model.profile}
-                fullName={model.fullName}
-                initials={model.initials}
-                avatarSrc={avatarSrc}
-                avatarLoadFailed={avatarLoadFailed}
-                onAvatarError={() => setAvatarLoadFailed(true)}
-                avatarUploading={model.avatarUploading}
-                avatarDeleting={model.avatarDeleting}
-                avatarNotice={model.avatarNotice}
-                profileNotice={model.profileNotice}
-                profileForm={model.profileForm}
-                isProfileDirty={model.isProfileDirty}
-                profileSaving={model.profileSaving}
-                onAvatarUpload={(file: File) => void model.uploadAvatar(file)}
-                onAvatarDelete={() => void model.deleteAvatar()}
-                onProfileFieldChange={model.setProfileField}
-                onSubmit={handleProfileSubmit}
-                onReset={model.resetProfileForm}
-              />
-            ) : null}
+              {navigation.activeSection === 'account' ? (
+                <AccountSection
+                  profile={model.profile}
+                  fullName={model.fullName}
+                  initials={model.initials}
+                  avatarSrc={avatarSrc}
+                  avatarLoadFailed={avatarLoadFailed}
+                  onAvatarError={() => setAvatarLoadFailed(true)}
+                  avatarUploading={model.avatarUploading}
+                  avatarDeleting={model.avatarDeleting}
+                  avatarNotice={model.avatarNotice}
+                  profileNotice={model.profileNotice}
+                  profileForm={model.profileForm}
+                  isProfileDirty={model.isProfileDirty}
+                  profileSaving={model.profileSaving}
+                  onAvatarUpload={(file: File) => void model.uploadAvatar(file)}
+                  onAvatarDelete={() => void model.deleteAvatar()}
+                  onProfileFieldChange={model.setProfileField}
+                  onSubmit={handleProfileSubmit}
+                  onReset={model.resetProfileForm}
+                />
+              ) : null}
 
-            {navigation.activeSection === 'security' ? (
-              <SecuritySection
-                passwordForm={model.passwordForm}
-                passwordNotice={model.passwordNotice}
-                passwordSaving={model.passwordSaving}
-                accountDeleting={model.accountDeleting}
-                onPasswordFieldChange={model.setPasswordField}
-                onSubmit={handlePasswordSubmit}
-                onDeleteAccount={handleDeleteAccount}
-              />
-            ) : null}
+              {navigation.activeSection === 'security' ? (
+                <SecuritySection
+                  passwordForm={model.passwordForm}
+                  passwordNotice={model.passwordNotice}
+                  passwordSaving={model.passwordSaving}
+                  accountDeleting={model.accountDeleting}
+                  onPasswordFieldChange={model.setPasswordField}
+                  onSubmit={handlePasswordSubmit}
+                  onDeleteAccount={handleDeleteAccount}
+                />
+              ) : null}
 
-            {navigation.activeSection === 'favorites' ? (
-              <FavoritesSection
-                favorites={model.favorites}
-                favoritesCount={model.favoritesCount}
-                favoritesLoading={model.favoritesLoading}
-                favoritesError={model.favoritesError}
-              />
-            ) : null}
+              {navigation.activeSection === 'favorites' ? (
+                <FavoritesSection
+                  favorites={model.favorites}
+                  favoritesCount={model.favoritesCount}
+                  favoritesLoading={model.favoritesLoading}
+                  favoritesError={model.favoritesError}
+                />
+              ) : null}
 
-            {navigation.activeSection === 'payments' ? (
-              <TransactionsSection
-                transactions={model.transactions}
-                transactionsLoading={model.transactionsLoading}
-                transactionsError={model.transactionsError}
-              />
-            ) : null}
+              {navigation.activeSection === 'payments' ? (
+                <TransactionsSection
+                  transactions={model.transactions}
+                  transactionsLoading={model.transactionsLoading}
+                  transactionsError={model.transactionsError}
+                />
+              ) : null}
 
-            {navigation.isPromotionsSection ? (
-              <PromotionsSection
-                mode={navigation.activeSection === 'promotions-subscriptions' ? 'promotions-subscriptions' : 'promotions-top'}
-                properties={model.propertiesForPromotions}
-                propertiesLoading={model.propertiesForPromotionsLoading}
-                propertiesError={model.propertiesForPromotionsError}
-                walletBalance={model.walletBalance}
-                walletCurrency={model.walletCurrency}
-                subscriptionPlan={model.subscriptionPlan}
-                subscriptionActiveUntil={model.subscriptionActiveUntil}
-              />
-            ) : null}
+              {navigation.isPromotionsSection ? (
+                <PromotionsSection
+                  mode={navigation.activeSection === 'promotions-subscriptions' ? 'promotions-subscriptions' : 'promotions-top'}
+                  properties={model.propertiesForPromotions}
+                  propertiesLoading={model.propertiesForPromotionsLoading}
+                  propertiesError={model.propertiesForPromotionsError}
+                  walletBalance={model.walletBalance}
+                  walletCurrency={model.walletCurrency}
+                  subscriptionPlan={model.subscriptionPlan}
+                  subscriptionActiveUntil={model.subscriptionActiveUntil}
+                />
+              ) : null}
 
-            {navigation.isBookingsSection ? (
-              <BookingsSection
-                mode={navigation.activeSection === 'bookings-incoming' ? 'bookings-incoming' : 'bookings-my'}
-                myBookings={model.myBookings}
-                incomingBookings={model.incomingBookings}
-                myBookingsCount={model.myBookingsCount}
-                incomingBookingsCount={model.incomingBookingsCount}
-                paymentStatusByBookingId={model.paymentStatusByBookingId}
-                myBookingsLoading={model.myBookingsLoading}
-                incomingBookingsLoading={model.incomingBookingsLoading}
-                myBookingsError={model.myBookingsError}
-                incomingBookingsError={model.incomingBookingsError}
-                paymentsForBookingsError={model.paymentsForBookingsError}
-                bookingsNotice={model.bookingsNotice}
-                isActionPending={model.isBookingActionPending}
-                onCancelBooking={model.cancelBooking}
-                onConfirmIncomingBooking={model.confirmIncomingBooking}
-                onRejectIncomingBooking={model.rejectIncomingBooking}
-              />
-            ) : null}
+              {navigation.isBookingsSection ? (
+                <BookingsSection
+                  mode={navigation.activeSection === 'bookings-incoming' ? 'bookings-incoming' : 'bookings-my'}
+                  myBookings={model.myBookings}
+                  incomingBookings={model.incomingBookings}
+                  myBookingsCount={model.myBookingsCount}
+                  incomingBookingsCount={model.incomingBookingsCount}
+                  paymentStatusByBookingId={model.paymentStatusByBookingId}
+                  myBookingsLoading={model.myBookingsLoading}
+                  incomingBookingsLoading={model.incomingBookingsLoading}
+                  myBookingsError={model.myBookingsError}
+                  incomingBookingsError={model.incomingBookingsError}
+                  paymentsForBookingsError={model.paymentsForBookingsError}
+                  bookingsNotice={model.bookingsNotice}
+                  isActionPending={model.isBookingActionPending}
+                  onCancelBooking={model.cancelBooking}
+                  onConfirmIncomingBooking={model.confirmIncomingBooking}
+                  onRejectIncomingBooking={model.rejectIncomingBooking}
+                />
+              ) : null}
 
-            {navigation.isPropertiesSection ? (
-              <PropertiesSection
-                title={navigation.propertiesTabTitle}
-                properties={propertiesForSection}
-                propertiesLoading={propertiesLoadingForSection}
-                propertiesError={propertiesErrorForSection}
-                totalCount={
-                  isPublishedPropertiesSection
-                    ? publishedTotalCount
-                    : navigation.propertiesForActiveTab.length
-                }
-                currentPage={isPublishedPropertiesSection ? model.publishedPropertiesPage + 1 : undefined}
-                totalPages={isPublishedPropertiesSection ? publishedTotalPages : undefined}
-                pageSize={isPublishedPropertiesSection ? 10 : undefined}
-                onPageChange={
-                  isPublishedPropertiesSection
-                    ? (page) => model.setPublishedPropertiesPage(Math.max(0, page - 1))
-                    : undefined
-                }
-              />
-            ) : null}
-          </div>
+              {navigation.isPropertiesSection ? (
+                <PropertiesSection
+                  title={navigation.propertiesTabTitle}
+                  properties={propertiesForSection}
+                  propertiesLoading={propertiesLoadingForSection}
+                  propertiesError={propertiesErrorForSection}
+                  totalCount={
+                    isPublishedPropertiesSection
+                      ? publishedTotalCount
+                      : navigation.propertiesForActiveTab.length
+                  }
+                  currentPage={isPublishedPropertiesSection ? model.publishedPropertiesPage + 1 : undefined}
+                  totalPages={isPublishedPropertiesSection ? publishedTotalPages : undefined}
+                  pageSize={isPublishedPropertiesSection ? 10 : undefined}
+                  onPageChange={
+                    isPublishedPropertiesSection
+                      ? (page) => model.setPublishedPropertiesPage(Math.max(0, page - 1))
+                      : undefined
+                  }
+                />
+              ) : null}
+            </div>
+          </Suspense>
         </div>
       </div>
-      <TopUpModal
-        isOpen={isTopUpModalOpen}
-        currency={model.walletCurrency}
-        options={model.topUpOptions}
-        optionsLoading={model.topUpOptionsLoading}
-        optionsError={model.topUpOptionsError}
-        isSubmitting={model.walletTopUpPending}
-        onClose={() => setIsTopUpModalOpen(false)}
-        onSubmit={handleTopUpSubmit}
-      />
+      <Suspense fallback={null}>
+        <TopUpModal
+          isOpen={isTopUpModalOpen}
+          currency={model.walletCurrency}
+          options={model.topUpOptions}
+          optionsLoading={model.topUpOptionsLoading}
+          optionsError={model.topUpOptionsError}
+          isSubmitting={model.walletTopUpPending}
+          onClose={() => setIsTopUpModalOpen(false)}
+          onSubmit={handleTopUpSubmit}
+        />
+      </Suspense>
     </div>
   );
 };

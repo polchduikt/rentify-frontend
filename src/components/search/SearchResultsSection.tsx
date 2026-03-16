@@ -1,8 +1,11 @@
 import { ChevronLeft, ChevronRight, LayoutGrid, List, Map, RotateCw } from 'lucide-react';
-import type { CSSProperties } from 'react';
+import { Suspense, lazy, type CSSProperties } from 'react';
 import { PropertyListItem } from '@/components/search/PropertyListItem';
-import { SearchResultsMap } from '@/components/search/SearchResultsMap';
 import type { SearchResultsSectionProps } from './SearchResultsSection.types';
+
+const SearchResultsMap = lazy(() =>
+  import('@/components/search/SearchResultsMap').then((module) => ({ default: module.SearchResultsMap }))
+);
 
 const SINGLE_ROW_VIRTUAL_STYLE: CSSProperties = {
   contentVisibility: 'auto',
@@ -13,6 +16,13 @@ const DOUBLE_ROW_VIRTUAL_STYLE: CSSProperties = {
   contentVisibility: 'auto',
   containIntrinsicSize: '460px',
 };
+
+const MAP_VIEW_FALLBACK = (
+  <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+    <div className="h-[68vh] min-h-[500px] animate-pulse rounded-2xl border border-gray-200 bg-white" />
+    <div className="min-h-[240px] animate-pulse rounded-2xl border border-gray-200 bg-white" />
+  </div>
+);
 
 export const SearchResultsSection = ({
   loading,
@@ -95,14 +105,16 @@ export const SearchResultsSection = ({
             <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-700">{mapPinsError}</div>
           )}
 
-          <SearchResultsMap
-            loading={mapPinsLoading}
-            pins={mapPins}
-            selectedPropertyId={selectedMapPropertyId}
-            selectedProperty={selectedMapProperty}
-            onSelectProperty={onMapPropertySelect}
-            onMapBoundsChange={onMapBoundsChange}
-          />
+          <Suspense fallback={MAP_VIEW_FALLBACK}>
+            <SearchResultsMap
+              loading={mapPinsLoading}
+              pins={mapPins}
+              selectedPropertyId={selectedMapPropertyId}
+              selectedProperty={selectedMapProperty}
+              onSelectProperty={onMapPropertySelect}
+              onMapBoundsChange={onMapBoundsChange}
+            />
+          </Suspense>
         </>
       ) : loading ? (
         <div className="space-y-4">

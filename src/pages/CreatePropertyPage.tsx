@@ -1,17 +1,45 @@
+import { Suspense, lazy } from 'react';
 import { CreatePropertySidebar } from '@/components/property-create/CreatePropertySidebar';
 import { CreatePropertyStatusBanners } from '@/components/property-create/CreatePropertyStatusBanners';
 import { CreatePropertyStepActions } from '@/components/property-create/CreatePropertyStepActions';
 import { CreatePropertyStepHeader } from '@/components/property-create/CreatePropertyStepHeader';
-import {
-  PropertyCreateAmenitiesStep,
-  PropertyCreateBasicsStep,
-  PropertyCreateDetailsStep,
-  PropertyCreateLocationStep,
-  PropertyCreatePricingStep,
-} from '@/components/property-create/steps';
 import { useCreatePropertyPage } from '@/hooks/property-create';
 
 type CreatePropertyPageModel = ReturnType<typeof useCreatePropertyPage>;
+
+const PropertyCreateBasicsStep = lazy(() =>
+  import('@/components/property-create/steps/PropertyCreateBasicsStep').then((module) => ({
+    default: module.PropertyCreateBasicsStep,
+  }))
+);
+const PropertyCreateLocationStep = lazy(() =>
+  import('@/components/property-create/steps/PropertyCreateLocationStep').then((module) => ({
+    default: module.PropertyCreateLocationStep,
+  }))
+);
+const PropertyCreateDetailsStep = lazy(() =>
+  import('@/components/property-create/steps/PropertyCreateDetailsStep').then((module) => ({
+    default: module.PropertyCreateDetailsStep,
+  }))
+);
+const PropertyCreateAmenitiesStep = lazy(() =>
+  import('@/components/property-create/steps/PropertyCreateAmenitiesStep').then((module) => ({
+    default: module.PropertyCreateAmenitiesStep,
+  }))
+);
+const PropertyCreatePricingStep = lazy(() =>
+  import('@/components/property-create/steps/PropertyCreatePricingStep').then((module) => ({
+    default: module.PropertyCreatePricingStep,
+  }))
+);
+
+const STEP_FALLBACK = (
+  <div className="space-y-4">
+    <div className="h-10 w-1/3 animate-pulse rounded-2xl bg-slate-100" />
+    <div className="h-56 animate-pulse rounded-3xl bg-slate-100" />
+    <div className="h-32 animate-pulse rounded-3xl bg-slate-100" />
+  </div>
+);
 
 const renderStepContent = (step: number, model: CreatePropertyPageModel) => {
   switch (step) {
@@ -43,7 +71,7 @@ const CreatePropertyPage = () => {
           <CreatePropertyStepHeader step={model.step} />
           <CreatePropertyStatusBanners submitError={model.submitError} submitSuccess={model.submitSuccess} />
 
-          {renderStepContent(model.step, model)}
+          <Suspense fallback={STEP_FALLBACK}>{renderStepContent(model.step, model)}</Suspense>
 
           <CreatePropertyStepActions
             canGoPrev={model.canGoPrev}

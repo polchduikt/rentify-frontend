@@ -2,19 +2,18 @@ import { useEffect } from 'react';
 import L from 'leaflet';
 import { List } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { MapContainer, Marker, ZoomControl } from 'react-leaflet';
+import { MapContainer, ZoomControl } from 'react-leaflet';
 import { UkraineBaseTileLayers } from '@/components/map/UkraineBaseTileLayers';
 import { UkraineRegionLabelsLayer } from '@/components/map/UkraineRegionLabelsLayer';
 import { UkraineRegionsLayer } from '@/components/map/UkraineRegionsLayer';
 import { UkraineViewportSync } from '@/components/map/UkraineViewportSync';
 import { UkraineMaskLayer } from '@/components/map/UkraineMaskLayer';
+import { ClusteredPropertyMarkers } from '@/components/search/ClusteredPropertyMarkers';
 import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { SearchMapPropertyCard } from '@/components/search/SearchMapPropertyCard';
 import { ROUTES } from '@/config/routes';
 import { UKRAINE_LOCKED_MIN_ZOOM, UKRAINE_MAP_CENTER, UKRAINE_MAX_ZOOM } from '@/constants/searchMap';
 import { useSearchPage } from '@/hooks';
-import { usePricePinIcons } from '@/hooks/map/usePricePinIcons';
-import { toPinPosition } from '@/utils/searchMap';
 import { UKRAINE_VIEW_BOUNDS } from '@/utils/ukraineMask';
 
 const UKRAINE_MAP_RENDERER = L.svg({ padding: 1 });
@@ -31,7 +30,6 @@ const SearchMapPage = () => {
   }, [setViewMode, viewMode]);
 
   const mapPins = model.mapPins;
-  const markerIcons = usePricePinIcons(mapPins, model.selectedMapPropertyId);
   const isSidebarVisible = model.selectedMapPropertyId != null;
 
   const listSearchParams = new URLSearchParams(location.search);
@@ -65,24 +63,11 @@ const SearchMapPage = () => {
           onMapClick={() => model.setSelectedMapPropertyId(undefined)}
         />
 
-        {mapPins.map((pin) => {
-          const position = toPinPosition(pin);
-          const icon = markerIcons.get(pin.id);
-          if (!position || !icon) {
-            return null;
-          }
-          return (
-            <Marker
-              key={pin.id}
-              position={position}
-              icon={icon}
-              bubblingMouseEvents={false}
-              eventHandlers={{
-                click: () => model.setSelectedMapPropertyId(pin.id),
-              }}
-            />
-          );
-        })}
+        <ClusteredPropertyMarkers
+          pins={mapPins}
+          selectedPropertyId={model.selectedMapPropertyId}
+          onSelectProperty={model.setSelectedMapPropertyId}
+        />
       </MapContainer>
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] p-3">

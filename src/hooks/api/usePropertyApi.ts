@@ -39,6 +39,8 @@ export const useSearchPropertiesQuery = (
     queryKey: queryKeys.properties.search(criteria, page),
     queryFn: () => propertyService.searchProperties(criteria, page),
     enabled,
+    placeholderData: (previousData) => previousData,
+    staleTime: 60_000,
   });
 
 export const useSearchPropertyMapPinsQuery = (
@@ -50,6 +52,8 @@ export const useSearchPropertyMapPinsQuery = (
     queryKey: queryKeys.properties.mapPins(criteria, page),
     queryFn: () => propertyService.searchMapPins(criteria, page),
     enabled,
+    placeholderData: (previousData) => previousData,
+    staleTime: 45_000,
   });
 
 export const useAvailabilityBlocksQuery = (propertyId: number, enabled = true) =>

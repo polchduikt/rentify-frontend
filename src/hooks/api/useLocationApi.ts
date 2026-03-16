@@ -7,4 +7,5 @@ export const useLocationSuggestQuery = (query: LocationSuggestQuery, enabled = t
     queryKey: queryKeys.locations.suggest(query),
     queryFn: () => locationService.suggest(query),
     enabled: enabled && query.q.trim().length >= 2,
+    staleTime: 60_000,
   });

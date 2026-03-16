@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { startTransition, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   useAmenitiesGroupedQuery,
@@ -8,6 +8,7 @@ import {
   useSearchPropertiesQuery,
   useSearchPropertyMapPinsQuery,
 } from '@/hooks/api';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useAuth } from '@/contexts/AuthContext';
 import type { AmenityCategory } from '@/types/enums';
 import type { LocationSuggestionDto } from '@/types/location';
@@ -63,6 +64,13 @@ export const useSearchPage = () => {
   const [mapBounds, setMapBounds] = useState<SearchMapBounds | null>(null);
   const [selectedMapPropertyId, setSelectedMapPropertyId] = useState<number | undefined>(undefined);
 
+  const deferredDraftFilters = useDeferredValue(draftFilters);
+  const deferredSortMode = useDeferredValue(draftSortMode);
+  const deferredMapBounds = useDeferredValue(mapBounds);
+  const debouncedFilters = useDebouncedValue(deferredDraftFilters, 260);
+  const debouncedCityInput = useDebouncedValue(deferredDraftFilters.cityInput, 260);
+  const debouncedMapBounds = useDebouncedValue(deferredMapBounds, 220);
+
   useEffect(() => {
     const next = buildSearchParams(urlFilters, urlSortMode, viewMode, currentPageState);
     if (params.toString() !== next.toString()) {
@@ -70,13 +78,13 @@ export const useSearchPage = () => {
     }
   }, [currentPageState, params, setParams, urlFilters, urlSortMode, viewMode]);
 
-  const criteria = useMemo(() => toCriteria(draftFilters), [draftFilters]);
+  const criteria = useMemo(() => toCriteria(debouncedFilters), [debouncedFilters]);
   const mapCriteria = useMemo(
     () => ({
       ...criteria,
-      ...(mapBounds ?? {}),
+      ...(debouncedMapBounds ?? {}),
     }),
-    [criteria, mapBounds]
+    [criteria, debouncedMapBounds]
   );
 
   const propertiesQuery = useSearchPropertiesQuery(criteria, { page: 0, size: 200, sort: 'createdAt,desc' });
@@ -86,8 +94,8 @@ export const useSearchPage = () => {
     viewMode === 'map'
   );
   const locationSuggestQuery = useLocationSuggestQuery(
-    { q: draftFilters.cityInput, limit: 10 },
-    draftFilters.cityInput.trim().length >= 2
+    { q: debouncedCityInput, limit: 10 },
+    debouncedCityInput.trim().length >= 2
   );
   const amenitiesGroupedQuery = useAmenitiesGroupedQuery();
   const favoritesQuery = useMyFavoritesQuery(isAuthenticated);
@@ -100,9 +108,9 @@ export const useSearchPage = () => {
   const filtered = useMemo(() => {
     const source = propertiesQuery.data?.content ?? [];
     const activeOnly = source.filter((property) => String(property.status).toUpperCase() === 'ACTIVE');
-    const withClientRules = applyClientOnlyFilters(activeOnly, draftFilters);
-    return sortProperties(withClientRules, draftSortMode);
-  }, [propertiesQuery.data?.content, draftFilters, draftSortMode]);
+    const withClientRules = applyClientOnlyFilters(activeOnly, deferredDraftFilters);
+    return sortProperties(withClientRules, deferredSortMode);
+  }, [deferredDraftFilters, deferredSortMode, propertiesQuery.data?.content]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(currentPageState, totalPages);
@@ -168,28 +176,34 @@ export const useSearchPage = () => {
       ...draftFilters,
       rentalType: parseRentalType(value || null),
     };
-    setDraftFilters(nextFilters);
-    setUrlFilters(nextFilters);
-    setUrlSortMode(draftSortMode);
-    setCurrentPageState(1);
-    setLoadedPagesFromCurrent(1);
+    startTransition(() => {
+      setDraftFilters(nextFilters);
+      setUrlFilters(nextFilters);
+      setUrlSortMode(draftSortMode);
+      setCurrentPageState(1);
+      setLoadedPagesFromCurrent(1);
+    });
   };
 
   const handleRoomsSelect = (value: string) => {
-    setDraftFilters((prev) => ({
-      ...prev,
-      roomsMin: value,
-    }));
+    startTransition(() => {
+      setDraftFilters((prev) => ({
+        ...prev,
+        roomsMin: value,
+      }));
+    });
   };
 
   const handleExtraImmediateChange = (patch: Partial<SearchExtraFilters>) => {
-    setDraftFilters((prev) => ({
-      ...prev,
-      extra: {
-        ...prev.extra,
-        ...patch,
-      },
-    }));
+    startTransition(() => {
+      setDraftFilters((prev) => ({
+        ...prev,
+        extra: {
+          ...prev.extra,
+          ...patch,
+        },
+      }));
+    });
   };
 
   const handleSortModeChange = (mode: SearchSortMode) => {
@@ -286,91 +300,111 @@ export const useSearchPage = () => {
     favoriteIds,
     extraCount,
     setCityInput: (value: string) =>
-      setDraftFilters((prev) => ({
-        ...prev,
-        cityInput: value,
-        locationType: undefined,
-        cityId: undefined,
-        districtId: undefined,
-        metroStationId: undefined,
-        residentialComplexId: undefined,
-      })),
+      startTransition(() => {
+        setDraftFilters((prev) => ({
+          ...prev,
+          cityInput: value,
+          locationType: undefined,
+          cityId: undefined,
+          districtId: undefined,
+          metroStationId: undefined,
+          residentialComplexId: undefined,
+        }));
+      }),
     setPriceFrom: (value: string) =>
-      setDraftFilters((prev) => ({
-        ...prev,
-        priceFrom: value,
-      })),
+      startTransition(() => {
+        setDraftFilters((prev) => ({
+          ...prev,
+          priceFrom: value,
+        }));
+      }),
     setPriceTo: (value: string) =>
-      setDraftFilters((prev) => ({
-        ...prev,
-        priceTo: value,
-      })),
+      startTransition(() => {
+        setDraftFilters((prev) => ({
+          ...prev,
+          priceTo: value,
+        }));
+      }),
     setRoomsMax: (value: string) =>
-      setDraftFilters((prev) => ({
-        ...prev,
-        roomsMax: value,
-      })),
+      startTransition(() => {
+        setDraftFilters((prev) => ({
+          ...prev,
+          roomsMax: value,
+        }));
+      }),
     setAreaFrom: (value: string) =>
-      setDraftFilters((prev) => ({
-        ...prev,
-        areaFrom: value,
-      })),
+      startTransition(() => {
+        setDraftFilters((prev) => ({
+          ...prev,
+          areaFrom: value,
+        }));
+      }),
     setAreaTo: (value: string) =>
-      setDraftFilters((prev) => ({
-        ...prev,
-        areaTo: value,
-      })),
+      startTransition(() => {
+        setDraftFilters((prev) => ({
+          ...prev,
+          areaTo: value,
+        }));
+      }),
     handleLocationSuggestionSelect: (suggestion: LocationSuggestionDto) => {
-      setDraftFilters((prev) => ({
-        ...prev,
-        cityInput: suggestion.name,
-        locationType: suggestion.type,
-        cityId: suggestion.type === 'CITY' ? suggestion.id : suggestion.cityId || undefined,
-        districtId: suggestion.type === 'DISTRICT' ? suggestion.id : undefined,
-        metroStationId: suggestion.type === 'METRO' ? suggestion.id : undefined,
-        residentialComplexId: suggestion.type === 'RESIDENTIAL_COMPLEX' ? suggestion.id : undefined,
-      }));
+      startTransition(() => {
+        setDraftFilters((prev) => ({
+          ...prev,
+          cityInput: suggestion.name,
+          locationType: suggestion.type,
+          cityId: suggestion.type === 'CITY' ? suggestion.id : suggestion.cityId || undefined,
+          districtId: suggestion.type === 'DISTRICT' ? suggestion.id : undefined,
+          metroStationId: suggestion.type === 'METRO' ? suggestion.id : undefined,
+          residentialComplexId: suggestion.type === 'RESIDENTIAL_COMPLEX' ? suggestion.id : undefined,
+        }));
+      });
     },
     handleFiltersCommit,
     handleRentalTypeChange,
     handleRoomsSelect,
     handleExtraDraftChange: (patch: Partial<SearchExtraFilters>) =>
-      setDraftFilters((prev) => ({
-        ...prev,
-        extra: {
-          ...prev.extra,
-          ...patch,
-        },
-      })),
-    handleExtraImmediateChange,
-    handleAmenitySlugToggle: (slug: string) => {
-      setDraftFilters((prev) => {
-        const exists = prev.extra.amenitySlugs.includes(slug);
-        const amenitySlugs = exists
-          ? prev.extra.amenitySlugs.filter((item) => item !== slug)
-          : [...prev.extra.amenitySlugs, slug];
-        return {
+      startTransition(() => {
+        setDraftFilters((prev) => ({
           ...prev,
           extra: {
             ...prev.extra,
-            amenitySlugs,
+            ...patch,
           },
-        };
+        }));
+      }),
+    handleExtraImmediateChange,
+    handleAmenitySlugToggle: (slug: string) => {
+      startTransition(() => {
+        setDraftFilters((prev) => {
+          const exists = prev.extra.amenitySlugs.includes(slug);
+          const amenitySlugs = exists
+            ? prev.extra.amenitySlugs.filter((item) => item !== slug)
+            : [...prev.extra.amenitySlugs, slug];
+          return {
+            ...prev,
+            extra: {
+              ...prev.extra,
+              amenitySlugs,
+            },
+          };
+        });
       });
     },
     handleAmenityCategoryToggle: (category: AmenityCategory) => {
-      setDraftFilters((prev) => {
-        const exists = prev.extra.amenityCategories.includes(category);
-        const amenityCategories = exists
-          ? prev.extra.amenityCategories.filter((item) => item !== category)
-          : [...prev.extra.amenityCategories, category];
-        return {
-          ...prev,
-          extra: {
-            ...prev.extra,
-            amenityCategories,
-          },
-        };
+      startTransition(() => {
+        setDraftFilters((prev) => {
+          const exists = prev.extra.amenityCategories.includes(category);
+          const amenityCategories = exists
+            ? prev.extra.amenityCategories.filter((item) => item !== category)
+            : [...prev.extra.amenityCategories, category];
+          return {
+            ...prev,
+            extra: {
+              ...prev.extra,
+              amenityCategories,
+            },
+          };
+        });
       });
     },
     handleSortModeChange,
@@ -378,7 +412,9 @@ export const useSearchPage = () => {
     setViewMode: (mode: SearchViewMode) => setViewMode(mode),
     setSelectedMapPropertyId,
     handleMapBoundsChange: (bounds: SearchMapBounds) =>
-      setMapBounds((prev) => (areBoundsEqual(prev, bounds) ? prev : bounds)),
+      startTransition(() => {
+        setMapBounds((prev) => (areBoundsEqual(prev, bounds) ? prev : bounds));
+      }),
     showMore,
     goPrevPage,
     goNextPage,

@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { MapContainer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, useMap } from 'react-leaflet';
 import { UkraineBaseTileLayers } from '@/components/map/UkraineBaseTileLayers';
 import { UkraineRegionLabelsLayer } from '@/components/map/UkraineRegionLabelsLayer';
 import { UkraineRegionsLayer } from '@/components/map/UkraineRegionsLayer';
 import { UkraineViewportSync } from '@/components/map/UkraineViewportSync';
 import { UkraineMaskLayer } from '@/components/map/UkraineMaskLayer';
+import { ClusteredPropertyMarkers } from '@/components/search/ClusteredPropertyMarkers';
 import { PropertyListItem } from '@/components/search/PropertyListItem';
 import { UKRAINE_LOCKED_MIN_ZOOM, UKRAINE_MAP_CENTER, UKRAINE_MAX_ZOOM } from '@/constants/searchMap';
-import { usePricePinIcons } from '@/hooks/map/usePricePinIcons';
 import { toPinPosition } from '@/utils/searchMap';
 import { UKRAINE_VIEW_BOUNDS } from '@/utils/ukraineMask';
 import type { SearchResultsMapProps, SearchResultsMapSelectionSyncProps } from './SearchResultsMap.types';
@@ -63,8 +63,6 @@ export const SearchResultsMap = ({
   onSelectProperty,
   onMapBoundsChange,
 }: SearchResultsMapProps) => {
-  const markerIcons = usePricePinIcons(pins, selectedPropertyId);
-
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
       <section className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white">
@@ -87,24 +85,11 @@ export const SearchResultsMap = ({
           <UkraineRegionLabelsLayer />
           <UkraineViewportSync onBoundsChange={onMapBoundsChange} />
           <SearchResultsMapSelectionSync pins={pins} selectedPropertyId={selectedPropertyId} />
-
-          {pins.map((pin) => {
-            const position = toPinPosition(pin);
-            const icon = markerIcons.get(pin.id);
-            if (!position || !icon) {
-              return null;
-            }
-            return (
-              <Marker
-                key={pin.id}
-                position={position}
-                icon={icon}
-                eventHandlers={{
-                  click: () => onSelectProperty(pin.id),
-                }}
-              />
-            );
-          })}
+          <ClusteredPropertyMarkers
+            pins={pins}
+            selectedPropertyId={selectedPropertyId}
+            onSelectProperty={onSelectProperty}
+          />
         </MapContainer>
 
         {loading && (

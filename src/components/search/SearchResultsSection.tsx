@@ -1,8 +1,18 @@
 import { ChevronLeft, ChevronRight, LayoutGrid, List, Map, RotateCw } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { PropertyListItem } from '@/components/search/PropertyListItem';
 import { SearchResultsMap } from '@/components/search/SearchResultsMap';
 import type { SearchResultsSectionProps } from './SearchResultsSection.types';
 
+const SINGLE_ROW_VIRTUAL_STYLE: CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '420px',
+};
+
+const DOUBLE_ROW_VIRTUAL_STYLE: CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '460px',
+};
 
 export const SearchResultsSection = ({
   loading,
@@ -30,6 +40,7 @@ export const SearchResultsSection = ({
   onPageChange,
 }: SearchResultsSectionProps) => {
   const isMapView = viewMode === 'map';
+  const virtualStyle = viewMode === 'single' ? SINGLE_ROW_VIRTUAL_STYLE : DOUBLE_ROW_VIRTUAL_STYLE;
 
   return (
     <div className="mx-auto max-w-[1320px] px-4 py-8 sm:px-6">
@@ -107,7 +118,9 @@ export const SearchResultsSection = ({
         <>
           <div className={viewMode === 'single' ? 'space-y-4' : 'grid grid-cols-1 items-stretch gap-5 xl:grid-cols-2'}>
             {visibleItems.map((property) => (
-              <PropertyListItem key={property.id} property={property} variant={viewMode} isFavorite={favoriteIds.has(property.id)} />
+              <div key={property.id} style={virtualStyle}>
+                <PropertyListItem property={property} variant={viewMode} isFavorite={favoriteIds.has(property.id)} />
+              </div>
             ))}
           </div>
 

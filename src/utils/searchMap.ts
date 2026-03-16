@@ -49,6 +49,14 @@ export const createPricePinIcon = (label: string, active: boolean) => {
   });
 };
 
+export const createClusterPinIcon = (count: number, active: boolean) =>
+  L.divIcon({
+    className: 'rentify-map-cluster-pin',
+    html: `<span class="rentify-map-cluster-pin__badge ${active ? 'rentify-map-cluster-pin__badge--active' : ''}">${count}</span>`,
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
+  });
+
 export interface MapPropertyPrice {
   value: number;
   suffix: string;

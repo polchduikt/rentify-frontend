@@ -133,7 +133,13 @@ export const PropertyListItem = ({ property, variant = 'single', isFavorite = fa
           }
         >
           <div className={`relative overflow-hidden bg-slate-100 ${isDouble ? 'aspect-[16/9] w-full' : 'h-[220px] md:h-[320px]'}`}>
-            <img src={imageUrl} alt={property.title} className="h-full w-full object-cover" />
+            <img
+              src={imageUrl}
+              alt={property.title}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
             {isRecommended ? (
               <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white">
                 Рекомендовано

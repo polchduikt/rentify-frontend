@@ -3,11 +3,16 @@ import { promotionService } from '@/services/promotionService';
 import type { PurchaseSubscriptionRequestDto, PurchaseTopPromotionRequestDto } from '@/types/promotion';
 import { queryKeys } from '@/api/queryKeys';
 
+const PACKAGES_STALE_TIME_MS = 15 * 60_000;
+const PACKAGES_GC_TIME_MS = 60 * 60_000;
+
 export const useTopPromotionPackagesQuery = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.promotions.topPackages(),
     queryFn: () => promotionService.getTopPromotionPackages(),
     enabled,
+    staleTime: PACKAGES_STALE_TIME_MS,
+    gcTime: PACKAGES_GC_TIME_MS,
   });
 
 export const useSubscriptionPackagesQuery = (enabled = true) =>
@@ -15,6 +20,8 @@ export const useSubscriptionPackagesQuery = (enabled = true) =>
     queryKey: queryKeys.promotions.subscriptionPackages(),
     queryFn: () => promotionService.getSubscriptionPackages(),
     enabled,
+    staleTime: PACKAGES_STALE_TIME_MS,
+    gcTime: PACKAGES_GC_TIME_MS,
   });
 
 export const usePurchaseTopPromotionMutation = () => {

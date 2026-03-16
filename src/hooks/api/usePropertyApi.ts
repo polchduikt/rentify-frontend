@@ -10,6 +10,8 @@ import type {
 } from '@/types/property';
 import { queryKeys } from '@/api/queryKeys';
 
+const SEARCH_GC_TIME_MS = 5 * 60_000;
+
 export const useAllPropertiesQuery = (page?: PageQuery, enabled = true) =>
   useQuery({
     queryKey: queryKeys.properties.all(page),
@@ -41,6 +43,7 @@ export const useSearchPropertiesQuery = (
     enabled,
     placeholderData: (previousData) => previousData,
     staleTime: 60_000,
+    gcTime: SEARCH_GC_TIME_MS,
   });
 
 export const useSearchPropertyMapPinsQuery = (
@@ -54,6 +57,7 @@ export const useSearchPropertyMapPinsQuery = (
     enabled,
     placeholderData: (previousData) => previousData,
     staleTime: 45_000,
+    gcTime: SEARCH_GC_TIME_MS,
   });
 
 export const useAvailabilityBlocksQuery = (propertyId: number, enabled = true) =>

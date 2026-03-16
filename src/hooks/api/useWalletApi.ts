@@ -4,6 +4,9 @@ import type { PageQuery } from '@/types/api';
 import type { WalletTopUpRequestDto } from '@/types/wallet';
 import { queryKeys } from '@/api/queryKeys';
 
+const TOP_UP_OPTIONS_STALE_TIME_MS = 15 * 60_000;
+const TOP_UP_OPTIONS_GC_TIME_MS = 60 * 60_000;
+
 export const useWalletBalanceQuery = () =>
   useQuery({
     queryKey: queryKeys.wallet.balance(),
@@ -20,6 +23,8 @@ export const useWalletTopUpOptionsQuery = () =>
   useQuery({
     queryKey: queryKeys.wallet.topUpOptions(),
     queryFn: () => walletService.getTopUpOptions(),
+    staleTime: TOP_UP_OPTIONS_STALE_TIME_MS,
+    gcTime: TOP_UP_OPTIONS_GC_TIME_MS,
   });
 
 export const useWalletTopUpMutation = () => {

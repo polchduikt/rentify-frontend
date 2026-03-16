@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /profile
+Disallow: /favorites
+Disallow: /properties/new
+Disallow: /properties/*/edit
+Disallow: /bookings/*/payment
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://rentify.app/sitemap.xml

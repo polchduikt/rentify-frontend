@@ -63,6 +63,150 @@ const withSuspense = (node: ReactNode, fallback: ReactNode = <ContentSkeleton />
   <Suspense fallback={fallback}>{node}</Suspense>
 );
 
+const DEFAULT_DESCRIPTION = 'Rentify — сервіс оренди житла в Україні. Знайдіть квартиру, будинок чи кімнату швидко.';
+const DEFAULT_OG_IMAGE_PATH = '/rentify-logo.svg';
+const SITE_NAME = 'Rentify';
+
+type BreadcrumbItem = {
+  name: string;
+  path: string;
+};
+
+const resolveSiteUrl = () => {
+  const envUrl = import.meta.env.VITE_SITE_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  return typeof window !== 'undefined' ? window.location.origin : '';
+};
+
+const upsertMetaTag = (key: 'name' | 'property', value: string, content: string) => {
+  const selector = `meta[${key}="${value}"]`;
+  const existing = document.head.querySelector(selector);
+  const meta = existing ?? document.createElement('meta');
+  meta.setAttribute(key, value);
+  meta.setAttribute('content', content);
+  if (!existing) {
+    document.head.appendChild(meta);
+  }
+};
+
+const upsertLinkTag = (rel: string, href: string) => {
+  const selector = `link[rel="${rel}"]`;
+  const existing = document.head.querySelector(selector);
+  const link = existing ?? document.createElement('link');
+  link.setAttribute('rel', rel);
+  link.setAttribute('href', href);
+  if (!existing) {
+    document.head.appendChild(link);
+  }
+};
+
+const upsertJsonLd = (data: Record<string, unknown> | Array<Record<string, unknown>>) => {
+  const scriptId = 'seo-jsonld';
+  const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
+  const script = existing ?? document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = scriptId;
+  script.textContent = JSON.stringify(data);
+  if (!existing) {
+    document.head.appendChild(script);
+  }
+};
+
+const isExactRoute = (pathname: string, route: string) =>
+  matchPath({ path: route, end: true }, pathname) != null;
+
+const isNoIndexRoute = (pathname: string) =>
+  isExactRoute(pathname, ROUTES.login) ||
+  isExactRoute(pathname, ROUTES.register) ||
+  isExactRoute(pathname, ROUTES.profile) ||
+  isExactRoute(pathname, ROUTES.favorites) ||
+  isExactRoute(pathname, ROUTES.createProperty) ||
+  matchPath(ROUTES.editPropertyPattern, pathname) != null ||
+  matchPath(ROUTES.bookingPaymentPattern, pathname) != null;
+
+const resolveBreadcrumbs = (pathname: string): BreadcrumbItem[] | null => {
+  const labelMap: Record<string, string> = {
+    [ROUTES.search]: 'Пошук',
+    [ROUTES.searchMap]: 'Пошук на мапі',
+    [ROUTES.about]: 'Про нас',
+    [ROUTES.contacts]: 'Контакти',
+    [ROUTES.support]: 'Підтримка',
+    [ROUTES.privacy]: 'Політика конфіденційності',
+    [ROUTES.terms]: 'Умови користування',
+  };
+
+  const label = labelMap[pathname];
+  if (!label || pathname === ROUTES.home) {
+    return null;
+  }
+
+  return [
+    { name: 'Головна', path: ROUTES.home },
+    { name: label, path: pathname },
+  ];
+};
+
+const resolveSeo = (pathname: string) => {
+  let title = SITE_NAME;
+  let description = DEFAULT_DESCRIPTION;
+
+  if (pathname === ROUTES.home) {
+    title = 'Rentify - Оренда житла в Україні';
+    description = DEFAULT_DESCRIPTION;
+  } else if (pathname === ROUTES.search) {
+    title = 'Пошук оголошень - Rentify';
+    description = 'Пошук оголошень оренди житла за ціною, районом та зручностями.';
+  } else if (pathname === ROUTES.searchMap) {
+    title = 'Пошук на мапі - Rentify';
+    description = 'Пошук житла на мапі України з актуальними оголошеннями.';
+  } else if (pathname === ROUTES.about) {
+    title = 'Про нас - Rentify';
+    description = 'Дізнайтеся більше про Rentify та нашу місію на ринку оренди житла.';
+  } else if (pathname === ROUTES.contacts) {
+    title = 'Контакти - Rentify';
+    description = 'Контакти Rentify для підтримки, партнерства та медіа-запитів.';
+  } else if (pathname === ROUTES.support) {
+    title = 'Підтримка - Rentify';
+    description = 'Отримайте допомогу з пошуком, бронюванням та роботою платформи Rentify.';
+  } else if (pathname === ROUTES.profile) {
+    title = 'Профіль - Rentify';
+    description = 'Особистий кабінет Rentify для керування оголошеннями та бронюваннями.';
+  } else if (pathname === ROUTES.favorites) {
+    title = 'Обране - Rentify';
+    description = 'Збережені оголошення у вашому профілі Rentify.';
+  } else if (pathname === ROUTES.login) {
+    title = 'Вхід - Rentify';
+    description = 'Увійдіть у свій акаунт Rentify.';
+  } else if (pathname === ROUTES.register) {
+    title = 'Реєстрація - Rentify';
+    description = 'Створіть акаунт Rentify, щоб керувати бронюваннями та оголошеннями.';
+  } else if (pathname === ROUTES.createProperty) {
+    title = 'Створення оголошення - Rentify';
+    description = 'Створіть оголошення про оренду житла на Rentify.';
+  } else if (matchPath(ROUTES.propertyDetailsPattern, pathname)) {
+    title = 'Оголошення - Rentify';
+    description = 'Деталі оголошення про оренду житла на Rentify.';
+  } else if (matchPath(ROUTES.editPropertyPattern, pathname)) {
+    title = 'Редагування оголошення - Rentify';
+    description = 'Редагування оголошення про оренду житла на Rentify.';
+  } else if (matchPath(ROUTES.publicProfilePattern, pathname)) {
+    title = 'Профіль користувача - Rentify';
+    description = 'Публічний профіль користувача Rentify та його оголошення.';
+  } else if (matchPath(ROUTES.bookingPaymentPattern, pathname)) {
+    title = 'Оплата бронювання - Rentify';
+    description = 'Оплата бронювання житла через Rentify.';
+  }
+
+  return {
+    title,
+    description,
+    robots: isNoIndexRoute(pathname) ? 'noindex,nofollow' : 'index,follow',
+    breadcrumbs: resolveBreadcrumbs(pathname),
+  };
+};
+
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
@@ -102,75 +246,66 @@ const ScrollToTop = () => {
   return null;
 };
 
-const resolvePageTitle = (pathname: string): string => {
-  if (pathname === ROUTES.home) {
-    return 'Rentify - Оренда житла в Україні';
-  }
-
-  if (pathname === ROUTES.search) {
-    return 'Пошук оголошень - Rentify';
-  }
-
-  if (pathname === ROUTES.searchMap) {
-    return 'Пошук на мапі - Rentify';
-  }
-
-  if (pathname === ROUTES.about) {
-    return 'Про нас - Rentify';
-  }
-
-  if (pathname === ROUTES.contacts) {
-    return 'Контакти - Rentify';
-  }
-
-  if (pathname === ROUTES.support) {
-    return 'Підтримка - Rentify';
-  }
-
-  if (pathname === ROUTES.profile) {
-    return 'Профіль - Rentify';
-  }
-
-  if (pathname === ROUTES.favorites) {
-    return 'Обране - Rentify';
-  }
-
-  if (pathname === ROUTES.login) {
-    return 'Вхід - Rentify';
-  }
-
-  if (pathname === ROUTES.register) {
-    return 'Реєстрація - Rentify';
-  }
-
-  if (pathname === ROUTES.createProperty) {
-    return 'Створення оголошення - Rentify';
-  }
-
-  if (matchPath(ROUTES.propertyDetailsPattern, pathname)) {
-    return 'Оголошення - Rentify';
-  }
-
-  if (matchPath(ROUTES.editPropertyPattern, pathname)) {
-    return 'Редагування оголошення - Rentify';
-  }
-
-  if (matchPath(ROUTES.publicProfilePattern, pathname)) {
-    return 'Профіль користувача - Rentify';
-  }
-
-  if (matchPath(ROUTES.bookingPaymentPattern, pathname)) {
-    return 'Оплата бронювання - Rentify';
-  }
-
-  return 'Rentify';
-};
-
-const DocumentTitle = () => {
+const DocumentMeta = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    document.title = resolvePageTitle(pathname);
+    const { title, description, robots, breadcrumbs } = resolveSeo(pathname);
+    const siteUrl = resolveSiteUrl();
+    const canonicalUrl = `${siteUrl}${pathname}`;
+    const ogImageUrl = `${siteUrl}${DEFAULT_OG_IMAGE_PATH}`;
+
+    document.title = title;
+    upsertMetaTag('name', 'description', description);
+    upsertMetaTag('name', 'robots', robots);
+    upsertMetaTag('property', 'og:type', 'website');
+    upsertMetaTag('property', 'og:site_name', SITE_NAME);
+    upsertMetaTag('property', 'og:title', title);
+    upsertMetaTag('property', 'og:description', description);
+    upsertMetaTag('property', 'og:url', canonicalUrl);
+    upsertMetaTag('property', 'og:image', ogImageUrl);
+    upsertMetaTag('property', 'og:locale', 'uk_UA');
+    upsertMetaTag('name', 'twitter:card', 'summary_large_image');
+    upsertMetaTag('name', 'twitter:title', title);
+    upsertMetaTag('name', 'twitter:description', description);
+    upsertMetaTag('name', 'twitter:image', ogImageUrl);
+    upsertLinkTag('canonical', canonicalUrl);
+
+    const jsonLd: Record<string, unknown>[] = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: SITE_NAME,
+        url: siteUrl,
+        logo: ogImageUrl,
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: SITE_NAME,
+        url: siteUrl,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${siteUrl}${ROUTES.search}?city={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
+      },
+    ];
+
+    if (breadcrumbs) {
+      jsonLd.push({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((item, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: item.name,
+          item: `${siteUrl}${item.path}`,
+        })),
+      });
+    }
+
+    upsertJsonLd(jsonLd);
   }, [pathname]);
 
   return null;
@@ -178,7 +313,7 @@ const DocumentTitle = () => {
 
 const AppRouter = () => (
   <BrowserRouter>
-    <DocumentTitle />
+    <DocumentMeta />
     <ScrollToTop />
     <Routes>
       <Route element={<MainLayout />}>

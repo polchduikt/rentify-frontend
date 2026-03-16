@@ -1,0 +1,1 @@
+export const PROPERTY_CREATE_MAX_FILES = 12;

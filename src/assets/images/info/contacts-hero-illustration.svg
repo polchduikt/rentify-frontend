@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-label="Contacts hero illustration">
+  <defs>
+    <linearGradient id="contactsBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dbeafe"/>
+      <stop offset="48%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="640" fill="url(#contactsBg)"/>
+  <circle cx="130" cy="120" r="90" fill="#fff" fill-opacity="0.3"/>
+  <circle cx="890" cy="560" r="110" fill="#67e8f9" fill-opacity="0.25"/>
+
+  <g>
+    <rect x="140" y="130" width="680" height="120" rx="22" fill="#ffffff" fill-opacity="0.92"/>
+    <circle cx="206" cy="190" r="26" fill="#2563eb"/>
+    <path d="M195 186h22m-22 9h22m-22 9h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <rect x="250" y="172" width="340" height="16" rx="8" fill="#1e293b"/>
+    <rect x="250" y="198" width="210" height="12" rx="6" fill="#64748b"/>
+  </g>
+
+  <g>
+    <rect x="140" y="280" width="680" height="100" rx="20" fill="#ffffff" fill-opacity="0.92"/>
+    <circle cx="206" cy="330" r="24" fill="#2563eb"/>
+    <path d="M195 330h22m-11-11v22" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <rect x="250" y="316" width="300" height="14" rx="7" fill="#1e293b"/>
+    <rect x="250" y="338" width="250" height="10" rx="5" fill="#64748b"/>
+  </g>
+
+  <g>
+    <rect x="140" y="410" width="680" height="100" rx="20" fill="#ffffff" fill-opacity="0.92"/>
+    <circle cx="206" cy="460" r="24" fill="#2563eb"/>
+    <path d="M194 452h24v16h-24z" fill="none" stroke="#fff" stroke-width="4"/>
+    <rect x="250" y="446" width="260" height="14" rx="7" fill="#1e293b"/>
+    <rect x="250" y="468" width="280" height="10" rx="5" fill="#64748b"/>
+  </g>
+</svg>

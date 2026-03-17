@@ -84,6 +84,50 @@ The frontend is built with a robust and maintainable stack:
 
 ---
 
+## Screenshots
+
+### Home page
+
+![Home page](src/assets/images/home.jpg)
+
+_The landing page with key entry points and quick navigation._
+
+### Search listings
+
+![Search listings](src/assets/images/search.jpg)
+
+_Search with filters and results list to quickly find the right rental._
+
+### Map search
+
+![Map search](src/assets/images/map.jpg)
+
+_Map view with clustered pins for location-first browsing._
+
+### Property details
+
+![Property details](src/assets/images/property_details.jpg)
+
+_A full listing view: photos, rules, amenities, pricing, and availability._
+
+### User profile
+
+![User profile](src/assets/images/profile.jpg)
+
+_Account area for personal details and profile management._
+
+### Profile (dark mode)
+
+![Profile (dark mode)](src/assets/images/profile_dark_mode.jpg)
+
+_Dark theme example for comfortable low-light usage._
+
+### Create a listing
+
+![Create a listing](src/assets/images/create_property.jpg)
+
+_Listing creation flow: fill in the key details and prepare it for publishing._
+
 ## Frontend Behavior
 
 - **Guests**

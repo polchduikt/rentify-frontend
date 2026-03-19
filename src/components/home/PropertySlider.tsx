@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, Home } from 'lucide-react';
 import { useRef } from 'react';
-import PropertyCard from '@/components/PropertyCard';
+import PropertyCard from '@/components/property-card/PropertyCard.tsx';
 import { PROPERTY_SLIDER_CARD_CLASS } from '@/constants/homeUi';
 import type { PropertySliderProps } from './PropertySlider.types';
 

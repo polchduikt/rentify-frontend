@@ -22,7 +22,7 @@ interface AuthContextType {
   register: (data: RegisterRequestDto) => Promise<void>;
   loginWithGoogle: (data: GoogleOAuthRequestDto) => Promise<void>;
   refreshProfile: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,6 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const onSessionExpired = () => {
       authService.clearSessionCache();
       queryClient.clear();
+      setAuthToken(null);
       setToken(null);
       setUser(null);
     };
@@ -97,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!storedToken && !USE_HTTP_ONLY_AUTH_COOKIE) {
       authService.clearSessionCache();
       queryClient.clear();
+      setUser(null);
       setToken(null);
       return;
     }
@@ -108,10 +110,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await authService.logout();
-    queryClient.clear();
-    setToken(null);
-    setUser(null);
+    try {
+      await authService.logout();
+    } finally {
+      authService.clearSessionCache();
+      queryClient.clear();
+      setAuthToken(null);
+      setToken(null);
+      setUser(null);
+    }
   };
 
   return (

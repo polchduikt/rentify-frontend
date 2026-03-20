@@ -66,8 +66,9 @@ api.interceptors.response.use(
             requestUrl.includes('/auth/login') ||
             requestUrl.includes('/auth/register') ||
             requestUrl.includes('/auth/google');
+        const isSessionProbeRequest = requestUrl.includes('/users/profile');
 
-        if (error.response?.status === 401 && !isAuthRequest) {
+        if (error.response?.status === 401 && !isAuthRequest && !(USE_HTTP_ONLY_AUTH_COOKIE && isSessionProbeRequest)) {
             clearAuthToken();
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));

@@ -225,7 +225,7 @@ const ProtectedRoute = () => {
 const GuestRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
+  if (isLoading && isAuthenticated) {
     return <FullPageLoader />;
   }
 

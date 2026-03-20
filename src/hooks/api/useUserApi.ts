@@ -21,6 +21,7 @@ export const useMySessionQuery = (enabled = true) => {
     enabled: shouldFetch,
     staleTime: SESSION_STALE_TIME_MS,
     gcTime: SESSION_GC_TIME_MS,
+    retry: false,
   });
 };
 

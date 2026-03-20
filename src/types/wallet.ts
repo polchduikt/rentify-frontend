@@ -12,6 +12,11 @@ export interface WalletTopUpRequestDto {
   amount: Decimal;
 }
 
+export interface TopUpOptionDto {
+  amount: Decimal;
+  currency: string;
+}
+
 export interface WalletTransactionDto {
   id: number;
   userId: number;

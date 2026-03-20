@@ -13,7 +13,7 @@ export const API_ENDPOINTS = {
   },
   bookings: {
     root: '/bookings',
-    mine: '/bookings/my',
+    mine: '/bookings/me',
     incoming: '/bookings/incoming',
     byId: (id: number) => `/bookings/${id}`,
     cancel: (id: number) => `/bookings/${id}/cancel`,
@@ -22,8 +22,8 @@ export const API_ENDPOINTS = {
   },
   conversations: {
     root: '/conversations',
-    sendToProperty: (propertyId: number) => `/conversations/property/${propertyId}`,
-    reply: (conversationId: number) => `/conversations/${conversationId}/reply`,
+    create: '/conversations',
+    send: (conversationId: number) => `/conversations/${conversationId}/messages`,
     messages: (conversationId: number) => `/conversations/${conversationId}/messages`,
   },
   favorites: {
@@ -38,7 +38,7 @@ export const API_ENDPOINTS = {
     grouped: '/amenities/grouped',
   },
   payments: {
-    mine: '/payments/my',
+    mine: '/payments/me',
     payBooking: (bookingId: number) => `/payments/bookings/${bookingId}/mock-pay`,
     byBooking: (bookingId: number) => `/payments/bookings/${bookingId}`,
   },
@@ -50,7 +50,7 @@ export const API_ENDPOINTS = {
   },
   properties: {
     root: '/properties',
-    mine: '/properties/my',
+    mine: '/properties/me',
     search: '/properties/search',
     searchMapPins: '/properties/search/map-pins',
     byId: (id: number) => `/properties/${id}`,

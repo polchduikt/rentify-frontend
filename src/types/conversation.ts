@@ -23,3 +23,7 @@ export interface MessageDto {
 export interface SendMessageRequestDto {
   text: string;
 }
+
+export interface CreateConversationRequestDto {
+  propertyId: number;
+}

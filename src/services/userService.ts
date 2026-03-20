@@ -1,7 +1,6 @@
 import { API_ENDPOINTS } from '@/config/apiEndpoints';
 import type {
   ChangePasswordRequestDto,
-  DeleteAccountRequestDto,
   PublicUserProfileDto,
   UpdateUserRequestDto,
   UserResponseDto,
@@ -46,8 +45,8 @@ export const userService = {
     await api.patch(API_ENDPOINTS.users.changePassword, payload);
   },
 
-  async deleteCurrentAccount(payload: DeleteAccountRequestDto): Promise<void> {
-    await api.delete(API_ENDPOINTS.users.profile, { data: payload });
+  async deleteCurrentAccount(): Promise<void> {
+    await api.delete(API_ENDPOINTS.users.profile);
   },
 
   async uploadAvatar(file: File): Promise<string> {

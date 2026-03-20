@@ -7,10 +7,6 @@ export interface ChangePasswordRequestDto {
   confirmPassword: string;
 }
 
-export interface DeleteAccountRequestDto {
-  currentPassword?: string;
-}
-
 export interface PublicUserProfileDto {
   id: number;
   firstName: string;

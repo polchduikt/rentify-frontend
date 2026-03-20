@@ -265,7 +265,7 @@ export const useProfilePageActions = ({
 
   const deleteAccount = async () => {
     try {
-      await deleteAccountMutation.mutateAsync({});
+      await deleteAccountMutation.mutateAsync();
     } catch (error) {
       throw new Error(getApiErrorMessage(error, 'Не вдалося видалити акаунт.'));
     }

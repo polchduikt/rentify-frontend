@@ -20,10 +20,14 @@ const PropertyDetailsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOwnerPhoneVisible, setIsOwnerPhoneVisible] = useState(false);
+  const propertyId = model.property?.id ?? null;
 
   useEffect(() => {
+    if (propertyId == null) {
+      return;
+    }
     setIsOwnerPhoneVisible(false);
-  }, [model.property?.id]);
+  }, [propertyId]);
 
   const handleContactHost = () => {
     if (!model.property) {

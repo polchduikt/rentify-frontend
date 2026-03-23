@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
+import { SearchFiltersPanelConnected } from '@/components/search/SearchFiltersPanelConnected';
 import { SearchResultsSection } from '@/components/search/SearchResultsSection';
 import { ROUTES } from '@/config/routes';
 import { useSearchPage } from '@/hooks';
@@ -18,40 +18,7 @@ const SearchPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f6fa]">
-      <SearchFiltersPanel
-        cityInput={model.cityInput}
-        rentalType={model.rentalType}
-        priceFrom={model.priceFrom}
-        priceTo={model.priceTo}
-        roomsMin={model.roomsMin}
-        roomsMax={model.roomsMax}
-        areaFrom={model.areaFrom}
-        areaTo={model.areaTo}
-        extra={model.extra}
-        sortMode={model.sortMode}
-        extraCount={model.extraCount}
-        filteredCount={model.filtered.length}
-        suggestions={model.suggestions}
-        suggestionsLoading={model.suggestionsLoading}
-        amenitiesGrouped={model.amenitiesGrouped}
-        amenitiesLoading={model.amenitiesLoading}
-        onCityInputChange={model.setCityInput}
-        onLocationSuggestionSelect={model.handleLocationSuggestionSelect}
-        onRentalTypeChange={model.handleRentalTypeChange}
-        onPriceFromChange={model.setPriceFrom}
-        onPriceToChange={model.setPriceTo}
-        onRoomsSelect={model.handleRoomsSelect}
-        onRoomsMaxChange={model.setRoomsMax}
-        onAreaFromChange={model.setAreaFrom}
-        onAreaToChange={model.setAreaTo}
-        onExtraDraftChange={model.handleExtraDraftChange}
-        onExtraImmediateChange={model.handleExtraImmediateChange}
-        onAmenitySlugToggle={model.handleAmenitySlugToggle}
-        onAmenityCategoryToggle={model.handleAmenityCategoryToggle}
-        onSortModeChange={model.handleSortModeChange}
-        onCommitFilters={model.handleFiltersCommit}
-        onResetAllFilters={model.handleResetAllFilters}
-      />
+      <SearchFiltersPanelConnected model={model} />
 
       <SearchResultsSection
         loading={model.loading}

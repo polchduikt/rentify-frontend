@@ -9,7 +9,7 @@ import { UkraineRegionsLayer } from '@/components/map/UkraineRegionsLayer';
 import { UkraineViewportSync } from '@/components/map/UkraineViewportSync';
 import { UkraineMaskLayer } from '@/components/map/UkraineMaskLayer';
 import { ClusteredPropertyMarkers } from '@/components/search/ClusteredPropertyMarkers';
-import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
+import { SearchFiltersPanelConnected } from '@/components/search/SearchFiltersPanelConnected';
 import { SearchMapPropertyCard } from '@/components/search/SearchMapPropertyCard';
 import { ROUTES } from '@/config/routes';
 import { UKRAINE_LOCKED_MIN_ZOOM, UKRAINE_MAP_CENTER, UKRAINE_MAX_ZOOM } from '@/constants/searchMap';
@@ -72,7 +72,8 @@ const SearchMapPage = () => {
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] p-3">
         <div className="pointer-events-auto">
-          <SearchFiltersPanel
+          <SearchFiltersPanelConnected
+            model={model}
             mode="map"
             mapFormAction={
               <Link
@@ -83,38 +84,6 @@ const SearchMapPage = () => {
                 Дивитися списком
               </Link>
             }
-            cityInput={model.cityInput}
-            rentalType={model.rentalType}
-            priceFrom={model.priceFrom}
-            priceTo={model.priceTo}
-            roomsMin={model.roomsMin}
-            roomsMax={model.roomsMax}
-            areaFrom={model.areaFrom}
-            areaTo={model.areaTo}
-            extra={model.extra}
-            sortMode={model.sortMode}
-            extraCount={model.extraCount}
-            filteredCount={model.filtered.length}
-            suggestions={model.suggestions}
-            suggestionsLoading={model.suggestionsLoading}
-            amenitiesGrouped={model.amenitiesGrouped}
-            amenitiesLoading={model.amenitiesLoading}
-            onCityInputChange={model.setCityInput}
-            onLocationSuggestionSelect={model.handleLocationSuggestionSelect}
-            onRentalTypeChange={model.handleRentalTypeChange}
-            onPriceFromChange={model.setPriceFrom}
-            onPriceToChange={model.setPriceTo}
-            onRoomsSelect={model.handleRoomsSelect}
-            onRoomsMaxChange={model.setRoomsMax}
-            onAreaFromChange={model.setAreaFrom}
-            onAreaToChange={model.setAreaTo}
-            onExtraDraftChange={model.handleExtraDraftChange}
-            onExtraImmediateChange={model.handleExtraImmediateChange}
-            onAmenitySlugToggle={model.handleAmenitySlugToggle}
-            onAmenityCategoryToggle={model.handleAmenityCategoryToggle}
-            onSortModeChange={model.handleSortModeChange}
-            onCommitFilters={model.handleFiltersCommit}
-            onResetAllFilters={model.handleResetAllFilters}
           />
         </div>
       </div>

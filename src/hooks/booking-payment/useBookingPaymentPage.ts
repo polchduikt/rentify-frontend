@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useBookingByIdQuery, useMockPayBookingMutation, usePaymentsByBookingQuery, usePropertyByIdQuery } from '@/hooks/api';
+import { diffNights } from '@/utils/bookingDates';
 import { getApiErrorMessage } from '@/utils/errors';
 import { getLatestPayment } from '@/utils/payments';
 
@@ -21,17 +22,43 @@ export const useBookingPaymentPage = () => {
   const propertyQuery = usePropertyByIdQuery(booking?.propertyId ?? 0, Boolean(booking?.propertyId));
   const property = propertyQuery.data ?? null;
 
+  const bookingSummary = useMemo(() => {
+    const currency = property?.pricing?.currency || 'UAH';
+    const totalPrice = Number(booking?.totalPrice || 0);
+    const nights = booking ? diffNights(booking.dateFrom, booking.dateTo) : 0;
+    const propertyAddress = [
+      property?.address?.location?.city,
+      property?.address?.location?.region,
+      property?.address?.street ? `вул. ${property.address.street}` : null,
+      property?.address?.houseNumber ? `буд. ${property.address.houseNumber}` : null,
+      property?.address?.apartment ? `кв. ${property.address.apartment}` : null,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    return {
+      currency,
+      totalPrice,
+      nights,
+      propertyAddress,
+    };
+  }, [
+    booking?.dateFrom,
+    booking?.dateTo,
+    booking?.totalPrice,
+    property?.address?.apartment,
+    property?.address?.houseNumber,
+    property?.address?.location?.city,
+    property?.address?.location?.region,
+    property?.address?.street,
+    property?.pricing?.currency,
+  ]);
+
   const payMutation = useMockPayBookingMutation();
   const [notice, setNotice] = useState<Notice>(null);
 
   const hasPaidPayment = latestPayment?.status === 'PAID';
-
-  const canPay =
-    booking != null &&
-    !hasPaidPayment &&
-    booking.status === 'CONFIRMED' &&
-    !payMutation.isPending;
-
+  const canPay = booking != null && !hasPaidPayment && booking.status === 'CONFIRMED' && !payMutation.isPending;
   const requiresHostConfirmation = booking != null && booking.status === 'CREATED' && !hasPaidPayment;
 
   const payBooking = async () => {
@@ -60,6 +87,10 @@ export const useBookingPaymentPage = () => {
     isValidBookingId,
     booking,
     property,
+    currency: bookingSummary.currency,
+    totalPrice: bookingSummary.totalPrice,
+    nights: bookingSummary.nights,
+    propertyAddress: bookingSummary.propertyAddress,
     payments,
     latestPayment,
     hasPaidPayment,
@@ -77,3 +108,4 @@ export const useBookingPaymentPage = () => {
 };
 
 export type BookingPaymentPageModel = ReturnType<typeof useBookingPaymentPage>;
+

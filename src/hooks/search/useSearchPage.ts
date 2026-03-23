@@ -421,3 +421,5 @@ export const useSearchPage = () => {
     goToPage,
   };
 };
+
+export type SearchPageModel = ReturnType<typeof useSearchPage>;

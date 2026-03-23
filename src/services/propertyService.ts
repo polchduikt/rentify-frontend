@@ -28,6 +28,19 @@ type UnavailableRangeApiDto = Partial<UnavailableDateRangeDto> & {
 };
 
 export const propertyService = {
+  getMyPropertiesRequestConfig(page?: PageQuery, statuses?: PropertyStatus[]) {
+    return {
+      params: {
+        ...withPageQuery(page),
+        ...(statuses && statuses.length > 0 ? { statuses: statuses.join(',') } : {}),
+      },
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    } as const;
+  },
+
   async getAllProperties(page?: PageQuery): Promise<SpringPage<PropertyResponseDto>> {
     const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.root, {
       params: withPageQuery(page),
@@ -36,9 +49,10 @@ export const propertyService = {
   },
 
   async getMyProperties(page?: PageQuery): Promise<SpringPage<PropertyResponseDto>> {
-    const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.mine, {
-      params: withPageQuery(page),
-    });
+    const { data } = await api.get<SpringPage<PropertyResponseDto>>(
+      API_ENDPOINTS.properties.mine,
+      propertyService.getMyPropertiesRequestConfig(page),
+    );
     return data;
   },
 
@@ -46,12 +60,10 @@ export const propertyService = {
     page?: PageQuery,
     statuses?: PropertyStatus[]
   ): Promise<SpringPage<PropertyResponseDto>> {
-    const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.mine, {
-      params: {
-        ...withPageQuery(page),
-        ...(statuses && statuses.length > 0 ? { statuses: statuses.join(',') } : {}),
-      },
-    });
+    const { data } = await api.get<SpringPage<PropertyResponseDto>>(
+      API_ENDPOINTS.properties.mine,
+      propertyService.getMyPropertiesRequestConfig(page, statuses),
+    );
     return data;
   },
 
@@ -95,7 +107,7 @@ export const propertyService = {
     criteria?: PropertySearchCriteriaDto,
     page?: PageQuery
   ): Promise<SpringPage<PropertyResponseDto>> {
-    const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.search, {
+    const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.root, {
       params: {
         ...cleanQueryParams(criteria ?? {}),
         ...withPageQuery(page),
@@ -108,7 +120,7 @@ export const propertyService = {
     criteria?: PropertySearchCriteriaDto,
     page?: PageQuery
   ): Promise<SpringPage<PropertyMapPinDto>> {
-    const { data } = await api.get<SpringPage<PropertyMapPinDto>>(API_ENDPOINTS.properties.searchMapPins, {
+    const { data } = await api.get<SpringPage<PropertyMapPinDto>>(API_ENDPOINTS.properties.mapPins, {
       params: {
         ...cleanQueryParams(criteria ?? {}),
         ...withPageQuery(page),

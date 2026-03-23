@@ -11,15 +11,15 @@ export const bookingService = {
   },
 
   async getMyBookings(page?: PageQuery): Promise<SpringPage<BookingDto>> {
-    const { data } = await api.get<SpringPage<BookingDto>>(API_ENDPOINTS.bookings.mine, {
-      params: withPageQuery(page),
+    const { data } = await api.get<SpringPage<BookingDto>>(API_ENDPOINTS.bookings.list, {
+      params: { ...withPageQuery(page), role: 'guest' },
     });
     return data;
   },
 
   async getIncomingBookings(page?: PageQuery): Promise<SpringPage<BookingDto>> {
-    const { data } = await api.get<SpringPage<BookingDto>>(API_ENDPOINTS.bookings.incoming, {
-      params: withPageQuery(page),
+    const { data } = await api.get<SpringPage<BookingDto>>(API_ENDPOINTS.bookings.list, {
+      params: { ...withPageQuery(page), role: 'host' },
     });
     return data;
   },
@@ -30,17 +30,23 @@ export const bookingService = {
   },
 
   async cancelBooking(id: number): Promise<BookingDto> {
-    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.cancel(id));
+    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.update(id), {
+      status: 'CANCELLED',
+    });
     return data;
   },
 
   async confirmBooking(id: number): Promise<BookingDto> {
-    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.confirm(id));
+    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.update(id), {
+      status: 'CONFIRMED',
+    });
     return data;
   },
 
   async rejectBooking(id: number): Promise<BookingDto> {
-    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.reject(id));
+    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.update(id), {
+      status: 'REJECTED',
+    });
     return data;
   },
 };

@@ -63,10 +63,10 @@ api.interceptors.response.use(
     (error) => {
         const requestUrl = typeof error.config?.url === 'string' ? error.config.url : '';
         const isAuthRequest =
-            requestUrl.includes('/auth/login') ||
-            requestUrl.includes('/auth/register') ||
-            requestUrl.includes('/auth/google');
-        const isSessionProbeRequest = requestUrl.includes('/users/profile');
+            requestUrl.includes('/sessions') ||
+            requestUrl.endsWith('/users') ||
+            requestUrl.includes('/sessions/google');
+        const isSessionProbeRequest = requestUrl.includes('/users/me');
 
         if (error.response?.status === 401 && !isAuthRequest && !(USE_HTTP_ONLY_AUTH_COOKIE && isSessionProbeRequest)) {
             clearAuthToken();

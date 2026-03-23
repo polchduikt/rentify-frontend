@@ -160,7 +160,7 @@ export const authService = {
     sessionRequest = null;
     sessionRequestKey = null;
     try {
-      await api.post(API_ENDPOINTS.auth.logout);
+      await api.delete(API_ENDPOINTS.auth.logout);
     } finally {
       clearAuthToken();
       clearGoogleAvatarUrl();

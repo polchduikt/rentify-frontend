@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserSessionDto | null>(null);
 
   const sessionQuery = useMySessionQuery(true);
+  const resolvedUser = useMemo(() => user ?? sessionQuery.data ?? null, [user, sessionQuery.data]);
   const isLoading = useMemo(() => {
     if (!USE_HTTP_ONLY_AUTH_COOKIE && !token) {
       return false;
@@ -124,9 +125,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: resolvedUser,
         token,
-        isAuthenticated: Boolean(user),
+        isAuthenticated: Boolean(resolvedUser),
         isLoading,
         login,
         register,

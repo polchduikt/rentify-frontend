@@ -11,7 +11,7 @@ export const walletService = {
   },
 
   async topUp(payload: WalletTopUpRequestDto): Promise<WalletBalanceDto> {
-    const { data } = await api.post<WalletBalanceDto>(API_ENDPOINTS.wallet.topUp, payload);
+    const { data } = await api.post<WalletBalanceDto>(API_ENDPOINTS.wallet.transactions, payload);
     return data;
   },
 

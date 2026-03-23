@@ -4,12 +4,12 @@ import api from './api';
 
 export const paymentService = {
   async mockPayBooking(bookingId: number): Promise<PaymentResponseDto> {
-    const { data } = await api.post<PaymentResponseDto>(API_ENDPOINTS.payments.payBooking(bookingId));
+    const { data } = await api.post<PaymentResponseDto>(API_ENDPOINTS.payments.root, { bookingId });
     return data;
   },
 
   async getMyPayments(): Promise<PaymentResponseDto[]> {
-    const { data } = await api.get<PaymentResponseDto[]>(API_ENDPOINTS.payments.mine);
+    const { data } = await api.get<PaymentResponseDto[]>(API_ENDPOINTS.payments.root);
     return data;
   },
 

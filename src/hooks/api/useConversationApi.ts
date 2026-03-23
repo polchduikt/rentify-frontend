@@ -25,8 +25,13 @@ export const useSendMessageToPropertyMutation = () => {
   return useMutation({
     mutationFn: ({ propertyId, payload }: { propertyId: number; payload: SendMessageRequestDto }) =>
       conversationService.sendMessageToProperty(propertyId, payload),
-    onSuccess: () => {
+    onSuccess: (createdMessage) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.conversations.mine() });
+      if (createdMessage.conversationId > 0) {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.conversations.messages(createdMessage.conversationId),
+        });
+      }
     },
   });
 };

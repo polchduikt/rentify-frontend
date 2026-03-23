@@ -69,6 +69,7 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState('');
   const skipForwardGeocodeRef = useRef(false);
+  const reverseGeocodeAbortRef = useRef<AbortController | null>(null);
   const initializedEditPropertySnapshotRef = useRef<string | null>(null);
   const initializedAvailabilitySnapshotRef = useRef<string | null>(null);
   const initialExistingPhotoIdsRef = useRef<number[]>([]);
@@ -124,7 +125,9 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     setReverseGeocodingError('');
     setIsReverseGeocoding(true);
 
+    reverseGeocodeAbortRef.current?.abort();
     const abortController = new AbortController();
+    reverseGeocodeAbortRef.current = abortController;
     void reverseGeocodeCoordinates(lat, lng, abortController.signal)
       .then((address) => {
         if (!address) {
@@ -158,7 +161,10 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
         setReverseGeocodingError('Не вдалося автоматично визначити адресу за точкою. Можна ввести вручну.');
       })
       .finally(() => {
-        setIsReverseGeocoding(false);
+        if (reverseGeocodeAbortRef.current === abortController) {
+          reverseGeocodeAbortRef.current = null;
+          setIsReverseGeocoding(false);
+        }
       });
   };
 
@@ -223,6 +229,13 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     setExistingAvailabilityBlocks((prev) => prev.filter((block) => block.id !== blockId));
     setRemovedExistingAvailabilityBlockIds((prev) => (prev.includes(blockId) ? prev : [...prev, blockId]));
   };
+
+  useEffect(
+    () => () => {
+      reverseGeocodeAbortRef.current?.abort();
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!isEditMode) {
@@ -335,6 +348,93 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     }
   };
 
+  const syncPropertyPhotos = async (savedPropertyId: number) => {
+    const currentExistingPhotoIds = existingPhotos.map((photo) => photo.id);
+    const existingPhotosChanged = isEditMode && !areIdsEqual(initialExistingPhotoIdsRef.current, currentExistingPhotoIds);
+
+    if (existingPhotosChanged) {
+      const existingFiles = await Promise.all(
+        existingPhotos.map((photo, index) => toFileFromUrl(photo.url, `property-${savedPropertyId}-existing-${index + 1}`)),
+      );
+
+      for (const photoId of initialExistingPhotoIdsRef.current) {
+        try {
+          await deletePhotoMutation.mutateAsync({
+            propertyId: savedPropertyId,
+            photoId,
+          });
+        } catch (error) {
+          if (!isNotFoundError(error)) {
+            throw error;
+          }
+        }
+      }
+
+      const orderedFiles = [...existingFiles, ...photos];
+      for (const file of orderedFiles) {
+        await uploadPhotoMutation.mutateAsync({
+          propertyId: savedPropertyId,
+          file,
+        });
+      }
+      return;
+    }
+
+    if (photos.length > 0) {
+      for (const file of photos) {
+        await uploadPhotoMutation.mutateAsync({
+          propertyId: savedPropertyId,
+          file,
+        });
+      }
+    }
+  };
+
+  const syncAvailabilityBlocks = async (savedPropertyId: number) => {
+    if (removedExistingAvailabilityBlockIds.length > 0) {
+      await Promise.all(
+        removedExistingAvailabilityBlockIds.map((blockId) =>
+          deleteAvailabilityBlockMutation.mutateAsync({
+            propertyId: savedPropertyId,
+            blockId,
+          }),
+        ),
+      );
+    }
+
+    if (availabilityBlocks.length > 0) {
+      await Promise.all(
+        availabilityBlocks.map((block) =>
+          createAvailabilityBlockMutation.mutateAsync({
+            propertyId: savedPropertyId,
+            payload: {
+              dateFrom: block.dateFrom,
+              dateTo: block.dateTo,
+              reason: block.reason || undefined,
+            },
+          }),
+        ),
+      );
+    }
+  };
+
+  const savePropertyWithStatus = async (values: PropertyCreateFormValues, status: 'ACTIVE' | 'DRAFT') => {
+    const payload = buildCreatePropertyPayload(values, selectedLocation, amenitySlugs, locationRefIds);
+    const savedProperty = isEditMode
+      ? await updatePropertyMutation.mutateAsync({ id: propertyId, payload })
+      : await createPropertyMutation.mutateAsync(payload);
+
+    await syncPropertyPhotos(savedProperty.id);
+    await syncAvailabilityBlocks(savedProperty.id);
+
+    await changePropertyStatusMutation.mutateAsync({
+      propertyId: savedProperty.id,
+      payload: { status },
+    });
+
+    return savedProperty;
+  };
+
   const publishProperty = form.handleSubmit(async (values) => {
     setSubmitError('');
     setSubmitSuccess('');
@@ -346,79 +446,7 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
     }
 
     try {
-      const payload = buildCreatePropertyPayload(values, selectedLocation, amenitySlugs, locationRefIds);
-      const savedProperty = isEditMode
-        ? await updatePropertyMutation.mutateAsync({ id: propertyId, payload })
-        : await createPropertyMutation.mutateAsync(payload);
-
-      const currentExistingPhotoIds = existingPhotos.map((photo) => photo.id);
-      const existingPhotosChanged =
-        isEditMode && !areIdsEqual(initialExistingPhotoIdsRef.current, currentExistingPhotoIds);
-
-      if (existingPhotosChanged) {
-        const existingFiles = await Promise.all(
-          existingPhotos.map((photo, index) => toFileFromUrl(photo.url, `property-${savedProperty.id}-existing-${index + 1}`)),
-        );
-
-        for (const photoId of initialExistingPhotoIdsRef.current) {
-          try {
-            await deletePhotoMutation.mutateAsync({
-              propertyId: savedProperty.id,
-              photoId,
-            });
-          } catch (error) {
-            if (!isNotFoundError(error)) {
-              throw error;
-            }
-          }
-        }
-
-        const orderedFiles = [...existingFiles, ...photos];
-        for (const file of orderedFiles) {
-          await uploadPhotoMutation.mutateAsync({
-            propertyId: savedProperty.id,
-            file,
-          });
-        }
-      } else if (photos.length > 0) {
-        for (const file of photos) {
-          await uploadPhotoMutation.mutateAsync({
-            propertyId: savedProperty.id,
-            file,
-          });
-        }
-      }
-
-      if (removedExistingAvailabilityBlockIds.length > 0) {
-        await Promise.all(
-          removedExistingAvailabilityBlockIds.map((blockId) =>
-            deleteAvailabilityBlockMutation.mutateAsync({
-              propertyId: savedProperty.id,
-              blockId,
-            }),
-          ),
-        );
-      }
-
-      if (availabilityBlocks.length > 0) {
-        await Promise.all(
-          availabilityBlocks.map((block) =>
-            createAvailabilityBlockMutation.mutateAsync({
-              propertyId: savedProperty.id,
-              payload: {
-                dateFrom: block.dateFrom,
-                dateTo: block.dateTo,
-                reason: block.reason || undefined,
-              },
-            }),
-          ),
-        );
-      }
-
-      await changePropertyStatusMutation.mutateAsync({
-        propertyId: savedProperty.id,
-        payload: { status: 'ACTIVE' },
-      });
+      const savedProperty = await savePropertyWithStatus(values, 'ACTIVE');
 
       setSubmitSuccess(
         isEditMode
@@ -472,79 +500,7 @@ export const useCreatePropertyPage = (options?: UseCreatePropertyPageOptions) =>
 
     try {
       const values = normalizeDraftValues(form.getValues());
-      const payload = buildCreatePropertyPayload(values, selectedLocation, amenitySlugs, locationRefIds);
-      const savedProperty = isEditMode
-        ? await updatePropertyMutation.mutateAsync({ id: propertyId, payload })
-        : await createPropertyMutation.mutateAsync(payload);
-
-      const currentExistingPhotoIds = existingPhotos.map((photo) => photo.id);
-      const existingPhotosChanged =
-        isEditMode && !areIdsEqual(initialExistingPhotoIdsRef.current, currentExistingPhotoIds);
-
-      if (existingPhotosChanged) {
-        const existingFiles = await Promise.all(
-          existingPhotos.map((photo, index) => toFileFromUrl(photo.url, `property-${savedProperty.id}-existing-${index + 1}`)),
-        );
-
-        for (const photoId of initialExistingPhotoIdsRef.current) {
-          try {
-            await deletePhotoMutation.mutateAsync({
-              propertyId: savedProperty.id,
-              photoId,
-            });
-          } catch (error) {
-            if (!isNotFoundError(error)) {
-              throw error;
-            }
-          }
-        }
-
-        const orderedFiles = [...existingFiles, ...photos];
-        for (const file of orderedFiles) {
-          await uploadPhotoMutation.mutateAsync({
-            propertyId: savedProperty.id,
-            file,
-          });
-        }
-      } else if (photos.length > 0) {
-        for (const file of photos) {
-          await uploadPhotoMutation.mutateAsync({
-            propertyId: savedProperty.id,
-            file,
-          });
-        }
-      }
-
-      if (removedExistingAvailabilityBlockIds.length > 0) {
-        await Promise.all(
-          removedExistingAvailabilityBlockIds.map((blockId) =>
-            deleteAvailabilityBlockMutation.mutateAsync({
-              propertyId: savedProperty.id,
-              blockId,
-            }),
-          ),
-        );
-      }
-
-      if (availabilityBlocks.length > 0) {
-        await Promise.all(
-          availabilityBlocks.map((block) =>
-            createAvailabilityBlockMutation.mutateAsync({
-              propertyId: savedProperty.id,
-              payload: {
-                dateFrom: block.dateFrom,
-                dateTo: block.dateTo,
-                reason: block.reason || undefined,
-              },
-            }),
-          ),
-        );
-      }
-
-      await changePropertyStatusMutation.mutateAsync({
-        propertyId: savedProperty.id,
-        payload: { status: 'DRAFT' },
-      });
+      const savedProperty = await savePropertyWithStatus(values, 'DRAFT');
 
       setSubmitSuccess(`Оголошення #${savedProperty.id} збережено у чернетках.`);
       navigate(`${ROUTES.profile}?section=properties-drafts`, { replace: false });

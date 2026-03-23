@@ -26,4 +26,7 @@ export interface PasswordFormState {
   confirmPassword: string;
 }
 
-export type SectionNotice = { type: 'success' | 'error'; message: string } | null;
+export type SectionNotice =
+  | { type: 'success'; message: string }
+  | { type: 'error'; message: string; code?: string }
+  | null;

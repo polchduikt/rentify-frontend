@@ -38,20 +38,8 @@ export interface UserResponseDto {
   updatedAt: ZonedDateTimeString;
 }
 
-export interface UserSessionDto {
-  id: number;
-  firstName: string;
-  lastName: string;
-  avatarUrl: string;
-  roles: string[];
-  email?: string;
-  phone?: string;
-  isActive?: boolean;
-  balance?: Decimal;
-  subscriptionPlan?: SubscriptionPlan;
-  subscriptionActiveUntil?: ZonedDateTimeString;
-  createdAt?: ZonedDateTimeString;
-  updatedAt?: ZonedDateTimeString;
-}
+type UserSessionRequiredFields = 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'roles';
 
-export type User = UserResponseDto;
+export type UserSessionDto =
+  Pick<UserResponseDto, UserSessionRequiredFields> &
+  Partial<Omit<UserResponseDto, UserSessionRequiredFields>>;

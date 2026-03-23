@@ -152,9 +152,12 @@ export interface PropertyRuleDto {
   additionalRules?: string;
 }
 
-export interface PropertySearchCriteriaDto {
+export interface PropertyIdentitySearchCriteria {
   propertyId?: number;
   hostId?: number;
+}
+
+export interface PropertyLocationSearchCriteria {
   cityId?: number;
   districtId?: number;
   metroStationId?: number;
@@ -162,6 +165,9 @@ export interface PropertySearchCriteriaDto {
   country?: string;
   region?: string;
   city?: string;
+}
+
+export interface GeoSearchCriteria {
   lat?: number;
   lng?: number;
   radiusKm?: number;
@@ -169,8 +175,14 @@ export interface PropertySearchCriteriaDto {
   southWestLng?: number;
   northEastLat?: number;
   northEastLng?: number;
+}
+
+export interface PriceSearchCriteria {
   minPrice?: Decimal;
   maxPrice?: Decimal;
+}
+
+export interface PropertySizeSearchCriteria {
   minRooms?: number;
   maxRooms?: number;
   minFloor?: number;
@@ -181,19 +193,38 @@ export interface PropertySearchCriteriaDto {
   maxSleepingPlaces?: number;
   minArea?: number;
   maxArea?: number;
+}
+
+export interface PropertyAvailabilitySearchCriteria {
   dateFrom?: LocalDateString;
   dateTo?: LocalDateString;
+}
+
+export interface PropertyAttributeSearchCriteria {
   rentalType?: RentalType;
   marketType?: PropertyMarketType;
   propertyType?: string;
   verifiedProperty?: boolean;
   verifiedRealtor?: boolean;
   hideDuplicates?: boolean;
+  petsAllowed?: boolean;
+}
+
+export interface PropertyAmenitySearchCriteria {
   amenityIds?: number[];
   amenitySlugs?: string[];
   amenityCategories?: AmenityCategory[];
-  petsAllowed?: boolean;
 }
+
+export type PropertySearchCriteriaDto =
+  PropertyIdentitySearchCriteria &
+  PropertyLocationSearchCriteria &
+  GeoSearchCriteria &
+  PriceSearchCriteria &
+  PropertySizeSearchCriteria &
+  PropertyAvailabilitySearchCriteria &
+  PropertyAttributeSearchCriteria &
+  PropertyAmenitySearchCriteria;
 
 export interface PropertyStatusUpdateRequestDto {
   status: PropertyStatus;

@@ -37,6 +37,33 @@ export interface PropertyCreateFormValues {
   currency: string;
 }
 
+type PropertyCreateNumericFormFields =
+  | 'lat'
+  | 'lng'
+  | 'rooms'
+  | 'floor'
+  | 'totalFloors'
+  | 'areaSqm'
+  | 'maxGuests'
+  | 'pricePerNight'
+  | 'pricePerMonth'
+  | 'securityDeposit'
+  | 'cleaningFee';
+
+export type PropertyCreatePayload = Omit<PropertyCreateFormValues, PropertyCreateNumericFormFields> & {
+  lat: number;
+  lng: number;
+  rooms: number;
+  floor: number;
+  totalFloors: number;
+  areaSqm: number;
+  maxGuests: number;
+  pricePerNight: number;
+  pricePerMonth: number;
+  securityDeposit: number;
+  cleaningFee: number;
+};
+
 export interface AvailabilityDraft {
   dateFrom: string;
   dateTo: string;

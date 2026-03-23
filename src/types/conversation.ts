@@ -14,9 +14,9 @@ export interface MessageDto {
   conversationId: number;
   senderId: number;
   type: MessageType;
-  text: string;
-  isRead: boolean;
-  mediaUrl: string;
+  text?: string;
+  isRead?: boolean;
+  mediaUrl?: string | null;
   createdAt: ZonedDateTimeString;
 }
 

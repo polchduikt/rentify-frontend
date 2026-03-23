@@ -120,7 +120,7 @@ export const ChatMessagePane = ({
 
               return (
                 <article key={message.id} className={`max-w-[85%] rounded-2xl px-3 py-2 ${isMine ? 'ml-auto bg-blue-600 text-white' : 'bg-white text-slate-800'}`}>
-                  <p className="whitespace-pre-wrap text-sm">{message.text}</p>
+                  <p className="whitespace-pre-wrap text-sm">{message.text ?? ''}</p>
                   <p className={`mt-1 text-[11px] ${isMine ? 'text-blue-100' : 'text-slate-400'}`}>{formatChatTime(message.createdAt)}</p>
                 </article>
               );

@@ -209,6 +209,53 @@ By default, the app runs on `http://localhost:5173` and proxies API requests to 
 
 ---
 
+## Run with Docker
+
+This repository includes a production-ready `Dockerfile` (multi-stage build with Nginx).
+
+Important: in `nginx.conf`, API requests are proxied to `http://backend:8080`.
+So the backend container must be reachable as `backend` on the same Docker network.
+
+### 1. Create a shared network
+
+```bash
+docker network create rentify-net
+```
+
+### 2. Run backend container on that network
+
+Use your backend image/container, but keep the container name as `backend`:
+
+```bash
+docker run -d --name backend --network rentify-net -p 8080:8080 rentify-backend
+```
+
+### 3. Build frontend image
+
+```bash
+docker build -t rentify-frontend \
+  --build-arg VITE_API_BASE_URL=/api/v1 \
+  --build-arg VITE_AUTH_STRATEGY=cookie \
+  --build-arg VITE_CSRF_COOKIE_NAME=csrf_token \
+  --build-arg VITE_CSRF_HEADER_NAME=X-CSRF-Token \
+  --build-arg VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id \
+  .
+```
+
+### 4. Run frontend container
+
+```bash
+docker run -d --name rentify-frontend --network rentify-net -p 5173:80 rentify-frontend
+```
+
+Open the app at:
+
+- `http://localhost:5173`
+
+If your backend is not running in Docker, update `nginx.conf` (`proxy_pass`) accordingly and rebuild the image.
+
+---
+
 ## API Highlights (from the Frontend Perspective)
 
 The frontend relies on the REST API provided by `rentify-backend` (Spring Boot). Common endpoints:

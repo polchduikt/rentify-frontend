@@ -1,32 +1,9 @@
-import { Award, Globe2, ShieldCheck, Sparkles, Users } from 'lucide-react';
+import { Award, Sparkles, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import aboutHeroIllustration from '@/assets/images/info/about-hero-illustration.svg';
 import aboutWorkflowIllustration from '@/assets/images/info/about-workflow-illustration.svg';
 import { ROUTES } from '@/config/routes';
-
-const ABOUT_VALUES = [
-  {
-    icon: ShieldCheck,
-    title: 'Безпека та довіра',
-    description: 'Модерація оголошень, перевірка контенту та прозорі правила взаємодії між орендарями та власниками.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Зручний досвід',
-    description: 'Швидкий пошук, фільтри, карта та простий шлях від першого кліку до підтвердженого бронювання.',
-  },
-  {
-    icon: Globe2,
-    title: 'Фокус на Україні',
-    description: 'Розвиваємо сервіс під реальні потреби українських міст, громад та локального ринку оренди.',
-  },
-] as const;
-
-const ABOUT_STATS = [
-  { value: '14 000+', label: 'активних оголошень на платформі' },
-  { value: '180+', label: 'міст і громад у каталозі' },
-  { value: '24/7', label: 'підтримка для користувачів' },
-] as const;
+import { ABOUT_STATS, ABOUT_VALUES } from '@/constants/infoPages';
 
 const AboutPage = () => (
   <div className="bg-slate-50 py-10 sm:py-12">

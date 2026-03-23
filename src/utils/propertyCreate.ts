@@ -13,7 +13,7 @@ export interface PropertyLocationRefIds {
 const numberText = z
   .string()
   .trim()
-  .regex(/^\d*([.]\d+)?$/, 'Має бути числом');
+  .regex(/^\d*([.,]\d+)?$/, 'Має бути числом');
 
 export const propertyCreateSchema = z
   .object({
@@ -136,7 +136,7 @@ const toNumber = (value?: string): number | undefined => {
   if (!trimmed) {
     return undefined;
   }
-  const parsed = Number(trimmed);
+  const parsed = Number(trimmed.replace(',', '.'));
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
@@ -242,5 +242,12 @@ export const hasDateRangeConflict = (dateFrom: string, dateTo: string): boolean 
   if (!dateFrom || !dateTo) {
     return false;
   }
-  return new Date(dateFrom).getTime() > new Date(dateTo).getTime();
+
+  const fromTimestamp = Date.parse(dateFrom);
+  const toTimestamp = Date.parse(dateTo);
+  if (!Number.isFinite(fromTimestamp) || !Number.isFinite(toTimestamp)) {
+    return false;
+  }
+
+  return fromTimestamp > toTimestamp;
 };

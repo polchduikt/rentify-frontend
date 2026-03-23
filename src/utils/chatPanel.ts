@@ -2,16 +2,21 @@ import type { ConversationDto, MessageDto } from '@/types/conversation';
 import type { PropertyResponseDto } from '@/types/property';
 import type { PublicUserProfileDto } from '@/types/user';
 
+const toTimestampOrZero = (value: string | null | undefined): number => {
+  const parsed = value ? Date.parse(value) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 export const toPositiveId = (value: unknown): number | null => {
   const numeric = Number(value);
   return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
 };
 
 export const sortConversationsByCreatedAtDesc = (left: ConversationDto, right: ConversationDto) =>
-  new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+  toTimestampOrZero(right.createdAt) - toTimestampOrZero(left.createdAt);
 
 export const sortMessagesByCreatedAtAsc = (left: MessageDto, right: MessageDto) =>
-  new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
+  toTimestampOrZero(left.createdAt) - toTimestampOrZero(right.createdAt);
 
 export const resolveUserName = (profile?: PublicUserProfileDto | null) => {
   const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim();

@@ -2,7 +2,10 @@ import type { PropertyMapPinDto, PropertyResponseDto } from '@/types/property';
 import { resolvePropertyPriceValue } from './searchPageUtils';
 
 const toFiniteNumber = (value: unknown): number | null => {
-  const parsed = Number(value);
+  const parsed =
+    typeof value === 'string'
+      ? Number(value.trim().replace(',', '.'))
+      : Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 };
 

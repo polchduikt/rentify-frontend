@@ -20,8 +20,14 @@ import {
 } from './storage';
 import { sanitizeAvatarValue } from '@/utils/avatar';
 
-let sessionRequest: Promise<UserSessionDto> | null = null;
-let sessionRequestKey: string | null = null;
+const sessionCache = {
+  request: null as Promise<UserSessionDto> | null,
+  key: null as string | null,
+  clear() {
+    this.request = null;
+    this.key = null;
+  },
+};
 
 interface GoogleIdTokenPayload {
   picture?: string;
@@ -81,12 +87,12 @@ export const authService = {
       return Promise.reject(new Error('Auth token is missing'));
     }
 
-    if (sessionRequest && sessionRequestKey === nextSessionKey) {
-      return sessionRequest;
+    if (sessionCache.request && sessionCache.key === nextSessionKey) {
+      return sessionCache.request;
     }
 
-    sessionRequestKey = nextSessionKey;
-    sessionRequest = api
+    sessionCache.key = nextSessionKey;
+    sessionCache.request = api
       .get<UserResponseDto>(
         API_ENDPOINTS.users.profile,
         USE_HTTP_ONLY_AUTH_COOKIE || !resolvedToken
@@ -107,13 +113,12 @@ export const authService = {
         return toUserSession(withAvatar);
       })
       .finally(() => {
-        if (sessionRequestKey === nextSessionKey) {
-          sessionRequest = null;
-          sessionRequestKey = null;
+        if (sessionCache.key === nextSessionKey) {
+          sessionCache.clear();
         }
       });
 
-    return sessionRequest;
+    return sessionCache.request;
   },
 
   async loginWithProfile(data: AuthenticationRequestDto): Promise<AuthSession> {
@@ -152,13 +157,11 @@ export const authService = {
   },
 
   clearSessionCache(): void {
-    sessionRequest = null;
-    sessionRequestKey = null;
+    sessionCache.clear();
   },
 
   async logout(): Promise<void> {
-    sessionRequest = null;
-    sessionRequestKey = null;
+    sessionCache.clear();
     try {
       await api.delete(API_ENDPOINTS.auth.logout);
     } finally {

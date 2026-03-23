@@ -9,7 +9,30 @@ import { getCookieValue } from '../utils/cookies';
 import { clearAuthToken, getAuthToken } from './storage';
 
 export const AUTH_SESSION_EXPIRED_EVENT = 'auth:session-expired';
+export const NETWORK_OFFLINE_EVENT = 'network:offline';
 const UNSAFE_HTTP_METHODS = new Set(['post', 'put', 'patch', 'delete']);
+const SNAKE_CASE_PART = /_([a-z])/g;
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+    Object.prototype.toString.call(value) === '[object Object]';
+
+const toCamelCase = (value: string): string =>
+    value.replace(SNAKE_CASE_PART, (_, char: string) => char.toUpperCase());
+
+const camelCaseKeysDeep = (value: unknown): unknown => {
+    if (Array.isArray(value)) {
+        return value.map(camelCaseKeysDeep);
+    }
+
+    if (!isPlainObject(value)) {
+        return value;
+    }
+
+    return Object.entries(value).reduce<Record<string, unknown>>((acc, [key, nestedValue]) => {
+        acc[toCamelCase(key)] = camelCaseKeysDeep(nestedValue);
+        return acc;
+    }, {});
+};
 
 const setRequestHeader = (
     config: InternalAxiosRequestConfig,
@@ -31,6 +54,17 @@ const api = axios.create({
         'Content-Type': 'application/json',
     },
 });
+
+const defaultResponseTransformers = Array.isArray(api.defaults.transformResponse)
+    ? api.defaults.transformResponse
+    : api.defaults.transformResponse
+        ? [api.defaults.transformResponse]
+        : [];
+
+api.defaults.transformResponse = [
+    ...defaultResponseTransformers,
+    (data) => camelCaseKeysDeep(data),
+];
 
 api.interceptors.request.use(
     (config) => {
@@ -61,6 +95,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        if (!error.response && typeof window !== 'undefined') {
+            window.dispatchEvent(new Event(NETWORK_OFFLINE_EVENT));
+        }
+
         const requestUrl = typeof error.config?.url === 'string' ? error.config.url : '';
         const isAuthRequest =
             requestUrl.includes('/sessions') ||

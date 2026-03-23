@@ -27,20 +27,18 @@ type UnavailableRangeApiDto = Partial<UnavailableDateRangeDto> & {
   reason?: string | null;
 };
 
-export const propertyService = {
-  getMyPropertiesRequestConfig(page?: PageQuery, statuses?: PropertyStatus[]) {
-    return {
-      params: {
-        ...withPageQuery(page),
-        ...(statuses && statuses.length > 0 ? { statuses: statuses.join(',') } : {}),
-      },
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-      },
-    } as const;
+const buildMyPropertiesRequestConfig = (page?: PageQuery, statuses?: PropertyStatus[]) => ({
+  params: {
+    ...withPageQuery(page),
+    ...(statuses && statuses.length > 0 ? { statuses: statuses.join(',') } : {}),
   },
+  headers: {
+    'Cache-Control': 'no-cache',
+    Pragma: 'no-cache',
+  },
+});
 
+export const propertyService = {
   async getAllProperties(page?: PageQuery): Promise<SpringPage<PropertyResponseDto>> {
     const { data } = await api.get<SpringPage<PropertyResponseDto>>(API_ENDPOINTS.properties.root, {
       params: withPageQuery(page),
@@ -48,21 +46,10 @@ export const propertyService = {
     return data;
   },
 
-  async getMyProperties(page?: PageQuery): Promise<SpringPage<PropertyResponseDto>> {
+  async getMyProperties(page?: PageQuery, statuses?: PropertyStatus[]): Promise<SpringPage<PropertyResponseDto>> {
     const { data } = await api.get<SpringPage<PropertyResponseDto>>(
       API_ENDPOINTS.properties.mine,
-      propertyService.getMyPropertiesRequestConfig(page),
-    );
-    return data;
-  },
-
-  async getMyPropertiesFiltered(
-    page?: PageQuery,
-    statuses?: PropertyStatus[]
-  ): Promise<SpringPage<PropertyResponseDto>> {
-    const { data } = await api.get<SpringPage<PropertyResponseDto>>(
-      API_ENDPOINTS.properties.mine,
-      propertyService.getMyPropertiesRequestConfig(page, statuses),
+      buildMyPropertiesRequestConfig(page, statuses),
     );
     return data;
   },

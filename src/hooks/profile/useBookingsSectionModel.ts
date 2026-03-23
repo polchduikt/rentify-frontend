@@ -10,6 +10,11 @@ interface UseBookingsSectionModelParams {
   paymentStatusByBookingId: Partial<Record<number, PaymentStatus>>;
 }
 
+const toTimestampOrZero = (value: string | null | undefined): number => {
+  const parsed = value ? Date.parse(value) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 export const useBookingsSectionModel = ({
   myBookings,
   incomingBookings,
@@ -21,8 +26,8 @@ export const useBookingsSectionModel = ({
   const sortedMyBookings = useMemo(
     () =>
       [...myBookings].sort((a, b) => {
-        const left = new Date(a.createdAt).getTime();
-        const right = new Date(b.createdAt).getTime();
+        const left = toTimestampOrZero(a.createdAt);
+        const right = toTimestampOrZero(b.createdAt);
         return right - left;
       }),
     [myBookings],
@@ -31,8 +36,8 @@ export const useBookingsSectionModel = ({
   const sortedIncomingBookings = useMemo(
     () =>
       [...incomingBookings].sort((a, b) => {
-        const left = new Date(a.createdAt).getTime();
-        const right = new Date(b.createdAt).getTime();
+        const left = toTimestampOrZero(a.createdAt);
+        const right = toTimestampOrZero(b.createdAt);
         return right - left;
       }),
     [incomingBookings],

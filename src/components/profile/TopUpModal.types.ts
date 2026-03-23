@@ -1,7 +1,9 @@
+import type { TopUpOptionDto } from '@/types/wallet';
+
 export interface TopUpModalProps {
   isOpen: boolean;
   currency: string;
-  options: number[];
+  options: TopUpOptionDto[];
   optionsLoading: boolean;
   optionsError: string | null;
   isSubmitting: boolean;

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { BedDouble, Expand, Heart, Layers, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PROPERTY_CARD_FALLBACK_IMAGE } from '@/constants/propertyImages';
-import { ROUTES } from '@/config/routes';
-import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi';
-import { formatMoney } from '@/utils/profileFormatters';
-import { isTopPromotionActive } from '@/utils/promotions';
-import type { PropertyCardProps } from './PropertyCard.types';
+import { PROPERTY_CARD_FALLBACK_IMAGE } from '@/constants/propertyImages.ts';
+import { ROUTES } from '@/config/routes.ts';
+import { useAddToFavoritesMutation, useRemoveFromFavoritesMutation } from '@/hooks/api/useFavoriteApi.ts';
+import { formatMoney } from '@/utils/profileFormatters.ts';
+import { isTopPromotionActive } from '@/utils/promotions.ts';
+import type { PropertyCardProps } from './PropertyCard.types.ts';
 
 const formatPublishedLabel = (createdAt?: string): string => {
   if (!createdAt) return 'Опубліковано нещодавно';

@@ -3,7 +3,10 @@ import { resolvePropertyPriceValue } from '@/utils/search/searchPageUtils';
 import type { PropertyMapPinDto, PropertyResponseDto } from '@/types/property';
 
 export const toFiniteNumber = (value: unknown): number | null => {
-  const parsed = Number(value);
+  const parsed =
+    typeof value === 'string'
+      ? Number(value.trim().replace(',', '.'))
+      : Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 };
 

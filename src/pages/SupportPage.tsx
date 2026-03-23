@@ -1,46 +1,10 @@
-import { BookOpenCheck, CircleAlert, LifeBuoy, Mail, MessageCircle, PhoneCall } from 'lucide-react';
+import { CircleAlert, LifeBuoy, Mail, PhoneCall } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import supportFaqIllustration from '@/assets/images/info/support-faq-illustration.svg';
 import supportHeroIllustration from '@/assets/images/info/support-hero-illustration.svg';
 import { APP_CONTENT } from '@/constants/appContent';
+import { SUPPORT_FAQ, SUPPORT_TOPICS } from '@/constants/infoPages';
 import { ROUTES } from '@/config/routes';
-
-const SUPPORT_TOPICS = [
-  {
-    icon: LifeBuoy,
-    title: 'Проблеми з бронюванням',
-    description: 'Оплата, підтвердження заявки, скасування та повернення коштів.',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Оголошення та модерація',
-    description: 'Статуси оголошень, редагування, архів і питання щодо правил публікації.',
-  },
-  {
-    icon: BookOpenCheck,
-    title: 'Профіль і безпека',
-    description: 'Доступ до акаунта, налаштування безпеки, відновлення входу.',
-  },
-] as const;
-
-const SUPPORT_FAQ = [
-  {
-    question: 'Як швидко відповідає підтримка?',
-    answer: 'У чаті та пошті зазвичай відповідаємо протягом 15-120 хвилин у робочий час.',
-  },
-  {
-    question: 'Куди звертатись, якщо не проходить оплата?',
-    answer: 'Напишіть у підтримку з ID бронювання або оголошення. Ми перевіримо транзакцію та статус платежу.',
-  },
-  {
-    question: 'Чому оголошення не показується в пошуку?',
-    answer: 'Перевірте статус оголошення: опубліковане, чернетка або архів. У пошуку показуються лише опубліковані.',
-  },
-  {
-    question: 'Що робити, якщо потрібна термінова допомога?',
-    answer: 'Для критичних випадків використовуйте телефон підтримки. Так ви отримаєте найшвидший контакт з оператором.',
-  },
-] as const;
 
 const SupportPage = () => (
   <div className="bg-slate-50 py-10 sm:py-12">

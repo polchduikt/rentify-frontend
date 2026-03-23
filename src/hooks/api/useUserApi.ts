@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { userService } from '@/services/userService';
 import { authService } from '@/services/authService';
 import { clearGoogleAvatarUrl, setGoogleAvatarFallbackDisabled } from '@/services/storage';
-import type { ChangePasswordRequestDto, DeleteAccountRequestDto, UpdateUserRequestDto } from '@/types/user';
+import type { ChangePasswordRequestDto, UpdateUserRequestDto } from '@/types/user';
 import { USE_HTTP_ONLY_AUTH_COOKIE } from '@/config/env';
 import { getAuthToken } from '@/services/storage';
 import { queryKeys } from '@/api/queryKeys';
@@ -21,6 +21,7 @@ export const useMySessionQuery = (enabled = true) => {
     enabled: shouldFetch,
     staleTime: SESSION_STALE_TIME_MS,
     gcTime: SESSION_GC_TIME_MS,
+    retry: false,
   });
 };
 
@@ -59,7 +60,7 @@ export const useDeleteAccountMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: DeleteAccountRequestDto) => userService.deleteCurrentAccount(payload),
+    mutationFn: () => userService.deleteCurrentAccount(),
     onSuccess: () => {
       queryClient.clear();
     },

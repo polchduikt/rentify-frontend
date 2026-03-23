@@ -4,7 +4,7 @@ import api from './api';
 
 export const favoriteService = {
   async addToFavorites(propertyId: number): Promise<FavoriteResponseDto> {
-    const { data } = await api.post<FavoriteResponseDto>(API_ENDPOINTS.favorites.byProperty(propertyId));
+    const { data } = await api.put<FavoriteResponseDto>(API_ENDPOINTS.favorites.byProperty(propertyId));
     return data;
   },
 

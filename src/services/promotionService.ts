@@ -7,133 +7,83 @@ import type {
   TopPromotionPackageDto,
   TopPromotionPurchaseResponseDto,
 } from '@/types/promotion';
-import type { SubscriptionPackageType, SubscriptionPlan, TopPromotionPackageType } from '@/types/enums';
-import type { Decimal, ZonedDateTimeString } from '@/types/scalars';
+import { asDecimal, asZonedDateTimeString } from '@/types/scalars';
 import api from './api';
 
-type RawTopPromotionPackageDto = {
-  packageType?: TopPromotionPackageType;
-  package_type?: TopPromotionPackageType;
-  durationDays?: number;
-  duration_days?: number;
-  price?: Decimal;
-  currency?: string;
-};
-
-type RawSubscriptionPackageDto = {
-  packageType?: SubscriptionPackageType;
-  package_type?: SubscriptionPackageType;
-  plan?: SubscriptionPlan;
-  durationDays?: number;
-  duration_days?: number;
-  price?: Decimal;
-  currency?: string;
-};
-
-type RawTopPromotionPurchaseResponseDto = {
-  propertyId?: number;
-  property_id?: number;
-  isTopPromoted?: boolean;
-  is_top_promoted?: boolean;
-  topPromotedUntil?: ZonedDateTimeString;
-  top_promoted_until?: ZonedDateTimeString;
-  chargedAmount?: Decimal;
-  charged_amount?: Decimal;
-  balanceAfter?: Decimal;
-  balance_after?: Decimal;
-  currency?: string;
-};
-
-type RawSubscriptionPurchaseResponseDto = {
-  subscriptionPlan?: SubscriptionPlan;
-  subscription_plan?: SubscriptionPlan;
-  subscriptionActiveUntil?: ZonedDateTimeString;
-  subscription_active_until?: ZonedDateTimeString;
-  chargedAmount?: Decimal;
-  charged_amount?: Decimal;
-  balanceAfter?: Decimal;
-  balance_after?: Decimal;
-  currency?: string;
-};
-
-const normalizeTopPackage = (raw: RawTopPromotionPackageDto): TopPromotionPackageDto | null => {
-  const packageType = raw.packageType ?? raw.package_type;
-  if (!packageType) {
+const normalizeTopPackage = (raw: Partial<TopPromotionPackageDto>): TopPromotionPackageDto | null => {
+  if (!raw.packageType) {
     return null;
   }
 
   return {
-    packageType,
-    durationDays: Number(raw.durationDays ?? raw.duration_days ?? 0),
-    price: raw.price ?? 0,
+    packageType: raw.packageType,
+    durationDays: Number(raw.durationDays ?? 0),
+    price: asDecimal(Number(raw.price ?? 0)),
     currency: raw.currency ?? 'UAH',
   };
 };
 
-const normalizeSubscriptionPackage = (raw: RawSubscriptionPackageDto): SubscriptionPackageDto | null => {
-  const packageType = raw.packageType ?? raw.package_type;
-  if (!packageType || !raw.plan) {
+const normalizeSubscriptionPackage = (raw: Partial<SubscriptionPackageDto>): SubscriptionPackageDto | null => {
+  if (!raw.packageType || !raw.plan) {
     return null;
   }
 
   return {
-    packageType,
+    packageType: raw.packageType,
     plan: raw.plan,
-    durationDays: Number(raw.durationDays ?? raw.duration_days ?? 0),
-    price: raw.price ?? 0,
+    durationDays: Number(raw.durationDays ?? 0),
+    price: asDecimal(Number(raw.price ?? 0)),
     currency: raw.currency ?? 'UAH',
   };
 };
 
-const normalizeTopPurchaseResponse = (
-  raw: RawTopPromotionPurchaseResponseDto
-): TopPromotionPurchaseResponseDto => ({
-  propertyId: Number(raw.propertyId ?? raw.property_id ?? 0),
-  isTopPromoted: Boolean(raw.isTopPromoted ?? raw.is_top_promoted),
-  topPromotedUntil: (raw.topPromotedUntil ?? raw.top_promoted_until ?? '') as ZonedDateTimeString,
-  chargedAmount: raw.chargedAmount ?? raw.charged_amount ?? 0,
-  balanceAfter: raw.balanceAfter ?? raw.balance_after ?? 0,
+const normalizeTopPurchaseResponse = (raw: Partial<TopPromotionPurchaseResponseDto>): TopPromotionPurchaseResponseDto => ({
+  propertyId: Number(raw.propertyId ?? 0),
+  isTopPromoted: Boolean(raw.isTopPromoted),
+  topPromotedUntil: raw.topPromotedUntil ?? asZonedDateTimeString(''),
+  chargedAmount: asDecimal(Number(raw.chargedAmount ?? 0)),
+  balanceAfter: asDecimal(Number(raw.balanceAfter ?? 0)),
   currency: raw.currency ?? 'UAH',
 });
 
 const normalizeSubscriptionPurchaseResponse = (
-  raw: RawSubscriptionPurchaseResponseDto
+  raw: Partial<SubscriptionPurchaseResponseDto>,
 ): SubscriptionPurchaseResponseDto => ({
-  subscriptionPlan: (raw.subscriptionPlan ?? raw.subscription_plan ?? 'FREE') as SubscriptionPlan,
-  subscriptionActiveUntil: (raw.subscriptionActiveUntil ?? raw.subscription_active_until ?? '') as ZonedDateTimeString,
-  chargedAmount: raw.chargedAmount ?? raw.charged_amount ?? 0,
-  balanceAfter: raw.balanceAfter ?? raw.balance_after ?? 0,
+  subscriptionPlan: raw.subscriptionPlan ?? 'FREE',
+  subscriptionActiveUntil: raw.subscriptionActiveUntil ?? asZonedDateTimeString(''),
+  chargedAmount: asDecimal(Number(raw.chargedAmount ?? 0)),
+  balanceAfter: asDecimal(Number(raw.balanceAfter ?? 0)),
   currency: raw.currency ?? 'UAH',
 });
 
 export const promotionService = {
   async getTopPromotionPackages(): Promise<TopPromotionPackageDto[]> {
-    const { data } = await api.get<RawTopPromotionPackageDto[]>(API_ENDPOINTS.promotions.topPackages);
+    const { data } = await api.get<Partial<TopPromotionPackageDto>[]>(API_ENDPOINTS.promotions.topPackages);
     return data.map(normalizeTopPackage).filter((item): item is TopPromotionPackageDto => item !== null);
   },
 
   async getSubscriptionPackages(): Promise<SubscriptionPackageDto[]> {
-    const { data } = await api.get<RawSubscriptionPackageDto[]>(API_ENDPOINTS.promotions.subscriptionPackages);
+    const { data } = await api.get<Partial<SubscriptionPackageDto>[]>(API_ENDPOINTS.promotions.subscriptionPackages);
     return data.map(normalizeSubscriptionPackage).filter((item): item is SubscriptionPackageDto => item !== null);
   },
 
   async purchaseTopPromotion(
     propertyId: number,
-    payload: PurchaseTopPromotionRequestDto
+    payload: PurchaseTopPromotionRequestDto,
   ): Promise<TopPromotionPurchaseResponseDto> {
-    const { data } = await api.post<RawTopPromotionPurchaseResponseDto>(
+    const { data } = await api.post<Partial<TopPromotionPurchaseResponseDto>>(
       API_ENDPOINTS.promotions.purchaseTopForProperty(propertyId),
-      { package_type: payload.packageType }
+      { packageType: payload.packageType, package_type: payload.packageType },
     );
     return normalizeTopPurchaseResponse(data);
   },
 
   async purchaseSubscription(
-    payload: PurchaseSubscriptionRequestDto
+    payload: PurchaseSubscriptionRequestDto,
   ): Promise<SubscriptionPurchaseResponseDto> {
-    const { data } = await api.post<RawSubscriptionPurchaseResponseDto>(
+    const { data } = await api.post<Partial<SubscriptionPurchaseResponseDto>>(
       API_ENDPOINTS.promotions.purchaseSubscription,
-      { package_type: payload.packageType }
+      { packageType: payload.packageType, package_type: payload.packageType },
     );
     return normalizeSubscriptionPurchaseResponse(data);
   },

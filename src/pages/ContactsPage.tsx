@@ -1,34 +1,8 @@
-import { Clock3, Mail, MapPin, MessageCircle, Phone, Send } from 'lucide-react';
+import { Clock3, MapPin, Send } from 'lucide-react';
 import contactsHeroIllustration from '@/assets/images/info/contacts-hero-illustration.svg';
 import contactsPartnershipIllustration from '@/assets/images/info/contacts-partnership-illustration.svg';
 import { APP_CONTENT } from '@/constants/appContent';
-
-const CONTACT_CHANNELS = [
-  {
-    icon: Phone,
-    title: 'Телефон',
-    value: APP_CONTENT.contacts.phone,
-    description: 'Пн-Нд: 09:00 - 21:00',
-    href: `tel:${APP_CONTENT.contacts.phone.replace(/\s|\(|\)|-/g, '')}`,
-    actionLabel: 'Зателефонувати',
-  },
-  {
-    icon: Mail,
-    title: 'Email',
-    value: APP_CONTENT.contacts.email,
-    description: 'Відповідаємо зазвичай до 2 годин',
-    href: `mailto:${APP_CONTENT.contacts.email}`,
-    actionLabel: 'Написати лист',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Онлайн-чат',
-    value: 'Чат у кабінеті Rentify',
-    description: 'Швидка допомога з бронюванням та оголошеннями',
-    href: '/profile',
-    actionLabel: 'Відкрити чат',
-  },
-] as const;
+import { CONTACT_CHANNELS } from '@/constants/infoPages';
 
 const ContactsPage = () => (
   <div className="bg-slate-50 py-10 sm:py-12">

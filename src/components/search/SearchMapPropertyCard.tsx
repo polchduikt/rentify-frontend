@@ -1,20 +1,11 @@
 import { BadgeCheck, BedDouble, Layers, MapPin, Ruler, Users, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MARKET_TYPE_LABELS, RENTAL_TYPE_LABELS } from '@/constants/propertyLabels';
 import { SEARCH_PROPERTY_FALLBACK_IMAGE } from '@/constants/propertyImages';
 import { ROUTES } from '@/config/routes';
 import { isTopPromotionActive } from '@/utils/promotions';
 import { resolveMapAddressLine, resolveMapPropertyPrice } from '@/utils/searchMap';
 import type { SearchMapPropertyCardProps } from './SearchMapPropertyCard.types';
-
-const MARKET_TYPE_LABELS: Record<string, string> = {
-  SECONDARY: 'Вторинний ринок',
-  NEW_BUILD: 'Новобудова',
-};
-
-const RENTAL_TYPE_LABELS: Record<string, string> = {
-  SHORT_TERM: 'Подобово',
-  LONG_TERM: 'Довгостроково',
-};
 
 const formatPublishedDate = (value?: string): string => {
   if (!value) {

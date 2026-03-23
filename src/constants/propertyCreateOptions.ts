@@ -1,4 +1,7 @@
-import type { PropertyMarketType, RentalType } from '@/types/enums';
+import type { RentalType } from '@/types/enums';
+import { MARKET_TYPE_OPTIONS, PROPERTY_TYPE_OPTIONS } from '@/constants/propertyLabels';
+
+export { MARKET_TYPE_OPTIONS, PROPERTY_TYPE_OPTIONS };
 
 export const RENTAL_TYPE_OPTIONS: Array<{ value: RentalType; label: string; description: string }> = [
   {
@@ -11,20 +14,6 @@ export const RENTAL_TYPE_OPTIONS: Array<{ value: RentalType; label: string; desc
     label: 'Подобово',
     description: 'Короткі заїзди, ціна за ніч',
   },
-];
-
-export const PROPERTY_TYPE_OPTIONS = [
-  { value: 'APARTMENT', label: 'Квартира' },
-  { value: 'HOUSE', label: 'Будинок' },
-  { value: 'ROOM', label: 'Кімната' },
-  { value: 'STUDIO', label: 'Студія' },
-  { value: 'PENTHOUSE', label: 'Пентхаус' },
-  { value: 'TOWNHOUSE', label: 'Таунхаус' },
-] as const;
-
-export const MARKET_TYPE_OPTIONS: Array<{ value: PropertyMarketType; label: string }> = [
-  { value: 'SECONDARY', label: 'Вторинний ринок' },
-  { value: 'NEW_BUILD', label: 'Новобудова' },
 ];
 
 export const DEFAULT_MAP_CENTER = {

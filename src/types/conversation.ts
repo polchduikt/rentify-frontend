@@ -14,12 +14,16 @@ export interface MessageDto {
   conversationId: number;
   senderId: number;
   type: MessageType;
-  text: string;
-  isRead: boolean;
-  mediaUrl: string;
+  text?: string;
+  isRead?: boolean;
+  mediaUrl?: string | null;
   createdAt: ZonedDateTimeString;
 }
 
 export interface SendMessageRequestDto {
   text: string;
+}
+
+export interface CreateConversationRequestDto {
+  propertyId: number;
 }

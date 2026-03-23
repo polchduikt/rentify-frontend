@@ -1,15 +1,15 @@
 import { X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { FALLBACK_TOP_UP_OPTIONS, MIN_TOP_UP_AMOUNT } from '@/constants/profileUi';
+import type { TopUpOptionDto } from '@/types/wallet';
 import { getApiErrorMessage } from '@/utils/errors';
 import { formatMoney } from '@/utils/profileFormatters';
 import type { TopUpModalProps } from './TopUpModal.types';
 
-
-const normalizeOptions = (options: number[]): number[] => {
+const normalizeOptions = (options: TopUpOptionDto[]): number[] => {
   const unique = new Set<number>();
-  for (const amount of options) {
-    const normalized = Number(amount);
+  for (const option of options) {
+    const normalized = Number(option.amount);
     if (Number.isFinite(normalized) && normalized > 0) {
       unique.add(normalized);
     }

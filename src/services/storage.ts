@@ -2,6 +2,8 @@ import { STORAGE_KEYS, USE_HTTP_ONLY_AUTH_COOKIE } from '../config/env';
 
 export type ThemeMode = 'light' | 'dark';
 
+const GOOGLE_AVATAR_DISABLED_GLOBALLY = '1';
+
 const getStorageItem = (key: string): string | null => {
     try {
         return localStorage.getItem(key);
@@ -74,7 +76,7 @@ export const isGoogleAvatarFallbackDisabled = (userId?: number | null): boolean 
         return false;
     }
 
-    if (value === '1') {
+    if (value === GOOGLE_AVATAR_DISABLED_GLOBALLY) {
         return true;
     }
 
@@ -87,7 +89,7 @@ export const setGoogleAvatarFallbackDisabled = (disabled: boolean, userId?: numb
         const normalizedUserId = normalizeUserId(userId);
         setStorageItem(
             STORAGE_KEYS.googleAvatarDisabled,
-            normalizedUserId != null ? String(normalizedUserId) : '1',
+            normalizedUserId != null ? String(normalizedUserId) : GOOGLE_AVATAR_DISABLED_GLOBALLY,
         );
     } else {
         removeStorageItem(STORAGE_KEYS.googleAvatarDisabled);

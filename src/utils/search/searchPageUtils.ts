@@ -116,12 +116,17 @@ const parseStringList = (value: string | null): string[] =>
     : [];
 
 const toFiniteNumber = (value: string): number | undefined => {
-  const normalized = value.trim();
+  const normalized = value.trim().replace(',', '.');
   if (!normalized) {
     return undefined;
   }
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const toTimestampOrZero = (value: string | null | undefined): number => {
+  const parsed = value ? Date.parse(value) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : 0;
 };
 
 export const createFiltersFromSearchParams = (params: URLSearchParams): SearchFormState => ({
@@ -275,8 +280,8 @@ export const sortProperties = (properties: PropertyResponseDto[], sortMode: Sear
     }
 
     if (sortMode === 'NEWEST') {
-      const left = leftProperty.createdAt ? new Date(leftProperty.createdAt).getTime() : 0;
-      const right = rightProperty.createdAt ? new Date(rightProperty.createdAt).getTime() : 0;
+      const left = toTimestampOrZero(leftProperty.createdAt);
+      const right = toTimestampOrZero(rightProperty.createdAt);
       return right - left;
     }
 
@@ -310,24 +315,27 @@ export const buildPagination = (currentPage: number, totalPages: number): Search
   return items;
 };
 
-export const countExtraFilters = (filters: SearchExtraFilters): number =>
-  [
-    filters.propertyType,
-    filters.marketType,
-    filters.minFloor,
-    filters.maxFloor,
-    filters.minTotalFloors,
-    filters.maxTotalFloors,
-    filters.minSleepingPlaces,
-    filters.maxSleepingPlaces,
-    filters.petsAllowed,
-    filters.smokingAllowed,
-    filters.partiesAllowed,
-    filters.verifiedProperty,
-    filters.verifiedRealtor,
-    filters.hideDuplicates,
-    filters.dateFrom,
-    filters.dateTo,
-    filters.amenitySlugs.length,
-    filters.amenityCategories.length,
-  ].filter(Boolean).length;
+export const countExtraFilters = (filters: SearchExtraFilters): number => {
+  let total = 0;
+
+  if (filters.propertyType) total += 1;
+  if (filters.marketType) total += 1;
+  if (filters.minFloor.trim().length > 0) total += 1;
+  if (filters.maxFloor.trim().length > 0) total += 1;
+  if (filters.minTotalFloors.trim().length > 0) total += 1;
+  if (filters.maxTotalFloors.trim().length > 0) total += 1;
+  if (filters.minSleepingPlaces.trim().length > 0) total += 1;
+  if (filters.maxSleepingPlaces.trim().length > 0) total += 1;
+  if (filters.petsAllowed) total += 1;
+  if (filters.smokingAllowed) total += 1;
+  if (filters.partiesAllowed) total += 1;
+  if (filters.verifiedProperty) total += 1;
+  if (filters.verifiedRealtor) total += 1;
+  if (filters.hideDuplicates) total += 1;
+  if (filters.dateFrom.trim().length > 0) total += 1;
+  if (filters.dateTo.trim().length > 0) total += 1;
+  if (filters.amenitySlugs.length > 0) total += 1;
+  if (filters.amenityCategories.length > 0) total += 1;
+
+  return total;
+};

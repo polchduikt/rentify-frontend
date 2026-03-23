@@ -22,7 +22,7 @@ export const useAllPropertiesQuery = (page?: PageQuery, enabled = true) =>
 export const useMyPropertiesQuery = (page?: PageQuery, statuses?: PropertyStatus[]) =>
   useQuery({
     queryKey: queryKeys.properties.mine(page, statuses),
-    queryFn: () => propertyService.getMyPropertiesFiltered(page, statuses),
+    queryFn: () => propertyService.getMyProperties(page, statuses),
   });
 
 export const usePropertyByIdQuery = (id: number, enabled = true) =>

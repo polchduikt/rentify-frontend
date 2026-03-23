@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bell, Heart, Menu, Moon, Plus, Sun, User, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { APP_CONTENT } from '@/constants/appContent';
-import { ROUTES } from '@/config/routes';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { resolveAvatarUrl } from '@/utils/avatar';
+import { APP_CONTENT } from '@/constants/appContent.ts';
+import { ROUTES } from '@/config/routes.ts';
+import { useAuth } from '@/contexts/AuthContext.tsx';
+import { useTheme } from '@/contexts/ThemeContext.tsx';
+import { resolveAvatarUrl } from '@/utils/avatar.ts';
 
 const INFO_NAV_LINKS = [
   { label: 'Про нас', to: ROUTES.about },

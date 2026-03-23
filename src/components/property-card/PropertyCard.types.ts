@@ -1,4 +1,4 @@
-import type { PropertyResponseDto } from '@/types/property';
+import type { PropertyResponseDto } from '@/types/property.ts';
 
 export interface PropertyCardProps {
   property: PropertyResponseDto;

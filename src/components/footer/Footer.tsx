@@ -1,8 +1,8 @@
 import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { APP_CONTENT } from '@/constants/appContent';
-import { FOOTER_LINKS } from '@/constants/footerLinks';
-import { ROUTES } from '@/config/routes';
+import { APP_CONTENT } from '@/constants/appContent.ts';
+import { FOOTER_LINKS } from '@/constants/footerLinks.ts';
+import { ROUTES } from '@/config/routes.ts';
 
 const Footer = () => (
   <footer className="mt-auto bg-slate-900 text-slate-300">

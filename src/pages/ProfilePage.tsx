@@ -1,14 +1,13 @@
-import { Suspense, lazy, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ProfileHero } from '@/components/profile/ProfileHero';
 import { ProfileSidebarNav } from '@/components/profile/ProfileSidebarNav';
 import { openChatWidget } from '@/components/chat';
 import { PROFILE_PAGE_SECTION_SET } from '@/constants/profilePage';
-import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useProfilePage } from '@/hooks';
-import { useProfileNavigation } from '@/hooks/profile';
+import { useProfileNavigation, useProfilePageHandlers } from '@/hooks/profile';
 import type { NavigationSection } from '@/types/profile';
 import { resolveAvatarUrl } from '@/utils/avatar';
 
@@ -63,6 +62,13 @@ const ProfilePage = () => {
       : null;
 
   const navigation = useProfileNavigation({ properties: model.properties, initialSection });
+  const handlers = useProfilePageHandlers({
+    model,
+    navigation,
+    logout,
+    navigate,
+    setIsTopUpModalOpen,
+  });
   const avatarSrc = useMemo(() => resolveAvatarUrl(model.profile?.avatarUrl), [model.profile?.avatarUrl]);
 
   useEffect(() => {
@@ -94,41 +100,6 @@ const ProfilePage = () => {
       </div>
     );
   }
-
-  const handleProfileSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    void model.saveProfile();
-  };
-
-  const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    void model.changePassword();
-  };
-
-  const handleDeleteAccount = async () => {
-    await model.deleteAccount();
-    logout();
-    navigate(ROUTES.login, { replace: true });
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.login);
-  };
-
-  const handleTopUpSubmit = async (amount: number) => {
-    await model.topUpWallet(amount);
-    setIsTopUpModalOpen(false);
-  };
-
-  const isPublishedPropertiesSection = navigation.activeSection === 'properties-published';
-  const propertiesForSection = isPublishedPropertiesSection ? model.publishedProperties : navigation.propertiesForActiveTab;
-  const propertiesLoadingForSection = isPublishedPropertiesSection
-    ? model.publishedPropertiesLoading
-    : model.propertiesLoading;
-  const propertiesErrorForSection = isPublishedPropertiesSection ? model.publishedPropertiesError : model.propertiesError;
-  const publishedTotalCount = Math.max(model.publishedPropertiesTotalElements, model.activePropertiesInPreview);
-  const publishedTotalPages = Math.max(model.publishedPropertiesTotalPages, Math.ceil(publishedTotalCount / 10));
 
   return (
     <div
@@ -171,7 +142,7 @@ const ProfilePage = () => {
             onToggleSettings={navigation.toggleSettingsOpen}
             onSelectSection={navigation.setActiveSection}
             onOpenChat={() => openChatWidget({})}
-            onLogout={handleLogout}
+            onLogout={handlers.handleLogout}
           />
 
           <Suspense fallback={SECTION_FALLBACK}>
@@ -193,10 +164,10 @@ const ProfilePage = () => {
                   profileForm={model.profileForm}
                   isProfileDirty={model.isProfileDirty}
                   profileSaving={model.profileSaving}
-                  onAvatarUpload={(file: File) => void model.uploadAvatar(file)}
-                  onAvatarDelete={() => void model.deleteAvatar()}
+                  onAvatarUpload={handlers.handleAvatarUpload}
+                  onAvatarDelete={handlers.handleAvatarDelete}
                   onProfileFieldChange={model.setProfileField}
-                  onSubmit={handleProfileSubmit}
+                  onSubmit={handlers.handleProfileSubmit}
                   onReset={model.resetProfileForm}
                 />
               ) : null}
@@ -208,8 +179,8 @@ const ProfilePage = () => {
                   passwordSaving={model.passwordSaving}
                   accountDeleting={model.accountDeleting}
                   onPasswordFieldChange={model.setPasswordField}
-                  onSubmit={handlePasswordSubmit}
-                  onDeleteAccount={handleDeleteAccount}
+                  onSubmit={handlers.handlePasswordSubmit}
+                  onDeleteAccount={handlers.handleDeleteAccount}
                 />
               ) : null}
 
@@ -267,20 +238,20 @@ const ProfilePage = () => {
               {navigation.isPropertiesSection ? (
                 <PropertiesSection
                   title={navigation.propertiesTabTitle}
-                  properties={propertiesForSection}
-                  propertiesLoading={propertiesLoadingForSection}
-                  propertiesError={propertiesErrorForSection}
+                  properties={handlers.propertiesForSection}
+                  propertiesLoading={handlers.propertiesLoadingForSection}
+                  propertiesError={handlers.propertiesErrorForSection}
                   totalCount={
-                    isPublishedPropertiesSection
-                      ? publishedTotalCount
+                    handlers.isPublishedPropertiesSection
+                      ? handlers.publishedTotalCount
                       : navigation.propertiesForActiveTab.length
                   }
-                  currentPage={isPublishedPropertiesSection ? model.publishedPropertiesPage + 1 : undefined}
-                  totalPages={isPublishedPropertiesSection ? publishedTotalPages : undefined}
-                  pageSize={isPublishedPropertiesSection ? 10 : undefined}
+                  currentPage={handlers.isPublishedPropertiesSection ? model.publishedPropertiesPage + 1 : undefined}
+                  totalPages={handlers.isPublishedPropertiesSection ? handlers.publishedTotalPages : undefined}
+                  pageSize={handlers.isPublishedPropertiesSection ? 10 : undefined}
                   onPageChange={
-                    isPublishedPropertiesSection
-                      ? (page) => model.setPublishedPropertiesPage(Math.max(0, page - 1))
+                    handlers.isPublishedPropertiesSection
+                      ? handlers.handlePublishedPropertiesPageChange
                       : undefined
                   }
                 />
@@ -298,7 +269,7 @@ const ProfilePage = () => {
           optionsError={model.topUpOptionsError}
           isSubmitting={model.walletTopUpPending}
           onClose={() => setIsTopUpModalOpen(false)}
-          onSubmit={handleTopUpSubmit}
+          onSubmit={handlers.handleTopUpSubmit}
         />
       </Suspense>
     </div>

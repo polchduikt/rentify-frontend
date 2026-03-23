@@ -143,13 +143,6 @@ export const usePropertyDetailsPage = () => {
   }, [availabilityBlocksQuery.data, unavailableRangesQuery.data]);
 
   useEffect(() => {
-    if (!isShortTerm) {
-      setBookingDateFrom('');
-      setBookingDateTo('');
-      setBookingGuestsState(1);
-      return;
-    }
-
     setBookingDateFrom('');
     setBookingDateTo('');
     setBookingGuestsState(1);
@@ -185,6 +178,14 @@ export const usePropertyDetailsPage = () => {
   }, [property?.id, recommended.length]);
 
   useEffect(() => {
+    const city = property?.address?.location?.city;
+    const region = property?.address?.location?.region;
+
+    const setFallbackCoords = () => {
+      const [fallbackLat, fallbackLng] = resolveLocationFallback(city, region);
+      setMapCoords({ lat: fallbackLat, lng: fallbackLng });
+    };
+
     if (!property) {
       setMapCoords(null);
       setMapCoordsLoading(false);
@@ -210,11 +211,7 @@ export const usePropertyDetailsPage = () => {
       .join(', ');
 
     if (!query.trim()) {
-      const [fallbackLat, fallbackLng] = resolveLocationFallback(
-        property.address?.location?.city,
-        property.address?.location?.region
-      );
-      setMapCoords({ lat: fallbackLat, lng: fallbackLng });
+      setFallbackCoords();
       setMapCoordsLoading(false);
       return;
     }
@@ -232,11 +229,13 @@ export const usePropertyDetailsPage = () => {
           setMapCoords(point);
           return;
         }
-        const [fallbackLat, fallbackLng] = resolveLocationFallback(
-          property.address?.location?.city,
-          property.address?.location?.region
-        );
-        setMapCoords({ lat: fallbackLat, lng: fallbackLng });
+        setFallbackCoords();
+      })
+      .catch((error: unknown) => {
+        if (!active || (error as { name?: string }).name === 'AbortError') {
+          return;
+        }
+        setFallbackCoords();
       })
       .finally(() => {
         if (active) {
@@ -248,7 +247,16 @@ export const usePropertyDetailsPage = () => {
       active = false;
       abortController.abort();
     };
-  }, [property]);
+  }, [
+    property?.id,
+    property?.address?.houseNumber,
+    property?.address?.lat,
+    property?.address?.lng,
+    property?.address?.location?.city,
+    property?.address?.location?.country,
+    property?.address?.location?.region,
+    property?.address?.street,
+  ]);
 
   const fallbackMapCenter = resolveLocationFallback(property?.address?.location?.city, property?.address?.location?.region);
   const mapCenter: [number, number] = mapCoords ? [mapCoords.lat, mapCoords.lng] : fallbackMapCenter;

@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '@/config/apiEndpoints';
 import type { PageQuery, SpringPage } from '@/types/api';
-import type { WalletBalanceDto, WalletTopUpRequestDto, WalletTransactionDto } from '@/types/wallet';
+import type { TopUpOptionDto, WalletBalanceDto, WalletTopUpRequestDto, WalletTransactionDto } from '@/types/wallet';
 import api from './api';
 import { withPageQuery } from './queryParams';
 
@@ -11,7 +11,7 @@ export const walletService = {
   },
 
   async topUp(payload: WalletTopUpRequestDto): Promise<WalletBalanceDto> {
-    const { data } = await api.post<WalletBalanceDto>(API_ENDPOINTS.wallet.topUp, payload);
+    const { data } = await api.post<WalletBalanceDto>(API_ENDPOINTS.wallet.transactions, payload);
     return data;
   },
 
@@ -22,8 +22,8 @@ export const walletService = {
     return data;
   },
 
-  async getTopUpOptions(): Promise<number[]> {
-    const { data } = await api.get<number[]>(API_ENDPOINTS.wallet.topUpOptions);
+  async getTopUpOptions(): Promise<TopUpOptionDto[]> {
+    const { data } = await api.get<TopUpOptionDto[]>(API_ENDPOINTS.wallet.topUpOptions);
     return data;
   },
 };

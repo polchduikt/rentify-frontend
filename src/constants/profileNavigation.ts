@@ -45,9 +45,9 @@ export const PROFILE_PROPERTIES_STATUS_FILTERS: Record<ProfilePropertiesSection,
   'properties-drafts': ['DRAFT'],
 };
 
-const PROPERTIES_SECTIONS = new Set<NavigationSection>(['properties-published', 'properties-archived', 'properties-drafts']);
-const BOOKINGS_SECTIONS = new Set<NavigationSection>(['bookings-my', 'bookings-incoming']);
-const PROMOTIONS_SECTIONS = new Set<NavigationSection>(['promotions-top', 'promotions-subscriptions']);
+const PROPERTIES_SECTIONS = new Set<NavigationSection>(PROFILE_PROPERTIES_NAV_ITEMS.map((item) => item.id));
+const BOOKINGS_SECTIONS = new Set<NavigationSection>(PROFILE_BOOKINGS_NAV_ITEMS.map((item) => item.id));
+const PROMOTIONS_SECTIONS = new Set<NavigationSection>(PROFILE_PROMOTIONS_NAV_ITEMS.map((item) => item.id));
 
 export const isPropertiesSection = (section: NavigationSection | null): section is ProfilePropertiesSection =>
   section !== null && PROPERTIES_SECTIONS.has(section);

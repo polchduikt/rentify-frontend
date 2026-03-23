@@ -1,4 +1,5 @@
 import type { BookingStatus, PaymentStatus } from '@/types/enums';
+import { BOOKING_PROPERTY_FALLBACK_IMAGE } from '@/constants/propertyImages';
 
 export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
   CREATED: 'В обробці',
@@ -34,5 +35,4 @@ export const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
   CANCELLED: 'bg-slate-200 text-slate-700',
 };
 
-export const FALLBACK_PROPERTY_IMAGE =
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80';
+export const FALLBACK_PROPERTY_IMAGE = BOOKING_PROPERTY_FALLBACK_IMAGE;

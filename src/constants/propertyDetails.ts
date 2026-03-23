@@ -1,23 +1,12 @@
 import { UKRAINE_REGION_LABELS } from '@/constants/ukraineRegionLabels';
+import { MARKET_TYPE_LABELS, PROPERTY_TYPE_LABELS } from '@/constants/propertyLabels';
+
+export { MARKET_TYPE_LABELS, PROPERTY_TYPE_LABELS };
 
 export const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1800&q=80';
 
 export const UKRAINE_DEFAULT_CENTER: [number, number] = [49.0, 31.0];
-
-export const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  APARTMENT: 'Квартира',
-  HOUSE: 'Будинок',
-  ROOM: 'Кімната',
-  STUDIO: 'Студія',
-  PENTHOUSE: 'Пентхаус',
-  TOWNHOUSE: 'Таунхаус',
-};
-
-export const MARKET_TYPE_LABELS: Record<string, string> = {
-  SECONDARY: 'Вторинний ринок',
-  NEW_BUILD: 'Новобудова',
-};
 
 export const CITY_COORDS: Record<string, [number, number]> = {
   'київ': [50.4501, 30.5234],

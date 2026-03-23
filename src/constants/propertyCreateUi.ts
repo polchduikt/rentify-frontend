@@ -1,4 +1,4 @@
-import type { AmenityCategory } from '@/types/enums';
+import { AMENITY_CATEGORY_LABELS } from '@/constants/propertyLabels';
 
 export const PROPERTY_CREATE_STEP_TITLES = [
   'Базова інформація',
@@ -21,17 +21,4 @@ export const PROPERTY_CREATE_INPUT_CLASS =
 
 export const PROPERTY_CREATE_LABEL_CLASS = 'mb-1.5 block text-sm font-medium text-slate-700';
 
-export const PROPERTY_CREATE_AMENITY_CATEGORY_LABELS: Record<AmenityCategory, string> = {
-  BASIC: 'Базові',
-  VERIFICATION: 'Верифікація',
-  RENOVATION: 'Ремонт',
-  ACCESSIBILITY: 'Доступність',
-  BLACKOUT_SUPPORT: 'Під час блекаутів',
-  LIVING_CONDITIONS: 'Умови проживання',
-  LAYOUT: 'Планування',
-  WALL_TYPE: 'Тип стін',
-  HEATING: 'Опалення',
-  OFFER_TYPE: 'Тип пропозиції',
-  RENTAL_TERMS: 'Умови оренди',
-  OTHER: 'Інше',
-};
+export const PROPERTY_CREATE_AMENITY_CATEGORY_LABELS = AMENITY_CATEGORY_LABELS;

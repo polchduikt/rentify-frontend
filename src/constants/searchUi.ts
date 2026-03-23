@@ -1,6 +1,3 @@
-export const SEARCH_PROPERTY_TYPE_LABELS: Record<string, string> = {
-  APARTMENT: 'Квартира',
-  HOUSE: 'Будинок',
-  ROOM: 'Кімната',
-  STUDIO: 'Студія',
-};
+import { PROPERTY_TYPE_LABELS } from '@/constants/propertyLabels';
+
+export const SEARCH_PROPERTY_TYPE_LABELS = PROPERTY_TYPE_LABELS;

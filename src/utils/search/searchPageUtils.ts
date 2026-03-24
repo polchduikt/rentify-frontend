@@ -64,11 +64,31 @@ const ALLOWED_AMENITY_CATEGORIES: AmenityCategory[] = [
   'OTHER',
 ];
 
+const ALLOWED_PROPERTY_TYPES = new Set([
+  'APARTMENT',
+  'HOUSE',
+  'ROOM',
+  'STUDIO',
+  'LOFT',
+  'PENTHOUSE',
+  'TOWNHOUSE',
+  'VILLA',
+  'OTHER',
+]);
+
 export const parseRentalType = (value: string | null): RentalType | undefined =>
   value === 'SHORT_TERM' || value === 'LONG_TERM' ? value : undefined;
 
 const parseMarketType = (value: string | null): PropertyMarketType | undefined =>
   value === 'SECONDARY' || value === 'NEW_BUILD' ? value : undefined;
+
+const parsePropertyType = (value: string | null): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  const normalized = value.trim().toUpperCase();
+  return ALLOWED_PROPERTY_TYPES.has(normalized) ? normalized : undefined;
+};
 
 export const parseSortMode = (value: string | null): SearchSortMode =>
   value === 'PRICE_ASC' || value === 'PRICE_DESC' || value === 'NEWEST' ? value : 'NEWEST';
@@ -144,7 +164,7 @@ export const createFiltersFromSearchParams = (params: URLSearchParams): SearchFo
   areaFrom: params.get('areaFrom')?.trim() ?? '',
   areaTo: params.get('areaTo')?.trim() ?? '',
   extra: {
-    propertyType: params.get('propertyType')?.trim() || undefined,
+    propertyType: parsePropertyType(params.get('propertyType')),
     marketType: parseMarketType(params.get('marketType')),
     minFloor: params.get('minFloor')?.trim() ?? '',
     maxFloor: params.get('maxFloor')?.trim() ?? '',
@@ -187,7 +207,7 @@ export const buildSearchParams = (
   if (filters.roomsMax.trim()) next.set('roomsMax', filters.roomsMax.trim());
   if (filters.areaFrom.trim()) next.set('areaFrom', filters.areaFrom.trim());
   if (filters.areaTo.trim()) next.set('areaTo', filters.areaTo.trim());
-  if (filters.extra.propertyType) next.set('propertyType', filters.extra.propertyType);
+  if (filters.extra.propertyType) next.set('propertyType', filters.extra.propertyType.toUpperCase());
   if (filters.extra.marketType) next.set('marketType', filters.extra.marketType);
   if (filters.extra.minFloor.trim()) next.set('minFloor', filters.extra.minFloor.trim());
   if (filters.extra.maxFloor.trim()) next.set('maxFloor', filters.extra.maxFloor.trim());
@@ -227,7 +247,7 @@ export const toCriteria = (filters: SearchFormState): PropertySearchCriteriaDto 
   maxRooms: toFiniteNumber(filters.roomsMax),
   minArea: toFiniteNumber(filters.areaFrom),
   maxArea: toFiniteNumber(filters.areaTo),
-  propertyType: filters.extra.propertyType,
+  propertyType: filters.extra.propertyType?.toUpperCase(),
   marketType: filters.extra.marketType,
   minFloor: toFiniteNumber(filters.extra.minFloor),
   maxFloor: toFiniteNumber(filters.extra.maxFloor),

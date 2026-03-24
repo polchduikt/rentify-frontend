@@ -3,7 +3,7 @@ export const API_ENDPOINTS = {
     login: '/sessions',
     register: '/users',
     google: '/sessions/google',
-    logout: '/sessions/current',
+    logout: '/sessions/me',
   },
   users: {
     profile: '/users/me',
@@ -15,7 +15,9 @@ export const API_ENDPOINTS = {
     root: '/bookings',
     list: '/bookings',
     byId: (id: number) => `/bookings/${id}`,
-    update: (id: number) => `/bookings/${id}`,
+    cancellation: (id: number) => `/bookings/${id}/cancellation`,
+    confirmation: (id: number) => `/bookings/${id}/confirmation`,
+    rejection: (id: number) => `/bookings/${id}/rejection`,
   },
   conversations: {
     root: '/conversations',
@@ -41,8 +43,8 @@ export const API_ENDPOINTS = {
   promotions: {
     topPackages: '/promotion-packages/top',
     subscriptionPackages: '/promotion-packages/subscriptions',
-    purchaseTopForProperty: (propertyId: number) => `/properties/${propertyId}/top-promotions`,
-    purchaseSubscription: '/subscription-purchases',
+    purchaseTopForProperty: (propertyId: number) => `/properties/${propertyId}/promotions`,
+    purchaseSubscription: '/subscriptions',
   },
   properties: {
     root: '/properties',

@@ -192,7 +192,7 @@ export const buildCreatePropertyPayload = (
     title: values.title.trim(),
     description: values.description.trim(),
     rentalType: values.rentalType,
-    propertyType: values.propertyType,
+    propertyType: values.propertyType.trim().toUpperCase(),
     marketType: values.marketType,
     isVerifiedProperty: values.isVerifiedProperty,
     isVerifiedRealtor: values.isVerifiedRealtor,

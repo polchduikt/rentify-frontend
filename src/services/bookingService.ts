@@ -1,12 +1,8 @@
 import { API_ENDPOINTS } from '@/config/apiEndpoints';
 import type { PageQuery, SpringPage } from '@/types/api';
-import type { BookingDto, BookingRequestDto, BookingStatusUpdateRequestDto } from '@/types/booking';
+import type { BookingDto, BookingRequestDto } from '@/types/booking';
 import api from './api';
 import { withPageQuery } from './queryParams';
-
-const CANCEL_BOOKING_PAYLOAD: BookingStatusUpdateRequestDto = { status: 'CANCELLED' };
-const CONFIRM_BOOKING_PAYLOAD: BookingStatusUpdateRequestDto = { status: 'CONFIRMED' };
-const REJECT_BOOKING_PAYLOAD: BookingStatusUpdateRequestDto = { status: 'REJECTED' };
 
 export const bookingService = {
   async createBooking(payload: BookingRequestDto): Promise<BookingDto> {
@@ -34,17 +30,17 @@ export const bookingService = {
   },
 
   async cancelBooking(id: number): Promise<BookingDto> {
-    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.update(id), CANCEL_BOOKING_PAYLOAD);
+    const { data } = await api.post<BookingDto>(API_ENDPOINTS.bookings.cancellation(id));
     return data;
   },
 
   async confirmBooking(id: number): Promise<BookingDto> {
-    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.update(id), CONFIRM_BOOKING_PAYLOAD);
+    const { data } = await api.post<BookingDto>(API_ENDPOINTS.bookings.confirmation(id));
     return data;
   },
 
   async rejectBooking(id: number): Promise<BookingDto> {
-    const { data } = await api.patch<BookingDto>(API_ENDPOINTS.bookings.update(id), REJECT_BOOKING_PAYLOAD);
+    const { data } = await api.post<BookingDto>(API_ENDPOINTS.bookings.rejection(id));
     return data;
   },
 };

@@ -3,6 +3,18 @@ import type { PropertyPhotoDto, PropertyResponseDto } from '@/types/property';
 import type { PropertyCreateFormValues } from '@/types/propertyCreate';
 import type { PropertyLocationRefIds } from '@/utils/propertyCreate';
 
+const KNOWN_PROPERTY_TYPES = new Set([
+  'APARTMENT',
+  'HOUSE',
+  'ROOM',
+  'STUDIO',
+  'LOFT',
+  'PENTHOUSE',
+  'TOWNHOUSE',
+  'VILLA',
+  'OTHER',
+]);
+
 const toOptionalText = (value: unknown) => (typeof value === 'string' ? value : '');
 
 const toTextValue = (value: unknown) => {
@@ -31,6 +43,13 @@ const normalizeRentalType = (property: PropertyResponseDto): 'LONG_TERM' | 'SHOR
     Number(property.pricing?.pricePerNight ?? 0) > 0;
 
   return hasShortTermSignals ? 'SHORT_TERM' : 'LONG_TERM';
+};
+
+const normalizePropertyType = (value: unknown): string => {
+  const normalized = String(value ?? '')
+    .trim()
+    .toUpperCase();
+  return KNOWN_PROPERTY_TYPES.has(normalized) ? normalized : '';
 };
 
 export const sortPropertyPhotos = (photos: PropertyPhotoDto[]) =>
@@ -69,7 +88,7 @@ export const toLocationRefIdsFromProperty = (property: PropertyResponseDto): Pro
 
 export const toFormValuesFromProperty = (property: PropertyResponseDto): PropertyCreateFormValues => ({
   rentalType: normalizeRentalType(property),
-  propertyType: property.propertyType ?? '',
+  propertyType: normalizePropertyType(property.propertyType),
   marketType: property.marketType,
   title: toOptionalText(property.title),
   description: toOptionalText(property.description),

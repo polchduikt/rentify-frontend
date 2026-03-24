@@ -20,9 +20,3 @@ export interface BookingRequestDto {
   dateTo: LocalDateString;
   guests: number;
 }
-
-export type BookingMutableStatus = Extract<BookingStatus, 'CANCELLED' | 'CONFIRMED' | 'REJECTED'>;
-
-export interface BookingStatusUpdateRequestDto {
-  status: BookingMutableStatus;
-}

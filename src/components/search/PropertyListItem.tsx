@@ -26,7 +26,7 @@ const resolveMeta = (property: PropertyResponseDto): string[] => {
 };
 
 const resolveAddress = (property: PropertyResponseDto): { city: string; street: string } => {
-  const city = property.address?.location?.city || property.address?.location?.region || '';
+  const city = property.address?.city || property.address?.region || '';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
   return { city, street };
 };

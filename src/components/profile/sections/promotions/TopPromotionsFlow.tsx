@@ -76,7 +76,7 @@ export const TopPromotionsFlow = ({ model }: TopPromotionsFlowProps) => (
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-slate-900">{property.title}</p>
                       <p className="mt-1 text-xs text-slate-600">
-                        ID #{property.id} • {property.address?.location?.city || 'Місто не вказано'}
+                        ID #{property.id} • {property.address?.city || 'Місто не вказано'}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
                         Ціна: {formatMoney(price, property.pricing?.currency || model.walletCurrency)}

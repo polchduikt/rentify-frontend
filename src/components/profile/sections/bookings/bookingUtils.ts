@@ -6,8 +6,8 @@ const toFiniteNumber = (value: unknown): number | null => {
 };
 
 export const buildPropertyAddress = (property?: PropertyResponseDto): { primary: string; secondary: string; fullText: string } => {
-  const location = property?.address?.location;
-  const primary = [location?.city, location?.region].filter(Boolean).join(', ') || 'Локацію не вказано';
+  const address = property?.address;
+  const primary = [address?.city, address?.region].filter(Boolean).join(', ') || 'Локацію не вказано';
 
   const details: string[] = [];
   if (property?.address?.street) details.push(`вул. ${property.address.street}`);

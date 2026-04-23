@@ -3,7 +3,9 @@ import type { Decimal, LocalDateString, LocalTimeString, ZonedDateTimeString } f
 
 export interface AddressDto {
   id?: number;
-  location: LocationDto;
+  country?: string;
+  region?: string;
+  city?: string;
   cityId?: number;
   districtId?: number;
   metroStationId?: number;
@@ -48,12 +50,7 @@ export interface AvailabilityBlockRequestDto {
   reason?: string;
 }
 
-export interface LocationDto {
-  id?: number;
-  country: string;
-  region?: string;
-  city: string;
-}
+
 
 export interface PropertyCreateRequestDto {
   address: AddressDto;

@@ -38,7 +38,7 @@ const PropertyCard = ({ property, isFavorite = false }: PropertyCardProps) => {
 
   const imageUrl = property.photos?.[0]?.url || PROPERTY_CARD_FALLBACK_IMAGE;
   const isRecommended = isTopPromotionActive(property);
-  const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
+  const city = property.address?.city || property.address?.region || 'Місто не вказано';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
   const locationLine = [city, street].filter(Boolean).join(', ');
 

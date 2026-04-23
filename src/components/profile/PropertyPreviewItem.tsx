@@ -35,7 +35,7 @@ export const PropertyPreviewItem = ({
   const isRecommended = isTopPromotionActive(property);
   const promotionUntilDate = formatPromotionUntilDate(property.topPromotedUntil);
 
-  const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
+  const city = property.address?.city || property.address?.region || 'Місто не вказано';
   const addressLine = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
 
   const isShortTerm = property.rentalType === 'SHORT_TERM';

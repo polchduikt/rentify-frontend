@@ -206,11 +206,9 @@ export const buildCreatePropertyPayload = (
     checkOutTime: isShortTerm ? toOptionalString(values.checkOutTime) : undefined,
     amenitySlugs: amenitySlugs.length > 0 ? amenitySlugs : undefined,
     address: {
-      location: {
-        country: values.country.trim(),
-        region: toOptionalString(values.region),
-        city: values.city.trim(),
-      },
+      country: values.country.trim(),
+      region: toOptionalString(values.region),
+      city: values.city.trim(),
       cityId: locationRefIds.cityId,
       districtId: locationRefIds.districtId,
       metroStationId: locationRefIds.metroStationId,

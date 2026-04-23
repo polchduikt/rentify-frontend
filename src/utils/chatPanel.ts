@@ -29,7 +29,7 @@ export const resolveUserInitials = (profile?: PublicUserProfileDto | null) => {
 };
 
 export const formatPropertyAddress = (property?: PropertyResponseDto | null) => {
-  const city = property?.address?.location?.city?.trim();
+  const city = property?.address?.city?.trim();
   const street = property?.address?.street?.trim();
   const houseNumber = property?.address?.houseNumber?.trim();
   const streetWithHouse = [street, houseNumber].filter(Boolean).join(' ').trim();

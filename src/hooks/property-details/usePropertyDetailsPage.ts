@@ -31,20 +31,20 @@ import { geocodeAddress } from '@/utils/geocoding';
 
 const RECOMMENDATION_CARDS_PER_VIEW = 3;
 
-const FALLBACK_CITY_LABEL = '\u041c\u0456\u0441\u0442\u043e \u043d\u0435 \u0432\u043a\u0430\u0437\u0430\u043d\u043e';
-const FALLBACK_OWNER_LABEL = '\u0412\u043b\u0430\u0441\u043d\u0438\u043a \u043e\u0433\u043e\u043b\u043e\u0448\u0435\u043d\u043d\u044f';
+const FALLBACK_CITY_LABEL = 'Місто не вказано';
+const FALLBACK_OWNER_LABEL = 'Власник оголошення';
 const PROPERTY_ERROR_MESSAGE =
-  '\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u043e\u0433\u043e\u043b\u043e\u0448\u0435\u043d\u043d\u044f';
+  'Не вдалося завантажити оголошення';
 const REVIEWS_ERROR_MESSAGE =
-  '\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u0432\u0456\u0434\u0433\u0443\u043a\u0438';
+  'Не вдалося завантажити відгуки';
 const REVIEW_REQUIRES_COMPLETED_BOOKING_MESSAGE =
-  '\u0412\u0456\u0434\u0433\u0443\u043a \u043c\u043e\u0436\u043d\u0430 \u0437\u0430\u043b\u0438\u0448\u0438\u0442\u0438 \u043f\u0456\u0441\u043b\u044f \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e\u0433\u043e \u0431\u0440\u043e\u043d\u044e\u0432\u0430\u043d\u043d\u044f \u0442\u0430 \u0443\u0441\u043f\u0456\u0448\u043d\u043e\u0433\u043e \u0432\u0438\u0457\u0437\u0434\u0443.';
+  'Відгук можна залишити після завершеного бронювання та успішного виїзду.';
 const REVIEW_ALREADY_LEFT_MESSAGE =
-  '\u0412\u0438 \u0432\u0436\u0435 \u0437\u0430\u043b\u0438\u0448\u0438\u043b\u0438 \u0432\u0456\u0434\u0433\u0443\u043a \u0437\u0430 \u0432\u0441\u0456 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0456 \u0431\u0440\u043e\u043d\u044e\u0432\u0430\u043d\u043d\u044f \u0446\u0456\u0454\u0457 \u043f\u0440\u043e\u043f\u043e\u0437\u0438\u0446\u0456\u0457.';
+  'Ви вже залишили відгук за всі завершені бронювання цієї пропозиції.';
 const REVIEW_LOGIN_MESSAGE =
-  '\u0410\u0432\u0442\u043e\u0440\u0438\u0437\u0443\u0439\u0442\u0435\u0441\u044f, \u0449\u043e\u0431 \u0437\u0430\u043b\u0438\u0448\u0438\u0442\u0438 \u0432\u0456\u0434\u0433\u0443\u043a.';
+  'Авторизуйтесь, щоб залишити відгук.';
 const OWN_PROPERTY_REVIEW_MESSAGE =
-  '\u0412\u0438 \u043d\u0435 \u043c\u043e\u0436\u0435\u0442\u0435 \u0437\u0430\u043b\u0438\u0448\u0430\u0442\u0438 \u0432\u0456\u0434\u0433\u0443\u043a \u0434\u043e \u0432\u043b\u0430\u0441\u043d\u043e\u0433\u043e \u043e\u0433\u043e\u043b\u043e\u0448\u0435\u043d\u043d\u044f.';
+  'Ви не можете залишати відгук до власного оголошення.';
 
 export const usePropertyDetailsPage = () => {
   const { isAuthenticated, user } = useAuth();
@@ -102,11 +102,11 @@ export const usePropertyDetailsPage = () => {
   const createReviewMutation = useCreateReviewMutation();
   const recommendationsQuery = useSearchPropertiesQuery(
     {
-      city: property?.address?.location?.city,
+      city: property?.address?.city,
       rentalType: recommendationRentalType,
     },
     { page: 0, size: 18, sort: 'createdAt,desc' },
-    Boolean(property?.address?.location?.city && recommendationRentalType)
+    Boolean(property?.address?.city && recommendationRentalType)
   );
 
   const photos = useMemo(() => normalizePropertyPhotos(property, FALLBACK_IMAGE), [property]);
@@ -178,8 +178,8 @@ export const usePropertyDetailsPage = () => {
   }, [property?.id, recommended.length]);
 
   useEffect(() => {
-    const city = property?.address?.location?.city;
-    const region = property?.address?.location?.region;
+    const city = property?.address?.city;
+    const region = property?.address?.region;
 
     const setFallbackCoords = () => {
       const [fallbackLat, fallbackLng] = resolveLocationFallback(city, region);
@@ -203,9 +203,9 @@ export const usePropertyDetailsPage = () => {
     const query = [
       property.address?.street,
       property.address?.houseNumber,
-      property.address?.location?.city,
-      property.address?.location?.region,
-      property.address?.location?.country,
+      property.address?.city,
+      property.address?.region,
+      property.address?.country,
     ]
       .filter(Boolean)
       .join(', ');
@@ -252,13 +252,13 @@ export const usePropertyDetailsPage = () => {
     property?.address?.houseNumber,
     property?.address?.lat,
     property?.address?.lng,
-    property?.address?.location?.city,
-    property?.address?.location?.country,
-    property?.address?.location?.region,
+    property?.address?.city,
+    property?.address?.country,
+    property?.address?.region,
     property?.address?.street,
   ]);
 
-  const fallbackMapCenter = resolveLocationFallback(property?.address?.location?.city, property?.address?.location?.region);
+  const fallbackMapCenter = resolveLocationFallback(property?.address?.city, property?.address?.region);
   const mapCenter: [number, number] = mapCoords ? [mapCoords.lat, mapCoords.lng] : fallbackMapCenter;
 
   const city = resolvePropertyCity(property, FALLBACK_CITY_LABEL);

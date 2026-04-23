@@ -7,7 +7,7 @@ export const formatPublicProfilePropertyPrice = (property: PropertyResponseDto) 
 };
 
 export const formatPublicProfilePropertyAddress = (property: PropertyResponseDto) => {
-  const city = property.address?.location?.city || property.address?.location?.region || 'Місто не вказано';
+  const city = property.address?.city || property.address?.region || 'Місто не вказано';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
   return street || city;
 };

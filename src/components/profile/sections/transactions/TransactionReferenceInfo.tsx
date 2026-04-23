@@ -33,7 +33,7 @@ const PropertyReferenceInfo = ({ propertyId }: { propertyId: number }) => {
     );
   }
 
-  const locationLabel = [property.address?.location?.city, property.address?.location?.region].filter(Boolean).join(', ');
+  const locationLabel = [property.address?.city, property.address?.region].filter(Boolean).join(', ');
 
   return (
     <div className="space-y-1">

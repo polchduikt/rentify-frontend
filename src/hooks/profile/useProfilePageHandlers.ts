@@ -69,15 +69,19 @@ export const useProfilePageHandlers = ({
   const handleDeleteAccount = useCallback(async () => {
     try {
       await deleteAccount();
-      logout();
+      await logout();
       navigate(ROUTES.login, { replace: true });
     } catch (error) {
       logAsyncError('Failed to delete account', error);
     }
   }, [deleteAccount, logout, navigate]);
 
-  const handleLogout = useCallback(() => {
-    logout();
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout();
+    } catch (error) {
+      logAsyncError('Failed to logout', error);
+    }
     navigate(ROUTES.login);
   }, [logout, navigate]);
 

@@ -71,7 +71,7 @@ export const useLogoutMutation = () => {
 
   return useMutation({
     mutationFn: async () => {
-      authService.logout();
+      await authService.logout();
     },
     onSuccess: () => {
       queryClient.clear();

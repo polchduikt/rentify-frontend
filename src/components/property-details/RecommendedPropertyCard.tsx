@@ -18,7 +18,7 @@ export const RecommendedPropertyCard = ({ property, isFavorite = false }: Recomm
   const isRecommended = isTopPromotionActive(property);
   const price = Number(property.pricing?.pricePerMonth || property.pricing?.pricePerNight || 0);
   const currency = property.pricing?.currency || 'UAH';
-  const city = property.address?.location?.city || 'Місто не вказано';
+  const city = property.address?.city || 'Місто не вказано';
   const street = [property.address?.street, property.address?.houseNumber].filter(Boolean).join(', ');
 
   const isLoading = addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending;

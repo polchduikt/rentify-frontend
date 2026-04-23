@@ -38,7 +38,7 @@ export const resolvePropertyAddressLine = (property?: PropertyResponseDto | null
   [property?.address?.street, property?.address?.houseNumber, property?.address?.apartment].filter(Boolean).join(', ');
 
 export const resolvePropertyCity = (property?: PropertyResponseDto | null, fallbackCityLabel?: string): string =>
-  property?.address?.location?.city || fallbackCityLabel || '';
+  property?.address?.city || fallbackCityLabel || '';
 
 export const resolveOwnerPresentation = (
   owner?: PublicUserProfileDto | null,

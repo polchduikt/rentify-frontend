@@ -27,8 +27,8 @@ export const useBookingPaymentPage = () => {
     const totalPrice = Number(booking?.totalPrice || 0);
     const nights = booking ? diffNights(booking.dateFrom, booking.dateTo) : 0;
     const propertyAddress = [
-      property?.address?.location?.city,
-      property?.address?.location?.region,
+      property?.address?.city,
+      property?.address?.region,
       property?.address?.street ? `вул. ${property.address.street}` : null,
       property?.address?.houseNumber ? `буд. ${property.address.houseNumber}` : null,
       property?.address?.apartment ? `кв. ${property.address.apartment}` : null,
@@ -48,8 +48,8 @@ export const useBookingPaymentPage = () => {
     booking?.totalPrice,
     property?.address?.apartment,
     property?.address?.houseNumber,
-    property?.address?.location?.city,
-    property?.address?.location?.region,
+    property?.address?.city,
+    property?.address?.region,
     property?.address?.street,
     property?.pricing?.currency,
   ]);

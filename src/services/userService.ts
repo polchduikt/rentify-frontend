@@ -21,7 +21,7 @@ const resolveGoogleAvatarFallback = (userId: number | null | undefined): string 
 
 export const userService = {
   async getMySession(): Promise<UserSessionDto> {
-    const { data } = await api.get<UserResponseDto>(API_ENDPOINTS.users.profile);
+    const { data } = await api.get<UserSessionDto>(API_ENDPOINTS.users.session);
     const normalized = normalizeUserProfile(data, resolveGoogleAvatarFallback(data.id));
     return toUserSession(normalized);
   },

@@ -22,11 +22,9 @@ const makeProperty = (id: number): PropertyResponseDto => ({
   id,
   hostId: id + 100,
   address: {
-    location: {
-      country: 'Ukraine',
-      region: 'Kyivska',
-      city: 'Kyiv',
-    },
+    country: 'Ukraine',
+    region: 'Kyivska',
+    city: 'Kyiv',
     street: 'Test',
     houseNumber: String(id),
   },

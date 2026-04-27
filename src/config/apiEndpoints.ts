@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
     logout: '/sessions/me',
   },
   users: {
+    session: '/users/me/session',
     profile: '/users/me',
     publicProfile: (userId: number) => `/users/${userId}`,
     changePassword: '/users/me/password',

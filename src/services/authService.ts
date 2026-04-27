@@ -7,7 +7,7 @@ import type {
   GoogleOAuthRequestDto,
   RegisterRequestDto,
 } from '@/types/auth';
-import type { UserResponseDto, UserSessionDto } from '@/types/user';
+import type { UserSessionDto } from '@/types/user';
 import api from './api';
 import { normalizeUserProfile, toUserSession } from './adapters/userAdapter';
 import {
@@ -93,8 +93,8 @@ export const authService = {
 
     sessionCache.key = nextSessionKey;
     sessionCache.request = api
-      .get<UserResponseDto>(
-        API_ENDPOINTS.users.profile,
+      .get<UserSessionDto>(
+        API_ENDPOINTS.users.session,
         USE_HTTP_ONLY_AUTH_COOKIE || !resolvedToken
           ? undefined
           : {

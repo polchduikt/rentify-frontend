@@ -38,8 +38,10 @@ export interface UserResponseDto {
   updatedAt: ZonedDateTimeString;
 }
 
-type UserSessionRequiredFields = 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'roles';
-
-export type UserSessionDto =
-  Pick<UserResponseDto, UserSessionRequiredFields> &
-  Partial<Omit<UserResponseDto, UserSessionRequiredFields>>;
+export interface UserSessionDto {
+  id: number;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  roles: string[];
+}
